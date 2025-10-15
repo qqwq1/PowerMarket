@@ -17,12 +17,17 @@ jobs:
           java-version: "21"
           cache: gradle
       - name: Build and tests
+        working-directory: app
         run: |
-          chmod +x gradlew
+          chmod +x ./gradlew
           ./gradlew clean build jacocoTestReport
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
+        with:
+          projectBaseDir: app
+          args: >
+            -Dsonar.organization=${{ secrets.SONAR_ORG }}
+            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
+            -Dsonar.java.binaries=build/classes/java/main
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_ORG: ${{ secrets.SONAR_ORG }}
-          SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
