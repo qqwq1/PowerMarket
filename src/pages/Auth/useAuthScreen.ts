@@ -7,8 +7,8 @@ import { useSetRecoilState } from 'recoil'
 import userAtom from '../User/user.atom'
 import authAtom from './auth.atom'
 
-const navigate = useNavigate()
 const useAuthScreen = () => {
+  const navigate = useNavigate()
   const [stepIndex, setStepIndex] = useState<0 | 1>(0)
   const [state, _, handleChange] = useStateWithChange({ email: '' })
   const [userRole, setUserRole] = useState<TUserRole>()
