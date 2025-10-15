@@ -1,1 +1,1 @@
-rootProject.name = "PowerMarket"
+rootProject.name = "powermarket-app"
