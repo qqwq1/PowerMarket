@@ -13,7 +13,7 @@ const equipmentLotFiltersAtom = atom<IEquipmentLotFiltersState>({
   default: {
     category: '',
     location: '',
-    price: [0, -1],
+    price: [null, null],
     status: null,
   },
 })

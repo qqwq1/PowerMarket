@@ -27,10 +27,10 @@ const MainLayout = (props: PropsWithChildren) => {
           <div className={css.navShadow} />
           <div className="flex-lines" style={{ gap: '2px' }}>
             <NavigationItem
-              matchPrefixes={['/main']}
+              matchPrefixes={['/catalog']}
               icon={<CatalogSvg style={{ width: '16px', height: '16px', flexShrink: 0 }} />}
-              title="Главная"
-              navItems={[{ title: 'Главная', to: urls.main }]}
+              title="Каталог"
+              navItems={[{ title: 'Каталог', to: urls.catalog }]}
             />
           </div>
         </nav>

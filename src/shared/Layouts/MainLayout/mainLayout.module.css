@@ -58,7 +58,7 @@
   flex-direction: column;
   width: 100%;
 
-  max-width: 240px;
+  max-width: 200px;
   transition: all ease 0.3s;
   flex-shrink: 0;
 
