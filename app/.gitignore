@@ -1,0 +1,39 @@
+### Java ###
+*.class
+*.log
+*.ctxt
+hs_err_pid*
+replay_pid*
+
+### Build ###
+/build/
+/out/
+/target/
+/bin/
+/dist/
+
+### Gradle ###
+.gradle/
+/!gradle/wrapper/gradle-wrapper.jar
+
+### Spring Boot ###
+*.jar
+*.war
+
+### IDE ###
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.project
+.classpath
+.settings/
+.sts4-cache/
+
+### Node ###
+node_modules/
+package-lock.json
+
+### Misc ###
+HELP.md
