@@ -1,0 +1,22 @@
+.wrapper {
+  position: absolute;
+  top: calc(var(--input-height) + 4px);
+  z-index: 1000;
+  box-shadow:
+    0 9px 28px 8px #0000000d,
+    0px 3px 6px -4px #0000001f,
+    0px 6px 16px 0 #00000014;
+  border-radius: 8px;
+
+  padding: 4px;
+  background: #fff;
+  max-height: 300px;
+}
+
+.wrapperRight {
+  left: 0;
+}
+
+.wrapperLeft {
+  right: 0;
+}

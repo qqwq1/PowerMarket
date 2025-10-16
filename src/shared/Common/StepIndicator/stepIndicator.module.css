@@ -1,0 +1,70 @@
+.wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: start;
+  gap: 8px;
+}
+
+.step {
+  &[data-active='true'] {
+    & .stepIconWrapper {
+      background-color: var(--primary);
+    }
+    & .stepIconText {
+      color: #fff;
+    }
+    & .stepName {
+      color: var(--text-default);
+    }
+  }
+
+  &[data-active='false'] {
+    &[data-step-passed='true'] {
+      color: var(--text-description);
+      & .stepIconWrapper {
+        background-color: #fff;
+      }
+      & .stepIconText {
+        color: var(--primary);
+      }
+      & .stepName {
+        color: var(--text-default);
+      }
+    }
+    &[data-step-passed='false'] {
+      color: var(--text-description);
+      & .stepIconWrapper {
+        background-color: var(--bg-text-hover);
+      }
+      & .stepIconText {
+        color: var(--text-description);
+      }
+      & .stepName {
+        color: var(--text-description);
+      }
+    }
+  }
+}
+
+.stepIconWrapper {
+  width: 24px;
+  height: 24px;
+  text-align: center;
+  vertical-align: middle;
+  border-radius: 50%;
+}
+
+.stepTail {
+  align-self: center;
+  flex: 1 1 0;
+  max-width: 166px;
+  border-top: 1px solid var(--text-placeholder);
+
+  &[data-step-passed='false'] {
+    border-top-color: var(--primary);
+  }
+}
+
+.stepIconText {
+  line-height: 24px;
+}
