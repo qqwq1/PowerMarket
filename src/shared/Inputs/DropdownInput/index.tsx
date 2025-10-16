@@ -1,13 +1,11 @@
-import { CSSProperties, ReactNode, useMemo, useRef, useState } from 'react'
-import { IDropdownGroupOption, TDropdownOption } from '@/shared/Inputs/DropdownInput/dropdown.types.ts'
+import { CSSProperties, ReactNode, useMemo, useRef } from 'react'
+import { IDropdownOption, TDropdownOption } from '@/shared/Inputs/DropdownInput/dropdown.types.ts'
 import { Primitive } from '@/types/global.ts'
 import css from './dropdown.module.css'
 import cn from '../../../utils/cn.ts'
 import ArrowDown from '@/assets/icons/arrowDown.svg?react'
 import usePopup from '../../hooks/usePopup.ts'
 import dropdownUtils from '@/shared/Inputs/DropdownInput/dropdown.utils.ts'
-import DropdownSubmenuListItem from '@/shared/Dropdowns/DropdownListItem/DropdownSubmenuListItem'
-import DropdownListItemGoBack from '@/shared/Dropdowns/DropdownListItem/DropdownListItemGoBack'
 import DropdownFadeInPanel from '@/shared/Dropdowns/DropdownFadeInPanel'
 import DropdownInputListItem from '@/shared/Dropdowns/DropdownInputListItem/index.tsx'
 
@@ -16,7 +14,7 @@ interface IProps<T extends Primitive> {
   selectedOption: T
   name?: string
   title: string | ReactNode
-  onSelect: (option: T, name: string, groupKey?: IDropdownGroupOption['key']) => void
+  onSelect: (option: T, name: string) => void
   disabled?: boolean
   menuStyle?: CSSProperties
   wrapperStyle?: CSSProperties
@@ -29,17 +27,11 @@ interface IProps<T extends Primitive> {
 const DropdownInput = <T extends Primitive>({ type = 'default', ...props }: IProps<T>) => {
   const ref = useRef<HTMLDivElement>(null)
   const { open, setOpen } = usePopup(ref)
-  const [path, setPath] = useState<Array<IDropdownGroupOption['key']>>([])
-
-  const handleGoBack = (ev) => {
-    ev.stopPropagation()
-    setPath((prev) => path.slice(0, prev.length - 2))
-  }
 
   const handleChange = (optionValue: T) => () => {
     if (props.disabled) return
 
-    props.onSelect(optionValue, props.name, path[path.length - 1])
+    props.onSelect(optionValue, props.name)
     setOpen(false)
   }
 
@@ -53,27 +45,7 @@ const DropdownInput = <T extends Primitive>({ type = 'default', ...props }: IPro
     )
   }, [props.selectedOption, flattenOptions])
 
-  const selectedGroupOptions = useMemo(() => {
-    if (!path.length) return props.options
-
-    const groupKey = path[path.length - 1]
-    return dropdownUtils.getGroupOptions(props.options, groupKey)
-  }, [props.options, path])
-
-  const renderOption = (option: TDropdownOption) => {
-    if ('children' in option) {
-      return (
-        <DropdownSubmenuListItem
-          key={option.key}
-          onClick={(ev) => {
-            ev.stopPropagation()
-            setPath((prev) => [...prev, (option as any).key])
-          }}
-          text={option.title}
-        />
-      )
-    }
-
+  const renderOption = (option: IDropdownOption) => {
     return (
       <DropdownInputListItem
         key={option.value as any}
@@ -105,8 +77,7 @@ const DropdownInput = <T extends Primitive>({ type = 'default', ...props }: IPro
 
       {!props.disabled && <ArrowDown data-open={open} data-selected={Boolean(selectedOption)} className={css.arrow} />}
       <DropdownFadeInPanel open={open} style={props.menuStyle}>
-        {Boolean(path.length) && <DropdownListItemGoBack text="Назад" onClick={handleGoBack} />}
-        {selectedGroupOptions.map(renderOption)}
+        {props.options.map(renderOption)}
         {props.loading && <span className="text-nm text-secondary">Загрузка ...</span>}
       </DropdownFadeInPanel>
     </div>

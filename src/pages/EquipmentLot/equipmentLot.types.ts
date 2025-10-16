@@ -3,7 +3,7 @@ export interface IEquipmentLot {
   title: string
   description: string
   category: string // metalworking, 3d-print...
-  price: string // 1500 ₽/час, т.к. может быть не только числом
+  price: number // 1500 ₽/час, т.к. может быть не только числом
   location: string // Екатеринбург
   images: string[] // Array of image URLs
   // createdBy: string, // Ссылка на User (contractor)

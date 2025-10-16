@@ -3,6 +3,7 @@ import urls from './urls'
 import Auth from '@/pages/Auth'
 import EquipmentCatalog from '@/pages/EquipmentLot/pages/EquipmentCatalog'
 import AuthGate from '@/pages/Auth/components/AuthGate'
+import EquipmentLotPage from '@/pages/EquipmentLot/pages/EquipmentLotPage'
 
 const router = createBrowserRouter([
   {
@@ -18,6 +19,22 @@ const router = createBrowserRouter([
     element: (
       <AuthGate>
         <EquipmentCatalog />
+      </AuthGate>
+    ),
+  },
+  {
+    path: urls.catalog,
+    element: (
+      <AuthGate>
+        <EquipmentCatalog />
+      </AuthGate>
+    ),
+  },
+  {
+    path: urls.equipmentLot + '/:id',
+    element: (
+      <AuthGate>
+        <EquipmentLotPage />
       </AuthGate>
     ),
   },

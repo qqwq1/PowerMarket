@@ -5,11 +5,14 @@ import EquipmentLotCard from './components/EquipmentLotCard'
 import EquipmentCatalogFilters from './components/EquipmentCatalogFilters'
 import equipmentLotFiltersAtom, { IEquipmentLotFiltersState } from '../../equipmentLotFilters.atom'
 import css from './equipmentCatalog.module.css'
-import cn from '@/utils/cn'
+import { useNavigate } from 'react-router-dom'
+import urls from '@/navigation/urls'
+import { useMemo } from 'react'
 
 const EquipmentCatalog = () => {
   const equipment = useRecoilValue(equipmentLotAtom).items
   const [filtersState, setFiltersState] = useRecoilState(equipmentLotFiltersAtom)
+  const navigate = useNavigate()
 
   const handleFilterChange = <T extends keyof IEquipmentLotFiltersState>(
     value: IEquipmentLotFiltersState[T],
@@ -17,6 +20,24 @@ const EquipmentCatalog = () => {
   ) => {
     setFiltersState((prev) => ({ ...prev, [key]: value }))
   }
+
+  const filteredEquipment = useMemo(() => {
+    return equipment.filter((item) => {
+      if (filtersState.category && item.category !== filtersState.category) {
+        return false
+      }
+
+      const [minPrice, maxPrice] = filtersState.price
+      if (minPrice != null && item.price < minPrice) {
+        return false
+      }
+      if (maxPrice != null && item.price > maxPrice) {
+        return false
+      }
+
+      return true
+    })
+  }, [equipment, filtersState])
 
   return (
     <MainLayout>
@@ -35,8 +56,12 @@ const EquipmentCatalog = () => {
             </aside>
             <div className={css.resizer}></div>
             <div className={css.catalog}>
-              {equipment.map((item) => (
-                <EquipmentLotCard key={item.id} equipmentLot={item} />
+              {filteredEquipment.map((item) => (
+                <EquipmentLotCard
+                  key={item.id}
+                  equipmentLot={item}
+                  onClick={(id) => navigate(urls.equipmentLotScreen(id))}
+                />
               ))}
             </div>
           </div>

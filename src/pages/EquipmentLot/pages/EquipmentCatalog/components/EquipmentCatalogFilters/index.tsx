@@ -1,6 +1,5 @@
 import { IEquipmentLotFiltersState } from '@/pages/EquipmentLot/equipmentLotFilters.atom'
-import css from './equipmentCatalogFilters.module.css'
-import DropdownInputListItem from '@/shared/Dropdowns/DropdownInputListItem'
+
 import DropdownInput from '@/shared/Inputs/DropdownInput'
 import Button from '@/shared/Buttons/Button'
 import { IOption } from '@/types/global'
