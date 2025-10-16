@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PowerMarket — Карточка лота</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="header">
+    <div class="brand">PowerMarket</div>
+    <div style="display:flex; gap:8px;">
+      <a class="btn secondary" href="/catalog">Назад</a>
+      <a class="btn secondary" href="/logout">Выйти</a>
+    </div>
+  </header>
+  <main class="container">
+    <div class="card" th:if="${lot != null}">
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <h1 style="margin:0" th:text="${lot.title}">Название</h1>
+        <div class="badge" th:text="${lot.category}">Категория</div>
+        <div class="lot-meta" th:text="${lot.location}">Город</div>
+        <div><span class="badge" th:text="${lot.price} + ' ' + ${lot.unit}">1500 ₽/час</span></div>
+        <div class="lot-meta" th:text="${lot.capacity}">2 смены/сутки</div>
+        <div th:text="${lot.description}">Описание</div>
+        <div><span class="label">Контакты</span><div th:text="${lot.contacts}">+7...</div></div>
+      </div>
+    </div>
+    <div class="card" th:if="${lot == null}">
+      Лот не найден.
+    </div>
+  </main>
+  <footer class="footer">Карточка лота</footer>
+</body>
+</html>

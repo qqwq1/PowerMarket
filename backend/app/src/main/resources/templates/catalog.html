@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PowerMarket — Каталог</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="header">
+    <div class="brand">PowerMarket</div>
+    <form action="/logout" method="get">
+      <button class="btn secondary" type="submit">Выйти</button>
+    </form>
+  </header>
+  <main class="container">
+    <div class="card">
+      <div class="grid cols-2">
+        <div>
+          <label class="label">Поиск</label>
+          <form method="get" action="/catalog" style="display:flex; gap:8px;">
+            <input class="input" name="q" placeholder="Название, описание" th:value="${q}" />
+            <button class="btn" type="submit">Найти</button>
+          </form>
+        </div>
+        <div class="grid cols-2">
+          <div>
+            <label class="label">Категория</label>
+            <select name="category" form="filters">
+              <option value="" th:selected="${category == ''}">Все</option>
+              <option th:selected="${category == 'Металлообработка'}">Металлообработка</option>
+              <option th:selected="${category == 'Печать 3D'}">Печать 3D</option>
+            </select>
+          </div>
+          <div>
+            <label class="label">Город</label>
+            <select name="location" form="filters">
+              <option value="" th:selected="${location == ''}">Все</option>
+              <option th:selected="${location == 'Москва'}">Москва</option>
+              <option th:selected="${location == 'Екатеринбург'}">Екатеринбург</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <form id="filters" method="get" action="/catalog" style="margin-top:8px">
+        <input type="hidden" name="q" th:value="${q}"/>
+        <input type="hidden" name="category" th:value="${category}"/>
+        <input type="hidden" name="location" th:value="${location}"/>
+        <div style="margin-top:8px">
+          <button class="btn secondary" onclick="applyFilters(event)">Применить фильтры</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="grid cols-3" style="margin-top:16px;">
+      <th:block th:each="l : ${lots}">
+        <a class="card card-link" th:href="@{'/lots/' + ${l.id}}">
+          <div class="lot">
+            <div class="lot-title" th:text="${l.title}">Название</div>
+            <div class="lot-meta" th:text="${l.category} + ' • ' + ${l.location}">Категория • Город</div>
+            <div><span class="badge" th:text="${l.price} + ' ' + ${l.unit}">1500 ₽/час</span></div>
+            <div class="lot-meta" th:text="${l.capacity}">2 смены/сутки</div>
+            <div th:text="${l.description}">Описание</div>
+          </div>
+        </a>
+      </th:block>
+    </div>
+  </main>
+  <footer class="footer">Каталог лотов с фильтрами</footer>
+  <script>
+    function applyFilters(e){
+      e.preventDefault();
+      const params = new URLSearchParams();
+      params.set('q', document.querySelector('input[name=q]').value);
+      params.set('category', document.querySelector('select[name=category]').value);
+      params.set('location', document.querySelector('select[name=location]').value);
+      window.location.href = '/catalog?' + params.toString();
+    }
+  </script>
+</body>
+</html>

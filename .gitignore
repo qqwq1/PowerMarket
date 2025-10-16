@@ -5,12 +5,12 @@
 .gradle/
 build/
 out/
-app/.gradle/
-app/build/
+backend/app/.gradle/
+backend/app/build/
 # Windows streams
 *:Zone.Identifier
 # Allow wrapper if позже добавите
-!/app/gradle/wrapper/gradle-wrapper.jar
-!/app/gradle/wrapper/gradle-wrapper.properties
-!/app/gradlew
-!/app/gradlew.bat
+!/backend/app/gradle/wrapper/gradle-wrapper.jar
+!/backend/app/gradle/wrapper/gradle-wrapper.properties
+!/backend/app/gradlew
+!/backend/app/gradlew.bat
