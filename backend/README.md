@@ -1,6 +1,7 @@
-# PowerMarket
+# Powermarket — backend (Spring Boot)
 
-## Java 21
-## Spring Boot 3.3
-## Gradle 8.9 (Kotlin DSL)
-## PostgreSQL 16
+## Стек
+- Java, Spring Boot
+- PostgreSQL, Spring Data JPA/Hibernate
+- Spring Security + JWT (`io.jsonwebtoken`)
+- Validation (Jakarta), Lombok, MapStruct

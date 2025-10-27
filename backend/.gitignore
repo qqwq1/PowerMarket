@@ -1,139 +1,33 @@
-# --- Keep this file tracked
-!.gitignore
+HELP.md
+target/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
 
-# --- OS junk
-.DS_Store
-Thumbs.db
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
 
-# --- IDEs / Editors
-.idea/
+### IntelliJ IDEA ###
+.idea
+*.iws
 *.iml
 *.ipr
-*.iws
-.vscode/
-*.swp
-*.swo
-*.orig
 
-# --- Java / Build tools
-.gradle/
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
 build/
-out/
-bin/
-target/
-classes/
-logs/
-*.log
-hs_err_pid*
-replay_pid*
+!**/src/main/**/build/
+!**/src/test/**/build/
 
-# Spring Boot fat jars
-*.jar
-*.war
-*.ear
-# keep Gradle wrapper
-!gradlew
-!gradlew.bat
-!gradle/wrapper/gradle-wrapper.jar
-!gradle/wrapper/gradle-wrapper.properties
-
-# --- Coverage / Reports
-jacoco.exec
-coverage/
-coverage-final.json
-lcov.info
-*.lcov
-reports/
-
-# --- Docker / Compose
-*.pid
-docker/*.crt
-docker/*.key
-docker/*.pem
-docker/*.p12
-docker/*.jks
-docker/*.keystore
-# local env & overrides
-docker-compose.override.yml
-
-# --- Environments / Secrets
-.env
-.env.*
-!.env.example
-
-# --- Node / Frontend (future-proof)
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-.pnp/
-.pnp.js
-.pnpm-store/
-.browserslistrc
-.cache/
-dist/
-build-ssr/
-temp/
-.tmp/
-.tmp/
-.eslintcache
-.stylelintcache
-.next/
-.nuxt/
-.svelte-kit/
-.hugo_build.lock
-.vite/
-vite.config.ts.timestamp-*
-.storybook-out/
-.storybook-static/
-storybook-static/
-.turbo/
-.parcel-cache/
-.report.html
-
-# --- Framework specific (optional future)
-/public/build/
-/.astro/
-
-# --- Database/Runtime
-*.db
-*.sqlite
-*.sqlite3
-*.mv.db
-*.trace.db
-
-# --- Keystores / Certs
-*.keystore
-*.jks
-*.p12
-*.pem
-*.key
-*.crt
-
-# --- Misc archives
-*.zip
-*.tar
-*.tar.gz
-*.tgz
-*.7z
-PowerMarket-merged*.zip
-
-# --- Generated/OpenAPI
-openapi.json
-openapi.yaml
-swagger-ui/
-
-# --- Sonar / Analysis
-.sonar/
-.scannerwork/
-
-# --- Checkstyle/Reports cache
-.checkstyle
-
-# --- macOS / Linux
-.AppleDouble
-.LSOverride
-.Trashes
-.fseventsd
-.Spotlight-V100
+### VS Code ###
+.vscode/
