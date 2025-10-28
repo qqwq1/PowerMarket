@@ -3,7 +3,7 @@
 """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api import api_router
+from app.api import search, preprocess
 from app.database.connection import init_db_pool, close_db_pool
 from app.services.typesense_client import init_collection
 import logging
@@ -25,24 +25,21 @@ app = FastAPI(
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # В production укажите конкретные домены
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-
-# События жизненного цикла приложения
+# События жизненного цикла
 @app.on_event("startup")
 async def startup():
     """Инициализация при запуске"""
     logger.info("Starting PowerMarket Search Service...")
     try:
-        # Инициализация пула соединений с БД
         init_db_pool()
         logger.info("Database connection pool initialized")
 
-        # Инициализация Typesense коллекции
         init_collection()
         logger.info("Typesense collection initialized")
 
@@ -51,7 +48,6 @@ async def startup():
         logger.error(f"Startup error: {e}")
         raise
 
-
 @app.on_event("shutdown")
 async def shutdown():
     """Очистка при остановке"""
@@ -59,12 +55,11 @@ async def shutdown():
     close_db_pool()
     logger.info("Service stopped")
 
+# Подключение роутеров с новой структурой
+app.include_router(search.router, prefix="/api/search", tags=["Search"])
+app.include_router(preprocess.router, prefix="/api/services", tags=["Services"])
 
-# Подключение роутеров
-app.include_router(api_router, prefix="/api")
-
-
-# Health check endpoint
+# Health check
 @app.get("/health")
 def health_check():
     """Проверка здоровья сервиса"""
@@ -74,12 +69,16 @@ def health_check():
         "version": "1.0.0"
     }
 
-
 @app.get("/")
 def root():
     """Корневой endpoint"""
     return {
         "message": "PowerMarket Search API",
         "docs": "/docs",
-        "health": "/health"
+        "health": "/health",
+        "endpoints": {
+            "search": "/api/search/",
+            "suggest": "/api/search/suggest",
+            "index": "/api/services/index"
+        }
     }

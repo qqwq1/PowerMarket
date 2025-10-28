@@ -31,7 +31,6 @@ def init_collection():
     schema = {
         'name': COLLECTION_NAME,
         'fields': [
-            {'name': 'id', 'type': 'string'},
             {'name': 'title', 'type': 'string'},
             {'name': 'description', 'type': 'string'},
             {'name': 'category', 'type': 'string', 'facet': True},

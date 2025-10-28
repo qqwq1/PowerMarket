@@ -1,5 +1,5 @@
 """
-Endpoint для поиска лотов через Typesense
+Endpoint для поиска услуг через Typesense
 """
 from fastapi import APIRouter, Query, HTTPException
 from typing import Optional
@@ -19,42 +19,41 @@ def search(
     location: Optional[str] = Query(None, description="Фильтр по местоположению")
 ):
     """
-    Поиск лотов производственных мощностей.
-    
+    Поиск услуг производственных мощностей.
+
     **Возможности:**
     - Поиск с опечатками (до 2 символов)
     - Поддержка синонимов
     - Морфологический анализ
     - Фильтрация по местоположению
-    
+
     **Примеры запросов:**
     - "трактор МТЗ"
     - "фрезерный станок ЧПУ"
     - "упаковочная линия"
     """
     try:
-        # Предобработка для логирования и аналитики
+        # Предобработка для логирования
         normalized_terms = preprocess_text(q)
-        
+
         if not normalized_terms:
             raise HTTPException(
-                status_code=400, 
+                status_code=400,
                 detail="Запрос пустой после нормализации"
             )
-        
+
         # Формируем фильтры
         filters = None
         if location:
             filters = f"location:={location}"
-        
+
         # Поиск через Typesense
         results = search_services(q, limit, offset, filters)
-        
+
         logger.info(f"Search query: '{q}', found: {results['found']}")
-        
+
         return SearchResponse(
             query=q,
-            normalized_query=" ".join(normalized_terms),
             total=results['found'],
             results=results['hits'],
             search_method="typesense"
