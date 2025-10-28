@@ -1,10 +1,10 @@
-import { IEquipmentLotFiltersState } from '../../../../equipmentLotFilters.atom'
+import { IEquipmentLotFiltersState } from '@/pages/EquipmentLot/equipmentLotFilters.atom'
 
-import DropdownInput from '../../../../../../shared/Inputs/DropdownInput'
-import Button from '../../../../../../shared/Buttons/Button'
-import { IOption } from '../../../../../../types/global'
-import { IEquipmentLot } from '../../../../equipmentLot.types'
-import TextInput from '../../../../../../shared/Inputs/TextInput'
+import DropdownInput from '@/shared/Inputs/DropdownInput'
+import Button from '@/shared/Buttons/Button'
+import { IOption } from '@/types/global'
+import { IEquipmentLot } from '@/pages/EquipmentLot/equipmentLot.types'
+import TextInput from '@/shared/Inputs/TextInput'
 
 interface IProps {
   filters: IEquipmentLotFiltersState

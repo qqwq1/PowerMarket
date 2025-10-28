@@ -1,4 +1,4 @@
-import MainLayout from '../../../../shared/Layouts/MainLayout'
+import MainLayout from '@/shared/Layouts/MainLayout'
 import { useRecoilState, useRecoilValue } from 'recoil'
 import equipmentLotAtom from '../../equipmentLot.atom'
 import EquipmentLotCard from './components/EquipmentLotCard'
@@ -6,7 +6,7 @@ import EquipmentCatalogFilters from './components/EquipmentCatalogFilters'
 import equipmentLotFiltersAtom, { IEquipmentLotFiltersState } from '../../equipmentLotFilters.atom'
 import css from './equipmentCatalog.module.css'
 import { useNavigate } from 'react-router-dom'
-import urls from '../../../../navigation/urls'
+import urls from '@/navigation/urls'
 import { useMemo } from 'react'
 
 const EquipmentCatalog = () => {

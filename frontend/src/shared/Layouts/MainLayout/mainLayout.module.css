@@ -34,12 +34,6 @@
   height: 100%;
 }
 
-.headerControls {
-  margin-left: auto;
-  display: inline-flex;
-  gap: 8px;
-}
-
 .logoImage {
   height: 10px;
   cursor: pointer;

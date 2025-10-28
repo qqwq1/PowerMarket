@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useCallback, useState } from 'react'
-import { AnyObject } from '../../global.types'
+import { AnyObject } from '@/global.types'
 
 export type ChangeCallback<T extends AnyObject, K extends keyof T> = (val: T[K], key: K) => void
 

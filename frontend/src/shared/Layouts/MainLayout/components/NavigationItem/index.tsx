@@ -2,8 +2,8 @@ import css from './navigationItem.module.css'
 import { memo, ReactNode, useRef } from 'react'
 import ArrowRight from '../../../../../assets/icons/arrowRight.svg?react'
 import { Link, useNavigate } from 'react-router-dom'
-import FadeInPanel from '../../../../Animated/FadeInPanel'
-import usePopup from '../../../../hooks/usePopup'
+import FadeInPanel from '@/shared/Animated/FadeInPanel'
+import usePopup from '@/shared/hooks/usePopup'
 
 interface IProps {
   icon: ReactNode

@@ -1,4 +1,4 @@
-import { IEquipmentLot } from '../../../../equipmentLot.types'
+import { IEquipmentLot } from '@/pages/EquipmentLot/equipmentLot.types'
 import css from './equipmentLotCard.module.css'
 
 interface IProps {

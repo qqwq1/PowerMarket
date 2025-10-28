@@ -1,4 +1,4 @@
-import cn from '../../../utils/cn'
+import cn from '@/utils/cn'
 import { CSSProperties, PropsWithChildren, ReactNode } from 'react'
 
 interface IProps {

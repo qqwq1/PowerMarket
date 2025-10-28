@@ -1,7 +1,7 @@
 import { CSSProperties, PropsWithChildren } from 'react'
 import css from './dropdownFadeInPanel.module.css'
-import FadeInPanel from '../../Animated/FadeInPanel'
-import cn from '../../../utils/cn.ts'
+import FadeInPanel from '@/shared/Animated/FadeInPanel'
+import cn from '@/utils/cn.ts'
 
 interface IProps {
   open: boolean

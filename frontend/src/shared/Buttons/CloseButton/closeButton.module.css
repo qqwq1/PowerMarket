@@ -1,0 +1,22 @@
+.wrapper {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.wrapper:hover {
+  background: var(--bg-text-hover);
+}
+
+.wrapper:active {
+  background: var(--bg-text-active);
+}
+
+.icon {
+  width: 16px;
+  height: 16px;
+}

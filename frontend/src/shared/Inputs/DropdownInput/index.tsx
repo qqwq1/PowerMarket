@@ -1,13 +1,13 @@
 import { CSSProperties, ReactNode, useMemo, useRef } from 'react'
-import { IDropdownOption, TDropdownOption } from './dropdown.types.ts'
-import { Primitive } from '../../../types/global.ts'
+import { IDropdownOption, TDropdownOption } from '@/shared/Inputs/DropdownInput/dropdown.types.ts'
+import { Primitive } from '@/types/global.ts'
 import css from './dropdown.module.css'
 import cn from '../../../utils/cn.ts'
-import ArrowDown from '../../../assets/icons/arrowDown.svg?react'
+import ArrowDown from '@/assets/icons/arrowDown.svg?react'
 import usePopup from '../../hooks/usePopup.ts'
-import dropdownUtils from './dropdown.utils.ts'
-import DropdownFadeInPanel from '../../Dropdowns/DropdownFadeInPanel'
-import DropdownInputListItem from '../../Dropdowns/DropdownInputListItem'
+import dropdownUtils from '@/shared/Inputs/DropdownInput/dropdown.utils.ts'
+import DropdownFadeInPanel from '@/shared/Dropdowns/DropdownFadeInPanel'
+import DropdownInputListItem from '@/shared/Dropdowns/DropdownInputListItem/index.tsx'
 
 interface IProps<T extends Primitive> {
   options: TDropdownOption[]

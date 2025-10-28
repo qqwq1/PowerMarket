@@ -1,4 +1,4 @@
-import cn from '../../../utils/cn.ts'
+import cn from '@/utils/cn.ts'
 import css from './dropdownListItem.module.css'
 import { PropsWithChildren, ReactNode, MouseEvent, forwardRef, CSSProperties } from 'react'
 

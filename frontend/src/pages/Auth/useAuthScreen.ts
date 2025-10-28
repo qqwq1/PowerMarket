@@ -1,5 +1,5 @@
-import urls from '../../navigation/urls'
-import useStateWithChange from '../../shared/hooks/useStateWithChange'
+import urls from '@/navigation/urls'
+import useStateWithChange from '@/shared/hooks/useStateWithChange'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { TUserRole } from '../User/user.types'
@@ -17,8 +17,7 @@ const useAuthScreen = () => {
   const setUserState = useSetRecoilState(userAtom)
 
   const handleSubmit = () => {
-    localStorage.setItem('userRole', userRole)
-    localStorage.setItem('email', state.email)
+    localStorage.setItem('user', JSON.stringify({ userRole, email: state.email }))
 
     setAuthValue({ authState: 'authorized' })
     setUserState({ userRole })

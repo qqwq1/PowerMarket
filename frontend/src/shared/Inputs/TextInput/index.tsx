@@ -1,7 +1,7 @@
 import React, { forwardRef } from 'react'
 import { CSSProperties, HTMLInputTypeAttribute, ReactNode } from 'react'
 import css from './textInput.module.css'
-import cn from '../../../utils/cn.ts'
+import cn from '@/utils/cn.ts'
 
 export interface ITextInputProps {
   error?: boolean

@@ -1,4 +1,4 @@
-import usePopup from '../../hooks/usePopup.ts'
+import usePopup from '@/shared/hooks/usePopup.ts'
 import { useCallback, useRef } from 'react'
 
 const useDropdownUnderIconCtrl = () => {

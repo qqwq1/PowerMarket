@@ -1,6 +1,6 @@
 import css from './stepIndicator.module.css'
-import StepPassedIcon from '../../../assets/icons/checked.svg?react'
-import cn from '../../../utils/cn'
+import StepPassedIcon from '@/assets/icons/checked.svg?react'
+import cn from '@/utils/cn'
 import { Fragment } from 'react'
 
 interface IProps {

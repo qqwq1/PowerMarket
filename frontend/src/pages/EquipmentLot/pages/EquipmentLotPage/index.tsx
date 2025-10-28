@@ -1,4 +1,4 @@
-import MainLayout from '../../../../shared/Layouts/MainLayout'
+import MainLayout from '@/shared/Layouts/MainLayout'
 import css from './equipmentLotPage.module.css'
 import { useParams } from 'react-router-dom'
 import useEquipmentLot from '../../hooks/useEquipmentLot'

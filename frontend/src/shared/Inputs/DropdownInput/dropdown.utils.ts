@@ -1,4 +1,4 @@
-import { IDropdownGroupOption, IDropdownOption, TDropdownOption } from './dropdown.types.ts'
+import { IDropdownGroupOption, IDropdownOption, TDropdownOption } from '@/shared/Inputs/DropdownInput/dropdown.types.ts'
 
 const flattenOptions = (allOptions: TDropdownOption[]): (IDropdownOption & { groupKey?: string })[] => {
   const selectableOptions: (IDropdownOption & { groupKey?: string })[] = []

@@ -15,7 +15,7 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "jsx": "preserve",
-    "baseUrl": "..",
+    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     },
@@ -36,8 +36,5 @@
   "exclude": [
     "node_modules"
   ],
-  "include": [
-    "src",
-    "frontend/src/custom-types.d.ts"
-  ]
+  "include": ["src", "src/custom-types.d.ts"],
 }

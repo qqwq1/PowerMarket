@@ -1,0 +1,17 @@
+.wrapper {
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.wrapper:hover {
+  background: var(--bg-control-item-hover);
+}
+
+.icon {
+  cursor: pointer;
+  color: var(--text-default);
+}
+
+.icon:hover {
+  color: var(--error);
+}

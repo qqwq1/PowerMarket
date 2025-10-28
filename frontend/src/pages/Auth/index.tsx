@@ -1,12 +1,12 @@
-import Button from '../../shared/Buttons/Button'
+import Button from '@/shared/Buttons/Button'
 import css from './authPage.module.css'
 import useAuthScreen from './useAuthScreen'
-import StepIndicator from '../../shared/Common/StepIndicator'
-import cn from '../../utils/cn'
-import Factory from '../../assets/images/factory.svg?react'
-import MagnifyingGlass from '../../assets/images/magnifyingGlassSearch.svg?react'
-import FormField from '../../shared/Forms/FormField'
-import TextInput from '../../shared/Inputs/TextInput'
+import StepIndicator from '@/shared/Common/StepIndicator'
+import cn from '@/utils/cn'
+import Factory from '@/assets/images/factory.svg?react'
+import MagnifyingGlass from '@/assets/images/magnifyingGlassSearch.svg?react'
+import FormField from '@/shared/Forms/FormField'
+import TextInput from '@/shared/Inputs/TextInput'
 
 const Auth = () => {
   const ctrl = useAuthScreen()
