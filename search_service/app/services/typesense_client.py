@@ -1,8 +1,11 @@
+import time
+
 import typesense
 from typesense.exceptions import ObjectNotFound, TypesenseClientError
 from app.config import settings
 import logging
 from typing import List, Dict, Any, Optional
+
 
 logger = logging.getLogger(__name__)
 
@@ -41,29 +44,34 @@ def init_collection():
             {'name': 'created_at', 'type': 'int64'}
         ]
     }
-    
-    try:
-        # Проверяем существование коллекции
+
+    max_retries = 10
+    retry_delay = 2
+
+    for attempt in range(max_retries):
         try:
-            client.collections[COLLECTION_NAME].retrieve()
-            logger.info(f"Collection '{COLLECTION_NAME}' already exists")
+            # Проверяем существование коллекции
+            try:
+                client.collections[COLLECTION_NAME].retrieve()
+                logger.info(f"Collection '{COLLECTION_NAME}' already exists")
+                return
+            except ObjectNotFound:
+                pass
+
+            # Создаем коллекцию
+            client.collections.create(schema)
+            logger.info(f"Created collection: {COLLECTION_NAME}")
+            init_synonyms()
             return
-        except ObjectNotFound:
-            pass
-        
-        # Создаем коллекцию
-        client.collections.create(schema)
-        logger.info(f"Created collection: {COLLECTION_NAME}")
-        
-        # Загружаем синонимы
-        init_synonyms()
-        
-    except TypesenseClientError as e:
-        logger.error(f"Typesense error initializing collection: {e}")
-        raise
-    except Exception as e:
-        logger.error(f"Error initializing collection: {e}")
-        raise
+
+        except Exception as e:
+            if attempt < max_retries - 1:
+                logger.warning(f"Failed to connect to Typesense (attempt {attempt + 1}/{max_retries}): {e}")
+                time.sleep(retry_delay)
+            else:
+                logger.error(f"Failed to initialize collection after {max_retries} attempts")
+                raise
+
 
 def init_synonyms():
     """Загрузка синонимов из PostgreSQL в Typesense"""

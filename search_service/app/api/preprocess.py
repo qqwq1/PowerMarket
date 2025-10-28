@@ -10,7 +10,7 @@ from app.models.schemas import (
     IndexResponse
 )
 from app.services.preprocessor import preprocess_text
-from app.services.typesense_client import index_lot, delete_lot
+from app.services.typesense_client import index_service, delete_service
 import logging
 
 router = APIRouter()
@@ -62,7 +62,7 @@ def index_lot_endpoint(request: IndexRequest):
     """
     try:
         lot_data = request.dict()
-        success = index_lot(lot_data)
+        success = index_service(lot_data)
         
         if not success:
             raise HTTPException(
@@ -96,7 +96,7 @@ def delete_lot_endpoint(lot_id: int):
     Java-бэкенд вызывает при удалении лота из PostgreSQL.
     """
     try:
-        success = delete_lot(str(lot_id))
+        success = delete_service(str(lot_id))
         
         if not success:
             raise HTTPException(

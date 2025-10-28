@@ -4,7 +4,7 @@ Endpoint для поиска лотов через Typesense
 from fastapi import APIRouter, Query, HTTPException
 from typing import Optional
 from app.models.schemas import SearchResponse
-from app.services.typesense_client import search_lots
+from app.services.typesense_client import search_services
 from app.services.preprocessor import preprocess_text
 import logging
 
@@ -48,7 +48,7 @@ def search(
             filters = f"location:={location}"
         
         # Поиск через Typesense
-        results = search_lots(q, limit, offset, filters)
+        results = search_services(q, limit, offset, filters)
         
         logger.info(f"Search query: '{q}', found: {results['found']}")
         
@@ -79,7 +79,7 @@ def suggest(
     Используется для поисковой строки.
     """
     try:
-        results = search_lots(q, limit=limit, offset=0)
+        results = search_services(q, limit=limit, offset=0)
         
         # Возвращаем только уникальные заголовки
         suggestions = list(set([

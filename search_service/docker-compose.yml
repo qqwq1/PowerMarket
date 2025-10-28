@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # PostgreSQL база данных
   postgres:
     image: postgres:15
     container_name: powermarket-postgres
@@ -20,7 +19,6 @@ services:
       timeout: 5s
       retries: 5
 
-  # Typesense поисковый движок
   typesense:
     image: typesense/typesense:0.25.1
     container_name: powermarket-typesense
@@ -30,12 +28,12 @@ services:
       - typesense-data:/data
     command: '--data-dir /data --api-key=your-api-key-here --enable-cors'
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8108/health"]
+      test: [ "CMD-SHELL", "timeout 1 bash -c '</dev/tcp/localhost/8108' || exit 1" ]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 15s
 
-  # Python Search Service
   search-service:
     build: .
     container_name: powermarket-search-service

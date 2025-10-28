@@ -70,7 +70,7 @@ def add_synonym_query(connection, word: str, synonym: str) -> bool:
         logger.error(f"Error adding synonym: {e}")
         return False
 
-def get_lot_by_id(connection, lot_id: int) -> Optional[Dict[str, Any]]:
+def get_service_by_id(connection, lot_id: int) -> Optional[Dict[str, Any]]:
     """Получение лота по ID"""
     try:
         cursor = connection.cursor(cursor_factory=RealDictCursor)

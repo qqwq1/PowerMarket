@@ -1,19 +1,15 @@
 FROM python:3.11-slim
 
-# Устанавливаем рабочую директорию
 WORKDIR /app
 
-# Копируем файл зависимостей
+# Копируем зависимости
 COPY requirements.txt .
-
-# Устанавливаем зависимости
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Копируем весь код приложения
+# Копируем код
 COPY ./app ./app
 
-# Открываем порт
 EXPOSE 8081
 
-# Команда запуска
+# Простой запуск
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8081"]
