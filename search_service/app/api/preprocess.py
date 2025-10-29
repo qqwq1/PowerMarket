@@ -1,7 +1,8 @@
 """
 Endpoints для предобработки и индексации услуг (services)
 """
-from fastapi import APIRouter, HTTPException
+
+from fastapi import APIRouter, HTTPException, Depends
 from typing import List
 from app.models.schemas import (
     PreprocessRequest,
@@ -11,7 +12,9 @@ from app.models.schemas import (
 )
 from app.services.preprocessor import preprocess_text
 from app.services.typesense_client import index_service, delete_service
+from app.api.dependencies import get_db
 import logging
+from app.database.queries import get_service_by_id
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -47,18 +50,30 @@ def preprocess_service_text(request: PreprocessRequest):
         )
 
 @router.post("/index", response_model=IndexResponse)
-def index_service_endpoint(request: IndexRequest):
+def index_service_endpoint(request: IndexRequest, db=Depends(get_db)):
     """
     Индексация услуги в Typesense.
 
     **Использование:**
-    Java-бэкенд вызывает после успешного сохранения услуги в PostgreSQL.
+    Java-бэкенд отправляет только ID услуги после сохранения в PostgreSQL.
+    Python-сервис сам получает данные из БД и индексирует их.
 
-    **Требования:**
-    - Услуга должна быть уже сохранена в БД
+    **Пример запроса:**
+    ```json
+    {"id": 1}
+    ```
     """
     try:
-        service_data = request.dict()
+        # Получаем данные услуги из PostgreSQL
+        service_data = get_service_by_id(db, request.id)
+
+        if not service_data:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Service with id {request.id} not found in database or inactive"
+            )
+
+        # Индексируем в Typesense
         success = index_service(service_data)
 
         if not success:
@@ -84,7 +99,7 @@ def index_service_endpoint(request: IndexRequest):
             detail=f"Ошибка индексации: {str(e)}"
         )
 
-@router.delete("/index/{service_id}", response_model=IndexResponse)
+@router.delete("/{service_id}", response_model=IndexResponse)
 def delete_service_endpoint(service_id: int):
     """
     Удаление услуги из поискового индекса.

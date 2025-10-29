@@ -1,8 +1,11 @@
 """
 Зависимости для dependency injection
 """
+"""
+Зависимости для dependency injection
+"""
 from typing import Generator
-from app.database.connection import get_db_connection
+from app.database.connection import get_db_connection, return_db_connection
 from fastapi import HTTPException
 import logging
 
@@ -18,9 +21,11 @@ def get_db() -> Generator:
         conn = get_db_connection()
         yield conn
     except Exception as e:
-        logger.error(f"Database connection error: {e}")
-        raise HTTPException(status_code=500, detail="Database connection error")
+        logger.error(f"Database connection error: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Database connection error: {str(e)}"
+        )
     finally:
         if conn:
-            from app.database.connection import return_db_connection
             return_db_connection(conn)
