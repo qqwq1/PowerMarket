@@ -10,14 +10,22 @@ import authAtom from './auth.atom'
 const useAuthScreen = () => {
   const navigate = useNavigate()
   const [stepIndex, setStepIndex] = useState<0 | 1>(0)
-  const [state, _, handleChange] = useStateWithChange({ email: '' })
+  const [state, _, handleChange] = useStateWithChange({
+    fullName: '',
+    companyName: '',
+    inn: '',
+    phone: '',
+    address: '',
+    email: '',
+  })
   const [userRole, setUserRole] = useState<TUserRole>()
 
   const setAuthValue = useSetRecoilState(authAtom)
   const setUserState = useSetRecoilState(userAtom)
 
   const handleSubmit = () => {
-    localStorage.setItem('user', JSON.stringify({ userRole, email: state.email }))
+    // Сохраняем все поля формы в localStorage (заглушка)
+    localStorage.setItem('user', JSON.stringify({ userRole, ...state }))
 
     setAuthValue({ authState: 'authorized' })
     setUserState({ userRole })

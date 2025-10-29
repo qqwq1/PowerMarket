@@ -3,57 +3,18 @@ import css from './authPage.module.css'
 import useAuthScreen from './useAuthScreen'
 import StepIndicator from '@/shared/Common/StepIndicator'
 import cn from '@/utils/cn'
-import Factory from '@/assets/images/factory.svg?react'
-import MagnifyingGlass from '@/assets/images/magnifyingGlassSearch.svg?react'
-import FormField from '@/shared/Forms/FormField'
-import TextInput from '@/shared/Inputs/TextInput'
+import AuthRoleSelection from './components/AuthRoleSelection'
+import AuthEmailForm from './components/AuthEmailForm'
 
 const Auth = () => {
   const ctrl = useAuthScreen()
 
   const renderContent = () => {
-    switch (ctrl.stepIndex) {
-      case 0:
-        return (
-          <>
-            <h3>Что вы хотите сделать?</h3>
-            <div className="inline-flex-gap gap16">
-              <div
-                className={css.roleSelectionButton}
-                onClick={() => ctrl.setUserRole('buyer')}
-                data-active={ctrl.userRole === 'buyer'}
-              >
-                <Factory width="64px" />
-                <h6 className="text-lg">Предложить свои мощности</h6>
-                <p className="text-nm text-secondary text-center">Разместить оборудование или услуги для аренды</p>
-              </div>
-              <div
-                className={css.roleSelectionButton}
-                onClick={() => ctrl.setUserRole('seller')}
-                data-active={ctrl.userRole === 'seller'}
-              >
-                <MagnifyingGlass width="64px" />
-                <h6 className="text-lg">Найти мощности</h6>
-                <p className="text-nm text-secondary text-center">Опубликовать заказ на выполнение работы</p>
-              </div>
-            </div>
-          </>
-        )
-
-      default:
-        return (
-          <FormField label="E-mail" style={{ width: '100%' }}>
-            <TextInput
-              value={ctrl.state.email}
-              name="email"
-              type="email"
-              onChange={ctrl.handleChange}
-              placeHolder="E-mail"
-              size="large"
-            />
-          </FormField>
-        )
+    if (ctrl.stepIndex === 0) {
+      return <AuthRoleSelection userRole={ctrl.userRole} setUserRole={ctrl.setUserRole} />
     }
+
+    return <AuthEmailForm state={ctrl.state} handleChange={ctrl.handleChange} />
   }
 
   return (

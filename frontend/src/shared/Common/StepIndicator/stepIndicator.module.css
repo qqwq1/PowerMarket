@@ -49,8 +49,9 @@
 .stepIconWrapper {
   width: 24px;
   height: 24px;
-  text-align: center;
-  vertical-align: middle;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   border-radius: 50%;
 }
 
