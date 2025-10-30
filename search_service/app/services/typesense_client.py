@@ -7,6 +7,7 @@ import logging
 from typing import Dict, Optional
 
 from app.database.queries import get_all_synonyms
+from typesense.exceptions import ObjectNotFound
 
 logger = logging.getLogger(__name__)
 
@@ -27,14 +28,14 @@ COLLECTION_NAME = 'services'
 COLLECTION_SCHEMA = {
     'name': COLLECTION_NAME,
     'fields': [
-        {'name': 'title', 'type': 'string'},
-        {'name': 'description', 'type': 'string', 'optional': True},
+        {'name': 'title', 'type': 'string', 'locale': 'ru', 'infix': True},
+        {'name': 'description', 'type': 'string', 'optional': True, 'locale': 'ru'},
         {'name': 'category', 'type': 'string', 'facet': True},
         {'name': 'location', 'type': 'string', 'optional': True, 'facet': True},
         {'name': 'capacity', 'type': 'string', 'optional': True},
-        {'name': 'technical_specs', 'type': 'string', 'optional': True},
+        {'name': 'technical_specs', 'type': 'string', 'optional': True, 'locale': 'ru'},
         {'name': 'supplier_id', 'type': 'string', 'facet': True},
-        {'name': 'supplier_name', 'type': 'string', 'optional': True},
+        {'name': 'supplier_name', 'type': 'string', 'optional': True, 'locale': 'ru', 'infix': True},
         {'name': 'price_per_day', 'type': 'float', 'optional': True},
         {'name': 'created_at', 'type': 'int64'},
     ],
@@ -52,7 +53,7 @@ def init_collection():
         client.collections[COLLECTION_NAME].retrieve()
         logger.info(f"Collection '{COLLECTION_NAME}' already exists. Skipping creation.")
     except Exception:
-        # Если получаем ошибку (например, 404 Not Found), значит коллекции нет
+        # Если получаем ошибку (404 Not Found), значит коллекции нет
         logger.info(f"Collection '{COLLECTION_NAME}' not found. Creating...")
         try:
             # Создаем коллекцию с нашей схемой
@@ -107,17 +108,20 @@ def sync_synonyms_with_typesense(db_connection):
         logger.error(f"❌ Failed to synchronize synonyms with Typesense: {e}", exc_info=True)
 
 
+# app/services/typesense_client.py
+# ... (импорты и другие функции) ...
+
 def index_service(service_data: dict) -> bool:
     """Индексация услуги в Typesense"""
     try:
         # Преобразуем дату в Unix timestamp
         created_at_ts = 0
         if service_data.get('created_at'):
+            from dateutil import parser
             created_at_ts = int(parser.isoparse(service_data['created_at']).timestamp())
 
-        # Документ для Typesense. Поле `id` теперь берется из данных
         document = {
-            'id': str(service_data['id']), # ID документа должен быть строкой
+            'id': str(service_data['id']),
             'title': service_data.get('title', ''),
             'description': service_data.get('description', ''),
             'category': service_data.get('category', ''),
@@ -126,11 +130,17 @@ def index_service(service_data: dict) -> bool:
             'technical_specs': service_data.get('technical_specs', ''),
             'supplier_id': str(service_data.get('supplier_id', '')),
             'supplier_name': service_data.get('supplier_name', ''),
-            'price_per_day': float(service_data.get('price_per_day', 0.0)) if service_data.get('price_per_day') else 0.0,
+            'price_per_day': float(service_data.get('price_per_day', 0.0)) if service_data.get(
+                'price_per_day') else 0.0,
             'created_at': created_at_ts
         }
 
-        logger.info(f"Indexing document: {document['id']}")
+        # --- ДОБАВЬТЕ ЭТОТ ЛОГ ---
+        import json
+        logger.info(f"--- DEBUG: Preparing to index document ---")
+        logger.info(json.dumps(document, indent=2, ensure_ascii=False))
+        logger.info(f"----------------------------------------")
+
         client.collections[COLLECTION_NAME].documents.upsert(document)
         logger.info(f"Document {document['id']} indexed successfully.")
         return True
@@ -157,34 +167,36 @@ def search_services(
         per_page: int = 20,
         filters: Optional[Dict] = None
 ):
-    """Поиск услуг в Typesense."""
     try:
-        search_parameters = {
+        search_params = {
             'q': query,
-            'query_by': 'title,description,category,technical_specs,supplier_name',
-            'page': page,
+            'query_by': 'title,supplier_name,description,technical_specs',
+            'query_by_weights': '4,3,2,1',
+            'prefix': 'true',
+            'num_typos': 2,
             'per_page': per_page,
+            'page': page,
             'sort_by': '_text_match:desc,created_at:desc'
+            # Фильтр по 'active' теперь не нужен, т.к. мы индексируем только активные услуги
         }
-
+        # Построение фильтров из словаря
         if filters:
             filter_strings = []
             if filters.get('category'):
                 filter_strings.append(f"category:={filters['category']}")
             if filters.get('location'):
-                filter_strings.append(
-                    f"location:='{filters['location']}'")  # Для строк лучше использовать точное совпадение
-            if filters.get('min_price') is not None:
-                filter_strings.append(f"price_per_day:>={filters['min_price']}")
-            if filters.get('max_price') is not None:
-                filter_strings.append(f"price_per_day:<={filters['max_price']}")
+                filter_strings.append(f"location:='{filters['location']}'")
+            # ... можно добавить другие фильтры ...
 
             if filter_strings:
-                search_parameters['filter_by'] = ' && '.join(filter_strings)
+                search_params['filter_by'] = ' && '.join(filter_strings)
 
-        logger.info(f"Executing Typesense search: {search_parameters}")
-        results = client.collections[COLLECTION_NAME].documents.search(search_parameters)
-        return results
+        results = client.collections[COLLECTION_NAME].documents.search(search_params)
+        return {
+            'hits': results['hits'],  # Возвращаем полный hit, а не только document
+            'found': results['found'],
+            'page': results['page']
+        }
     except Exception as e:
-        logger.error(f"Typesense search failed: {e}", exc_info=True)
-        raise
+        logger.error(f"Error searching: {e}", exc_info=True)
+        return {'hits': [], 'found': 0, 'page': 1}
