@@ -43,9 +43,11 @@ const EquipmentCatalog = () => {
     <MainLayout>
       <div className="height100" style={{ padding: '24px', flex: 1 }}>
         <div className="flex-lines gap16 height100">
-          <h1 className="text-heading-3" style={{ margin: 0 }}>
-            Доступное оборудование
-          </h1>
+          <div>
+            <h1 className="text-heading-3" style={{ margin: 0 }}>
+              Доступное оборудование
+            </h1>
+          </div>
           <div className={css.content}>
             <aside className="filters">
               <EquipmentCatalogFilters

@@ -37,7 +37,7 @@ const NavigationItem = (props: IProps) => {
     <div className={css.wrapper} data-open={open} ref={ref} onClick={handleClick}>
       <div className="inline-flex-gap gap24 center">
         {props.icon}
-        <p className="text-nm line-clamp" style={{ color: 'inherit' }}>
+        <p className="text-nm" style={{ color: 'inherit' }}>
           {props.title}
         </p>
       </div>

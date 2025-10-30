@@ -45,7 +45,7 @@ const MainLayout = (props: PropsWithChildren) => {
             />
             <NavigationItem
               matchPrefixes={[urls.personalAccount]}
-              icon={<UserSvg style={{ width: '16px', height: '16px', flexShrink: 0 }} />}
+              icon={<UserSvg style={{ width: '16px', height: '16px', flexShrink: 0, color: '#000' }} />}
               title="Личный кабинет"
               navItems={[{ title: 'Личный кабинет', to: urls.personalAccount }]}
             />
