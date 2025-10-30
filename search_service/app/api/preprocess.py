@@ -1,157 +1,115 @@
-"""
-Endpoints для предобработки и индексации услуг (services)
-"""
+from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, Depends
-from typing import List
-from app.models.schemas import (
-    PreprocessRequest,
-    PreprocessResponse,
-    IndexRequest,
-    IndexResponse
-)
-from app.services.preprocessor import preprocess_text
-from app.services.typesense_client import index_service, delete_service
-from app.api.dependencies import get_db
+from fastapi import APIRouter, HTTPException, Depends, status
+from pydantic import BaseModel
+from app.database.connection import get_db
+from app.database.queries import get_service_by_id_query
 import logging
+import traceback
+
 from app.database.queries import get_service_by_id
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
-@router.post("/", response_model=PreprocessResponse)
-def preprocess_service_text(request: PreprocessRequest):
-    """
-    Предобработка текста услуги.
 
-    **Использование:**
-    Java-бэкенд вызывает этот endpoint перед сохранением услуги в PostgreSQL,
-    чтобы получить обработанные версии полей.
+class IndexRequest(BaseModel):
+    id: UUID
 
-    **Процесс:**
-    1. Приведение к нижнему регистру
-    2. Удаление лишних пробелов
-    3. Базовая нормализация
-    """
+class IndexResponse(BaseModel):
+    success: bool
+    service_id: UUID
+    message: str
+
+
+def get_db_dependency():
+    """Dependency для FastAPI"""
     try:
-        processed_title = preprocess_text(request.title)
-        processed_description = preprocess_text(request.description)
-
-        return PreprocessResponse(
-            processed_title=" ".join(processed_title),
-            processed_description=" ".join(processed_description)
-        )
-
+        with get_db() as conn:
+            yield conn
     except Exception as e:
-        logger.error(f"Preprocessing error: {e}")
+        logger.error(f"Database connection error: {e}")
         raise HTTPException(
             status_code=500,
-            detail=f"Ошибка предобработки: {str(e)}"
+            detail=f"Database connection error: {str(e)}"
         )
 
+
 @router.post("/index", response_model=IndexResponse)
-def index_service_endpoint(request: IndexRequest, db=Depends(get_db)):
-    """
-    Индексация услуги в Typesense.
+def index_service_endpoint(
+        request: IndexRequest,
+        db=Depends(get_db_dependency)
+):
+    """Индексация услуги в Typesense по UUID"""
+    logger.info(f"=== Index request for service_id={request.id} ===")
 
-    **Использование:**
-    Java-бэкенд отправляет только ID услуги после сохранения в PostgreSQL.
-    Python-сервис сам получает данные из БД и индексирует их.
-
-    **Пример запроса:**
-    ```json
-    {"id": 1}
-    ```
-    """
     try:
-        # Получаем данные услуги из PostgreSQL
-        service_data = get_service_by_id(db, request.id)
+        service_dict = get_service_by_id(db, request.id)
 
-        if not service_data:
+        if not service_dict:
             raise HTTPException(
-                status_code=404,
-                detail=f"Service with id {request.id} not found in database or inactive"
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Service with id {request.id} not found or inactive"
             )
-
-        # Индексируем в Typesense
-        success = index_service(service_data)
+        
+        from app.services.typesense_client import index_service
+        success = index_service(service_dict)
 
         if not success:
             raise HTTPException(
-                status_code=500,
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Failed to index service in Typesense"
             )
-
-        logger.info(f"Successfully indexed service: {request.id}")
 
         return IndexResponse(
             success=True,
             service_id=request.id,
             message="Service indexed successfully"
         )
-
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Indexing error: {e}")
+        logging.error(f"Unhandled indexing error for service {request.id}: {e}", exc_info=True)
         raise HTTPException(
-            status_code=500,
-            detail=f"Ошибка индексации: {str(e)}"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred during indexing."
         )
 
-@router.delete("/{service_id}", response_model=IndexResponse)
+
+@router.delete("/index/{service_id}")
 def delete_service_endpoint(service_id: int):
-    """
-    Удаление услуги из поискового индекса.
-
-    **Использование:**
-    Java-бэкенд вызывает при удалении услуги из PostgreSQL.
-    """
+    """Удаление услуги из индекса"""
     try:
-        success = delete_service(str(service_id))
-
+        from app.services.typesense_client import delete_service
+        success = delete_service(service_id)
+        
         if not success:
             raise HTTPException(
-                status_code=404,
-                detail=f"Service {service_id} not found in index"
+                status_code=500,
+                detail="Failed to delete service from index"
             )
-
-        return IndexResponse(
-            success=True,
-            service_id=service_id,
-            message="Service deleted from index"
-        )
-
-    except HTTPException:
-        raise
+        
+        return {
+            "success": True,
+            "service_id": service_id,
+            "message": "Service deleted from index"
+        }
     except Exception as e:
         logger.error(f"Delete error: {e}")
         raise HTTPException(
             status_code=500,
-            detail=f"Ошибка удаления: {str(e)}"
+            detail=str(e)
         )
 
-@router.post("/batch", response_model=List[PreprocessResponse])
-def preprocess_batch(requests: List[PreprocessRequest]):
-    """
-    Пакетная предобработка (для массовой загрузки услуг).
 
-    **Использование:**
-    При миграции существующих данных или импорте из внешних систем.
-    """
-    results = []
-
-    for req in requests:
-        try:
-            processed_title = preprocess_text(req.title)
-            processed_description = preprocess_text(req.description)
-
-            results.append(PreprocessResponse(
-                processed_title=" ".join(processed_title),
-                processed_description=" ".join(processed_description)
-            ))
-        except Exception as e:
-            logger.warning(f"Error preprocessing item: {e}")
-            continue
+@router.get("/health")
+def services_health():
+    """Проверка работоспособности"""
+    from app.database.connection import check_db_connection
     
-    return results
+    db_ok = check_db_connection()
+    
+    return {
+        "status": "healthy" if db_ok else "unhealthy",
+        "database": "connected" if db_ok else "disconnected"
+    }

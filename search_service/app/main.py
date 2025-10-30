@@ -1,164 +1,95 @@
-"""
-Точка входа для Python-микросервиса поиска PowerMarket
-"""
+# search_service/app/main.py
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api import api_router
-from app.database.connection import init_db_pool, close_db_pool
-from app.services.typesense_client import init_collection
+from contextlib import asynccontextmanager
 import logging
+
+# Импортируем наш экземпляр настроек
+from app.config import settings
+from app.database.connection import init_db_pool, close_db_pool, check_db_connection
+
+# --- ИСПРАВЛЕНИЕ ЗДЕСЬ ---
+# Импортируем api_router из пакета app.api (из его __init__.py)
+from app.api import api_router
+
+from app.services.typesense_client import init_collection
+
+from app.database.connection import get_db
+from app.services.typesense_client import sync_synonyms_with_typesense
 
 # Настройка логирования
 logging.basicConfig(
-    level=logging.INFO,
+    level=getattr(logging, settings.LOG_LEVEL.upper(), logging.INFO),
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
 
-# Создание FastAPI приложения
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Управление жизненным циклом приложения"""
+    logger.info("--- Application Starting Up ---")
+
+    # Логируем ключевые настройки, чтобы всегда знать, с чем работаем
+    logger.info("Loaded configuration:")
+    logger.info(f"  Database Host: {settings.DB_HOST}")
+    logger.info(f"  Database Port: {settings.DB_PORT}")
+    logger.info(f"  Typesense Host: {settings.TYPESENSE_HOST}")
+
+    try:
+        init_db_pool()
+        if not check_db_connection():
+            raise Exception("Database connection health check failed on startup.")
+        logger.info("✅ Database pool initialized and connection confirmed.")
+
+        # Инициализируем коллекцию в Typesense
+        init_collection()
+
+        try:
+            with get_db() as conn:
+                sync_synonyms_with_typesense(conn)
+        except Exception as e:
+            logger.error(f"Could not run synonym synchronization during startup: {e}")
+
+    except Exception as e:
+        logger.error(f"❌ FATAL: Startup error: {e}", exc_info=True)
+        raise
+
+    yield
+
+    # Shutdown
+    logger.info("--- Application Shutting Down ---")
+    close_db_pool()
+    logger.info("Database pool closed.")
+
+
 app = FastAPI(
-    title="PowerMarket Search API",
-    description="Поисковый микросервис для маркетплейса производственных мощностей",
-    version="1.0.0"
+    title="Power Market Search Service",
+    description="Сервис индексации и поиска для PowerMarket",
+    version="1.0.0",
+    lifespan=lifespan
 )
 
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # В production укажите конкретные домены
+    allow_origins=settings.ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# События жизненного цикла приложения
-@app.on_event("startup")
-async def startup():
-    """Инициализация при запуске"""
-    logger.info("Starting PowerMarket Search Service...")
-    try:
-        # Инициализация пула соединений с БД
-        init_db_pool()
-        logger.info("Database connection pool initialized")
-
-        # Инициализация Typesense коллекции
-        init_collection()
-        logger.info("Typesense collection initialized")
-
-        logger.info("Service started successfully")
-    except Exception as e:
-        logger.error(f"Startup error: {e}")
-        raise
-
-@app.on_event("shutdown")
-async def shutdown():
-    """Очистка при остановке"""
-    logger.info("Shutting down...")
-    close_db_pool()
-    logger.info("Service stopped")
-
-# Подключение роутеров
 app.include_router(api_router, prefix="/api")
 
-# Health check endpoint
-@app.get("/health")
+
+@app.get("/health", tags=["Health"])
 def health_check():
-    """Проверка здоровья сервиса"""
-    return {
-        "status": "ok",
-        "service": "search-service",
-        "version": "1.0.0"
-    }
+    """Проверка общего состояния сервиса"""
+    return {"status": "ok"}
 
-@app.get("/")
+
+@app.get("/", tags=["Root"])
 def root():
-    """Корневой endpoint"""
-    return {
-        "message": "PowerMarket Search API",
-        "docs": "/docs",
-        "health": "/health"
-    }
-"""
-Точка входа для Python-микросервиса поиска PowerMarket
-"""
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from app.api import search, preprocess
-from app.database.connection import init_db_pool, close_db_pool
-from app.services.typesense_client import init_collection
-import logging
-
-# Настройка логирования
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
-
-# Создание FastAPI приложения
-app = FastAPI(
-    title="PowerMarket Search API",
-    description="Поисковый микросервис для маркетплейса производственных мощностей",
-    version="1.0.0"
-)
-
-# CORS middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# События жизненного цикла
-@app.on_event("startup")
-async def startup():
-    """Инициализация при запуске"""
-    logger.info("Starting PowerMarket Search Service...")
-    try:
-        init_db_pool()
-        logger.info("Database connection pool initialized")
-
-        init_collection()
-        logger.info("Typesense collection initialized")
-
-        logger.info("Service started successfully")
-    except Exception as e:
-        logger.error(f"Startup error: {e}")
-        raise
-
-@app.on_event("shutdown")
-async def shutdown():
-    """Очистка при остановке"""
-    logger.info("Shutting down...")
-    close_db_pool()
-    logger.info("Service stopped")
-
-# Подключение роутеров с новой структурой
-app.include_router(search.router, prefix="/api/search", tags=["Search"])
-app.include_router(preprocess.router, prefix="/api/services", tags=["Services"])
-
-# Health check
-@app.get("/health")
-def health_check():
-    """Проверка здоровья сервиса"""
-    return {
-        "status": "ok",
-        "service": "search-service",
-        "version": "1.0.0"
-    }
-
-@app.get("/")
-def root():
-    """Корневой endpoint"""
-    return {
-        "message": "PowerMarket Search API",
-        "docs": "/docs",
-        "health": "/health",
-        "endpoints": {
-            "search": "/api/search/",
-            "suggest": "/api/search/suggest",
-            "index": "/api/services/index"
-        }
-    }
+    """Корневой endpoint с информацией о API"""
+    return {"message": "Welcome to PowerMarket Search API", "docs": "/docs"}
