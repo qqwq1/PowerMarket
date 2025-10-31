@@ -25,7 +25,7 @@ const EquipmentLotPage = () => {
               <h1 className="text-heading-3" style={{ margin: 0 }}>
                 {equipmentLot.title}
               </h1>
-              {userState.userRole === 'seller' && (
+              {userState.userRole === 'buyer' && (
                 <Button
                   icon={<PlusIcon />}
                   text="Предложить сотрудничество"

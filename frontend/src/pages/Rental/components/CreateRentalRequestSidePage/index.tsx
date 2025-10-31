@@ -19,7 +19,20 @@ const CreateRentalRequestSidePage = (props: IProps) => {
   const [state, _, handleChange] = useStateWithChange(rentalUtils.generateCreateRentalDTO(props.lotId))
 
   const handleCreate = () => {
-    const newRentalRequest = { id: new Date().getMilliseconds(), tenantId: 0, supplierId: 0, ...state }
+    const newRentalRequest: import('../../rental.types').IRentalRequest = {
+      id: Date.now(),
+      serviceId: state.serviceId,
+      serviceTitle: '',
+      tenantId: 0,
+      tenantName: '',
+      supplierId: 0,
+      startDate: state.startDate,
+      endDate: state.endDate,
+      message: state.message ?? '',
+      totalPrice: 0,
+      status: 'PENDING',
+      createdAt: new Date().toISOString(),
+    }
     setRentalRequests((prev) => ({ ...prev, items: [newRentalRequest, ...prev.items] }))
   }
 
@@ -28,7 +41,6 @@ const CreateRentalRequestSidePage = (props: IProps) => {
       <div className="flex-lines gap16" style={{ height: '100%' }}>
         <h4 className="text-heading-4">Добавление сотрудника</h4>
         <SeparateLine />
-        bjfjkudfs89ugcf7ydr6
         <RentalRequestFormFields rentalRequest={state} onChange={handleChange} />
         <div style={{ marginTop: 'auto' }}>
           <SeparateLine />
