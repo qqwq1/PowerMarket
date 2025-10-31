@@ -1,45 +1,70 @@
+# PowerMarket
 
-# React + TypeScript + Vite
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](#)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## О проекте
 
-Currently, two official plugins are available:
+**PowerMarket** — это двусторонняя цифровая платформа для управления производственными заказами между предприятиями. Платформа обеспечивает:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Прозрачность выполнения заказов в реальном времени.
+- Контроль и аналитику производственных процессов через встроенные инструменты ПА (Производственный анализ).
+- Снижение ручного труда и транзакционных издержек.
 
-## React Compiler
+Проект нацелен на **малые и средние предприятия**, а также стартапы и инжиниринговые бюро, которым нужен доступ к внешним производственным мощностям.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## Технологии
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **Frontend:** React + TypeScript + Vite  
+- **Backend:** Spring Boot + Java 21 + Gradle  
+- **База данных:** PostgreSQL  
+- **Кэширование и очереди:** Redis  
+- **CI/CD:** GitHub Actions, Gradle  
+- **Контроль версий:** Git + GitHub
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+---
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Ключевые возможности (MVP)
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- Ведение и отслеживание выполнения заказов с помощью ПА.
+- Уведомления и цепочка взаимопомощи при отклонениях в производстве.
+- Дашборды и аналитика по ключевым метрикам выполнения заказов.
+- Мобильная и десктопная доступность платформы.
+
+---
+
+## Термины
+
+| Термин                     | Определение |
+|-----------------------------|------------|
+| **Исполнитель**             | Предприятие, предоставляющее свои производственные мощности. |
+| **Заказчик**                | Предприятие, размещающее заказ и отслеживающее его выполнение. |
+| **Производственный анализ (ПА)** | Инструмент фиксации и анализа плановых и фактических показателей производства. |
+| **Лот**                     | Публикация на платформе, привязанная к карточке ПА, где отображаются ключевые показатели выполнения заказа. |
+
+---
+
+## Цели и ценность
+
+- **Для заказчиков:** прозрачный контроль хода заказов и прогнозируемость выполнения.  
+- **Для исполнителей:** демонстрация эффективности и возможность управлять ресурсами в реальном времени.  
+- **Для всех:** снижение бумажной работы и ошибок, стандартизация процессов.
+
+## Установка и запуск (для разработчиков)
+
+```bash
+# Клонировать репозиторий
+git clone https://github.com/your-org/powermarket.git
+cd powermarket
+
+# Backend
+cd backend
+./gradlew bootRun
+
+# Frontend
+cd ../frontend
+npm install
+npm run dev
+
