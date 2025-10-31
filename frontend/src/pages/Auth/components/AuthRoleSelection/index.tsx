@@ -14,8 +14,8 @@ const AuthRoleSelection = ({ userRole, setUserRole }: IProps) => {
       <div className="inline-flex-gap gap16">
         <div
           className={css.roleSelectionButton}
-          onClick={() => setUserRole('buyer')}
-          data-active={userRole === 'buyer'}
+          onClick={() => setUserRole('seller')}
+          data-active={userRole === 'seller'}
         >
           <Factory width="64px" />
           <h6 className="text-lg">Предложить свои мощности</h6>
@@ -23,8 +23,8 @@ const AuthRoleSelection = ({ userRole, setUserRole }: IProps) => {
         </div>
         <div
           className={css.roleSelectionButton}
-          onClick={() => setUserRole('seller')}
-          data-active={userRole === 'seller'}
+          onClick={() => setUserRole('buyer')}
+          data-active={userRole === 'buyer'}
         >
           <MagnifyingGlass width="64px" />
           <h6 className="text-lg">Найти мощности</h6>

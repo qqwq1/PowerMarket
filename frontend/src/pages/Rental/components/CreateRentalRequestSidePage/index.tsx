@@ -1,6 +1,4 @@
 import Button from '@/shared/Buttons/Button'
-import FormField from '@/shared/Forms/FormField'
-import TextInput from '@/shared/Inputs/TextInput'
 import SeparateLine from '@/shared/SeparateLine'
 import SidePage from '@/shared/SidePage'
 import { useRecoilState } from 'recoil'
@@ -21,7 +19,8 @@ const CreateRentalRequestSidePage = (props: IProps) => {
   const [state, _, handleChange] = useStateWithChange(rentalUtils.generateCreateRentalDTO(props.lotId))
 
   const handleCreate = () => {
-    setRentalRequests((prev) => ({ ...prev, items: [{ id: new Date().getMilliseconds(), ...state }, ...prev.items] }))
+    const newRentalRequest = { id: new Date().getMilliseconds(), tenantId: 0, supplierId: 0, ...state }
+    setRentalRequests((prev) => ({ ...prev, items: [newRentalRequest, ...prev.items] }))
   }
 
   return (
@@ -29,8 +28,8 @@ const CreateRentalRequestSidePage = (props: IProps) => {
       <div className="flex-lines gap16" style={{ height: '100%' }}>
         <h4 className="text-heading-4">Добавление сотрудника</h4>
         <SeparateLine />
+        bjfjkudfs89ugcf7ydr6
         <RentalRequestFormFields rentalRequest={state} onChange={handleChange} />
-
         <div style={{ marginTop: 'auto' }}>
           <SeparateLine />
         </div>

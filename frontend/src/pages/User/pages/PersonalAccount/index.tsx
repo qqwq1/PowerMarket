@@ -1,9 +1,9 @@
 import { useRecoilValue } from 'recoil'
 import userAtom from '@/pages/User/user.atom'
 import MainLayout from '@/shared/Layouts/MainLayout'
+import css from './personalAccount.module.css'
 import SellerPersonalAccountContent from './components/SellerPersonalAccountContent'
 import BuyerPersonalAccountContent from './components/BuyerPersonalAccountContent'
-import css from './personalAccount.module.css'
 
 const PersonalAccount = () => {
   const { userRole } = useRecoilValue(userAtom)

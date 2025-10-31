@@ -1,9 +1,11 @@
 import { atom } from 'recoil'
 import { TUserRole } from './user.types'
 
-export interface IUser {
+interface IUser {
   userRole: TUserRole | null
 }
+
+// type TUserRole = 'ADMIN' | 'SUPPLIER' | 'TENANT'
 
 const userAtom = atom<IUser>({
   key: 'self/user',

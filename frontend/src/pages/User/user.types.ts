@@ -2,7 +2,7 @@ export type TUserRole = 'seller' | 'buyer'
 
 export type Role = 'ADMIN' | 'SUPPLIER' | 'TENANT'
 
-export interface User {
+export interface IUser {
   id: number
   email: string
   role: Role
