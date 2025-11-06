@@ -1,9 +1,7 @@
 package org.dev.powermarket.repository;
 
 import org.dev.powermarket.domain.Notification;
-import org.dev.powermarket.domain.User;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.dev.powermarket.security.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

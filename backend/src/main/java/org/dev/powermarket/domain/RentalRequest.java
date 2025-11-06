@@ -1,7 +1,10 @@
 package org.dev.powermarket.domain;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.dev.powermarket.domain.enums.RentalRequestStatus;
 import jakarta.persistence.*;
+import org.dev.powermarket.security.entity.User;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
@@ -11,6 +14,8 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "rental_requests")
+@Getter
+@Setter
 public class RentalRequest {
 
     @Id
@@ -34,6 +39,9 @@ public class RentalRequest {
 
     @Column(name = "total_price", precision = 10, scale = 2)
     private BigDecimal totalPrice;
+
+    @Column(name = "capacity_needed", nullable = false)
+    private Integer capacityNeeded;
 
     @Column(columnDefinition = "TEXT")
     private String message; // Сообщение от арендатора
@@ -66,40 +74,4 @@ public class RentalRequest {
         updatedAt = Instant.now();
     }
 
-    // Getters and setters
-    public UUID getId() { return id; }
-    public void setId(UUID id) { this.id = id; }
-
-    public Service getService() { return service; }
-    public void setService(Service service) { this.service = service; }
-
-    public User getTenant() { return tenant; }
-    public void setTenant(User tenant) { this.tenant = tenant; }
-
-    public LocalDate getStartDate() { return startDate; }
-    public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
-
-    public LocalDate getEndDate() { return endDate; }
-    public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
-
-    public BigDecimal getTotalPrice() { return totalPrice; }
-    public void setTotalPrice(BigDecimal totalPrice) { this.totalPrice = totalPrice; }
-
-    public String getMessage() { return message; }
-    public void setMessage(String message) { this.message = message; }
-
-    public RentalRequestStatus getStatus() { return status; }
-    public void setStatus(RentalRequestStatus status) { this.status = status; }
-
-    public String getRejectionReason() { return rejectionReason; }
-    public void setRejectionReason(String rejectionReason) { this.rejectionReason = rejectionReason; }
-
-    public Instant getRespondedAt() { return respondedAt; }
-    public void setRespondedAt(Instant respondedAt) { this.respondedAt = respondedAt; }
-
-    public Instant getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
-
-    public Instant getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
 }

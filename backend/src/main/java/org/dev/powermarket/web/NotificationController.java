@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/notifications")
+@RequestMapping({"/api/v1/notifications","/api/notifications"})
 public class NotificationController {
 
     private final NotificationService notificationService;
@@ -23,23 +23,19 @@ public class NotificationController {
     }
 
     @GetMapping
-    @Operation(summary = "Получить все уведомления", security = {@SecurityRequirement(name = "bearerAuth")})
     public ResponseEntity<List<NotificationDto>> getNotifications(
             @AuthenticationPrincipal UserDetails principal) {
+        System.out.println(principal.getUsername());
         return ResponseEntity.ok(notificationService.getMyNotifications(principal.getUsername()));
     }
 
     @GetMapping("/unread")
-    @Operation(summary = "Получить непрочитанные уведомления",
-            security = {@SecurityRequirement(name = "bearerAuth")})
     public ResponseEntity<List<NotificationDto>> getUnreadNotifications(
             @AuthenticationPrincipal UserDetails principal) {
         return ResponseEntity.ok(notificationService.getUnreadNotifications(principal.getUsername()));
     }
 
     @PutMapping("/{notificationId}/read")
-    @Operation(summary = "Отметить уведомление как прочитанное",
-            security = {@SecurityRequirement(name = "bearerAuth")})
     public ResponseEntity<Void> markAsRead(
             @AuthenticationPrincipal UserDetails principal,
             @PathVariable UUID notificationId) {
@@ -48,8 +44,6 @@ public class NotificationController {
     }
 
     @PutMapping("/read-all")
-    @Operation(summary = "Отметить все уведомления как прочитанные",
-            security = {@SecurityRequirement(name = "bearerAuth")})
     public ResponseEntity<Void> markAllAsRead(@AuthenticationPrincipal UserDetails principal) {
         notificationService.markAllAsRead(principal.getUsername());
         return ResponseEntity.noContent().build();

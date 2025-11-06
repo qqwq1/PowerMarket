@@ -5,6 +5,8 @@ import org.dev.powermarket.domain.enums.NotificationType;
 import org.dev.powermarket.domain.enums.RentalRequestStatus;
 import org.dev.powermarket.domain.enums.Role;
 import org.dev.powermarket.repository.*;
+import org.dev.powermarket.security.entity.User;
+import org.dev.powermarket.security.repository.AuthorizedUserRepository;
 import org.dev.powermarket.service.dto.*;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -12,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -23,29 +24,35 @@ public class RentalRequestService {
     private final RentalRequestRepository rentalRequestRepository;
     private final ServiceRepository serviceRepository;
     private final ServiceAvailabilityRepository availabilityRepository;
-    private final UserRepository userRepository;
+    private final AuthorizedUserRepository userRepository;
     private final NotificationRepository notificationRepository;
     private final RentalService rentalService;
+    private final RentalRepository rentalRepository;
+    private final ChatRepository chatRepository;
 
     public RentalRequestService(RentalRequestRepository rentalRequestRepository,
                                 ServiceRepository serviceRepository,
                                 ServiceAvailabilityRepository availabilityRepository,
-                                UserRepository userRepository,
+                                AuthorizedUserRepository userRepository,
                                 NotificationRepository notificationRepository,
-                                RentalService rentalService) {
+                                RentalService rentalService,
+                                RentalRepository rentalRepository,
+                                ChatRepository chatRepository) {
         this.rentalRequestRepository = rentalRequestRepository;
         this.serviceRepository = serviceRepository;
         this.availabilityRepository = availabilityRepository;
         this.userRepository = userRepository;
         this.notificationRepository = notificationRepository;
         this.rentalService = rentalService;
+        this.rentalRepository = rentalRepository;
+        this.chatRepository = chatRepository;
     }
 
     @Transactional
     public RentalRequestDto createRentalRequest(String email, CreateRentalRequestRequest request) {
         User tenant = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
-
+        System.out.println(tenant);
         if (tenant.getRole() != Role.TENANT) {
             throw new AccessDeniedException("Only tenants can create rental requests");
         }
@@ -58,7 +65,6 @@ public class RentalRequestService {
         }
 
         long days = request.getEndDate().toEpochDay() - request.getStartDate().toEpochDay() + 1;
-
 
         // Check if dates are available
         boolean isAvailable = availabilityRepository.isDateRangeAvailable(
@@ -77,10 +83,32 @@ public class RentalRequestService {
         rentalRequest.setStartDate(request.getStartDate());
         rentalRequest.setEndDate(request.getEndDate());
         rentalRequest.setTotalPrice(totalPrice);
-        rentalRequest.setMessage(request.getMessage());
+        rentalRequest.setMessage("");
+        rentalRequest.setCapacityNeeded(request.getCapacityNeeded());
         rentalRequest.setStatus(RentalRequestStatus.PENDING);
 
         RentalRequest saved = rentalRequestRepository.save(rentalRequest);
+
+        Rental rental = new Rental();
+        rental.setRentalRequest(saved);
+        rental.setService(service);
+        rental.setSupplier(service.getSupplier());
+        rental.setTenant(tenant);
+        rental.setStartDate(request.getStartDate());
+        rental.setEndDate(request.getEndDate());
+        rental.setTotalPrice(totalPrice);
+        rental.setSupplierConfirmed(false);
+        rental.setTenantConfirmed(false);
+        rental.setIsActive(true);
+
+        Rental savedRental = rentalRepository.save(rental);
+
+        Chat chat = new Chat();
+        chat.setRental(savedRental);
+        Chat savedChat = chatRepository.save(chat);
+
+        savedRental.setChat(savedChat);
+        rentalRepository.save(savedRental);
 
         // Create notification for supplier
         createNotification(
@@ -114,7 +142,7 @@ public class RentalRequestService {
         }
 
         if (request.getApproved()) {
-            rentalRequest.setStatus(RentalRequestStatus.APPROVED);
+            rentalRequest.setStatus(RentalRequestStatus.CONFIRMED);
             rentalRequest.setRespondedAt(Instant.now());
 
             // Create rental and chat
@@ -170,6 +198,28 @@ public class RentalRequestService {
     }
 
     @Transactional(readOnly = true)
+    public List<RentalRequestDto> getReceivedRequests(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        return rentalRequestRepository.findBySupplier(user, org.springframework.data.domain.Pageable.unpaged())
+                .stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<RentalRequestDto> getSentRequests(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        return rentalRequestRepository.findByTenant(user, org.springframework.data.domain.Pageable.unpaged())
+                .stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
     public RentalRequestDto getRequest(String email, UUID requestId) {
         RentalRequest request = rentalRequestRepository.findById(requestId)
                 .orElseThrow(() -> new IllegalArgumentException("Rental request not found"));
@@ -217,6 +267,7 @@ public class RentalRequestService {
         dto.setRejectionReason(request.getRejectionReason());
         dto.setCreatedAt(request.getCreatedAt());
         dto.setRespondedAt(request.getRespondedAt());
+        dto.setCapacityNeeded(request.getCapacityNeeded());
         return dto;
     }
 }

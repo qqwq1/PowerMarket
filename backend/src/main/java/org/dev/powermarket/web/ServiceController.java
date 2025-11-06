@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +22,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/services")
+@RequestMapping({"/api/v1/services","/api/services"})
 public class ServiceController {
 
 
@@ -31,26 +32,25 @@ public class ServiceController {
 
 
     @PostMapping
-    @Operation(summary = "Создать услугу (только для поставщиков)",
-            security = {@SecurityRequirement(name = "bearerAuth")})
     public ResponseEntity<ServiceDto> createService(
             @AuthenticationPrincipal UserDetails principal,
-            @Valid @RequestBody CreateServiceRequest request) {
+            @RequestBody CreateServiceRequest request) {
+        System.out.println(request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(serviceService.createService(principal.getUsername(), request));
     }
 
+
+
     @PutMapping("/{serviceId}")
-    @Operation(summary = "Обновить услугу", security = {@SecurityRequirement(name = "bearerAuth")})
     public ResponseEntity<ServiceDto> updateService(
             @AuthenticationPrincipal UserDetails principal,
             @PathVariable UUID serviceId,
-            @Valid @RequestBody UpdateServiceRequest request) {
+            @RequestBody UpdateServiceRequest request) {
         return ResponseEntity.ok(serviceService.updateService(principal.getUsername(), serviceId, request));
     }
 
     @GetMapping("/search")
-    @Operation(summary = "Поиск услуг")
     public ResponseEntity<Page<ServiceDto>> searchServices(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) ServiceCategory category,
@@ -61,19 +61,27 @@ public class ServiceController {
     }
 
     @GetMapping("/{serviceId}")
-    @Operation(summary = "Получить услугу по ID")
     public ResponseEntity<ServiceDto> getService(@PathVariable UUID serviceId) {
         return ResponseEntity.ok(serviceService.getService(serviceId));
     }
 
-    @GetMapping("/my")
-    @Operation(summary = "Получить мои услуги", security = {@SecurityRequirement(name = "bearerAuth")})
-    public ResponseEntity<List<ServiceDto>> getMyServices(@AuthenticationPrincipal UserDetails principal) {
-        return ResponseEntity.ok(serviceService.getMyServices(principal.getUsername()));
+    @GetMapping
+    public ResponseEntity<?> getMyServices(@AuthenticationPrincipal UserDetails principal) {
+        String role = principal.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .findFirst()
+                .orElse("")
+                .toUpperCase();
+        System.out.println(role);
+
+        if (role.contains("SUPPLIER")) {
+            return ResponseEntity.ok(serviceService.getMyServices(principal.getUsername()));
+        }  else {
+            return ResponseEntity.ok(serviceService.getAllServices());
+        }
     }
 
     @DeleteMapping("/{serviceId}")
-    @Operation(summary = "Удалить услугу", security = {@SecurityRequirement(name = "bearerAuth")})
     public ResponseEntity<Void> deleteService(
             @AuthenticationPrincipal UserDetails principal,
             @PathVariable UUID serviceId) {

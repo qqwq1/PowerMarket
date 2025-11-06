@@ -1,9 +1,9 @@
 package org.dev.powermarket.service;
 
 import org.dev.powermarket.domain.Notification;
-import org.dev.powermarket.domain.User;
+import org.dev.powermarket.security.entity.User;
 import org.dev.powermarket.repository.NotificationRepository;
-import org.dev.powermarket.repository.UserRepository;
+import org.dev.powermarket.security.repository.AuthorizedUserRepository;
 import org.dev.powermarket.service.dto.NotificationDto;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -17,10 +17,10 @@ import java.util.stream.Collectors;
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
-    private final UserRepository userRepository;
+    private final AuthorizedUserRepository userRepository;
 
     public NotificationService(NotificationRepository notificationRepository,
-                               UserRepository userRepository) {
+                               AuthorizedUserRepository userRepository) {
         this.notificationRepository = notificationRepository;
         this.userRepository = userRepository;
     }

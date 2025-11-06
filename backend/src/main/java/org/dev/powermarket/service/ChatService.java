@@ -2,10 +2,10 @@ package org.dev.powermarket.service;
 
 import org.dev.powermarket.domain.Chat;
 import org.dev.powermarket.domain.ChatMessage;
-import org.dev.powermarket.domain.User;
+import org.dev.powermarket.security.entity.User;
 import org.dev.powermarket.repository.ChatMessageRepository;
 import org.dev.powermarket.repository.ChatRepository;
-import org.dev.powermarket.repository.UserRepository;
+import org.dev.powermarket.security.repository.AuthorizedUserRepository;
 import org.dev.powermarket.service.dto.ChatDto;
 import org.dev.powermarket.service.dto.ChatMessageDto;
 import org.dev.powermarket.service.dto.SendMessageRequest;
@@ -24,11 +24,11 @@ public class ChatService {
 
     private final ChatRepository chatRepository;
     private final ChatMessageRepository messageRepository;
-    private final UserRepository userRepository;
+    private final AuthorizedUserRepository userRepository;
 
     public ChatService(ChatRepository chatRepository,
                        ChatMessageRepository messageRepository,
-                       UserRepository userRepository) {
+                       AuthorizedUserRepository userRepository) {
         this.chatRepository = chatRepository;
         this.messageRepository = messageRepository;
         this.userRepository = userRepository;
@@ -46,6 +46,24 @@ public class ChatService {
     @Transactional(readOnly = true)
     public ChatDto getChat(String email, UUID chatId) {
         Chat chat = chatRepository.findById(chatId)
+                .orElseThrow(() -> new IllegalArgumentException("Chat not found"));
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        boolean isAuthorized = chat.getRental().getSupplier().getId().equals(user.getId()) ||
+                chat.getRental().getTenant().getId().equals(user.getId());
+
+        if (!isAuthorized) {
+            throw new AccessDeniedException("You don't have access to this chat");
+        }
+
+        return toDto(chat);
+    }
+
+    @Transactional(readOnly = true)
+    public ChatDto getChatByRentalRequestId(String email, UUID rentalRequestId) {
+        Chat chat = chatRepository.findByRentalRequestId(rentalRequestId)
                 .orElseThrow(() -> new IllegalArgumentException("Chat not found"));
 
         User user = userRepository.findByEmail(email)
@@ -81,9 +99,54 @@ public class ChatService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
+    public List<ChatMessageDto> getChatMessagesByRentalRequestId(String email, UUID rentalRequestId) {
+        Chat chat = chatRepository.findByRentalRequestId(rentalRequestId)
+                .orElseThrow(() -> new IllegalArgumentException("Chat not found"));
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        boolean isAuthorized = chat.getRental().getSupplier().getId().equals(user.getId()) ||
+                chat.getRental().getTenant().getId().equals(user.getId());
+
+        if (!isAuthorized) {
+            throw new AccessDeniedException("You don't have access to this chat");
+        }
+
+        return messageRepository.findByChatOrderByCreatedAtAsc(chat).stream()
+                .map(this::toMessageDto)
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     public ChatMessageDto sendMessage(String email, UUID chatId, SendMessageRequest request) {
         Chat chat = chatRepository.findById(chatId)
+                .orElseThrow(() -> new IllegalArgumentException("Chat not found"));
+
+        User sender = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        boolean isAuthorized = chat.getRental().getSupplier().getId().equals(sender.getId()) ||
+                chat.getRental().getTenant().getId().equals(sender.getId());
+
+        if (!isAuthorized) {
+            throw new AccessDeniedException("You don't have access to this chat");
+        }
+
+        ChatMessage message = new ChatMessage();
+        message.setChat(chat);
+        message.setSender(sender);
+        message.setContent(request.getContent());
+        message.setCreatedAt(Instant.now());
+
+        ChatMessage saved = messageRepository.save(message);
+        return toMessageDto(saved);
+    }
+
+    @Transactional
+    public ChatMessageDto sendMessageByRentalRequestId(String email, UUID rentalRequestId, SendMessageRequest request) {
+        Chat chat = chatRepository.findByRentalRequestId(rentalRequestId)
                 .orElseThrow(() -> new IllegalArgumentException("Chat not found"));
 
         User sender = userRepository.findByEmail(email)

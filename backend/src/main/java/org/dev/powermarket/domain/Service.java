@@ -1,17 +1,23 @@
 package org.dev.powermarket.domain;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.dev.powermarket.domain.enums.ServiceCategory;
 import jakarta.persistence.*;
+import org.dev.powermarket.security.entity.User;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "services")
 public class Service {
 
+    // Getters and setters
     @Id
     @GeneratedValue
     @UuidGenerator
@@ -37,6 +43,12 @@ public class Service {
     @Column(name = "capacity")
     private String capacity; // Мощность/производительность
 
+    @Column(name = "available_capacity")
+    private String availableCapacity;
+
+    @Column(name = "total_capacity_units")
+    private Integer totalCapacityUnits = 1; // Общее количество единиц мощности
+
     @Column(name = "location")
     private String location;
 
@@ -45,6 +57,12 @@ public class Service {
 
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
+
+    @Column(name = "average_rating", precision = 3, scale = 2)
+    private BigDecimal averageRating;
+
+    @Column(name = "total_reviews")
+    private Integer totalReviews = 0;
 
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
@@ -64,40 +82,4 @@ public class Service {
         updatedAt = Instant.now();
     }
 
-    // Getters and setters
-    public UUID getId() { return id; }
-    public void setId(UUID id) { this.id = id; }
-
-    public User getSupplier() { return supplier; }
-    public void setSupplier(User supplier) { this.supplier = supplier; }
-
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
-
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
-
-    public ServiceCategory getCategory() { return category; }
-    public void setCategory(ServiceCategory category) { this.category = category; }
-
-    public BigDecimal getPricePerDay() { return pricePerDay; }
-    public void setPricePerDay(BigDecimal pricePerDay) { this.pricePerDay = pricePerDay; }
-
-    public String getCapacity() { return capacity; }
-    public void setCapacity(String capacity) { this.capacity = capacity; }
-
-    public String getLocation() { return location; }
-    public void setLocation(String location) { this.location = location; }
-
-    public String getTechnicalSpecs() { return technicalSpecs; }
-    public void setTechnicalSpecs(String technicalSpecs) { this.technicalSpecs = technicalSpecs; }
-
-    public Boolean getIsActive() { return isActive; }
-    public void setIsActive(Boolean isActive) { this.isActive = isActive; }
-
-    public Instant getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
-
-    public Instant getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
 }

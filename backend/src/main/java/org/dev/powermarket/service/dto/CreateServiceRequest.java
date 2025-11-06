@@ -31,6 +31,8 @@ public class CreateServiceRequest {
     @Min(1)
     private String capacity;
 
+    private String availableCapacity;
+
     private String technicalSpecs;
 
     @NotEmpty(message = "At least one availability period is required")
@@ -44,4 +46,6 @@ public class CreateServiceRequest {
         @NotNull
         private LocalDate endDate;
     }
+
+
 }

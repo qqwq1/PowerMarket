@@ -1,6 +1,7 @@
 package org.dev.powermarket.domain;
 
 import jakarta.persistence.*;
+import org.dev.powermarket.security.entity.User;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.time.Instant;

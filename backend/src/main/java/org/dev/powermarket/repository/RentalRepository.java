@@ -1,7 +1,8 @@
 package org.dev.powermarket.repository;
 
 import org.dev.powermarket.domain.Rental;
-import org.dev.powermarket.domain.User;
+import org.dev.powermarket.domain.RentalRequest;
+import org.dev.powermarket.security.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -26,4 +27,6 @@ public interface RentalRepository extends JpaRepository<Rental, UUID> {
     Optional<Rental> findByRentalRequestId(UUID rentalRequestId);
 
     List<Rental> findBySupplierOrTenant(User user, User user1);
+
+    Optional<Rental> findByRentalRequest(RentalRequest request);
 }

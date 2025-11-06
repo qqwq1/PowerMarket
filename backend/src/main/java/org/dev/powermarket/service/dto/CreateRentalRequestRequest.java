@@ -17,5 +17,5 @@ public class CreateRentalRequestRequest {
     @NotNull(message = "End date is required")
     private LocalDate endDate;
 
-    private String message;
+    private Integer capacityNeeded;
 }

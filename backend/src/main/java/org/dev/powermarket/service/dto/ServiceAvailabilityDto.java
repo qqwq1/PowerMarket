@@ -14,4 +14,11 @@ public class ServiceAvailabilityDto {
     private UUID id;
     private LocalDate availableDate;
     private Boolean isReserved;
+    private UUID reservedByRentalId;
+
+    public ServiceAvailabilityDto(UUID id, LocalDate availableDate, Boolean isReserved) {
+        this.id = id;
+        this.availableDate = availableDate;
+        this.isReserved = isReserved;
+    }
 }

@@ -50,4 +50,11 @@ public interface ServiceAvailabilityRepository extends JpaRepository<ServiceAvai
                                                             @Param("startDate") LocalDate startDate,
                                                             @Param("endDate") LocalDate endDate);
 
+    @Query("SELECT sa FROM ServiceAvailability sa " +
+            "WHERE sa.service = :service " +
+            "AND sa.availableDate BETWEEN :startDate AND :endDate " +
+            "AND sa.isReserved = true")
+    List<ServiceAvailability> findReservedAvailabilities(@Param("service") Service service,
+                                                         @Param("startDate") LocalDate startDate,
+                                                         @Param("endDate") LocalDate endDate);
 }

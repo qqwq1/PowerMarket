@@ -1,7 +1,7 @@
 package org.dev.powermarket.repository;
 
 import org.dev.powermarket.domain.Service;
-import org.dev.powermarket.domain.User;
+import org.dev.powermarket.security.entity.User;
 import org.dev.powermarket.domain.enums.ServiceCategory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,4 +28,6 @@ public interface ServiceRepository extends JpaRepository<Service, UUID> {
     Page<Service> searchServices(@Param("search") String search, Pageable pageable);
     
     List<Service> findBySupplierAndIsActiveTrue(User supplier);
+
+    List<Service> findByIdInAndIsActiveTrue(List<UUID> ids);
 }

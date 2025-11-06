@@ -1,6 +1,9 @@
 package org.dev.powermarket.domain;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+import org.dev.powermarket.security.entity.User;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
@@ -8,10 +11,13 @@ import java.time.LocalDate;
 import java.time.Instant;
 import java.util.UUID;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "rentals")
 public class Rental {
 
+    // Getters and setters
     @Id
     @GeneratedValue
     @UuidGenerator
@@ -42,6 +48,21 @@ public class Rental {
     @Column(name = "total_price", precision = 10, scale = 2)
     private BigDecimal totalPrice;
 
+    @Column(name = "supplier_confirmed", nullable = false)
+    private Boolean supplierConfirmed = false;
+
+    @Column(name = "tenant_confirmed", nullable = false)
+    private Boolean tenantConfirmed = false;
+
+    @Column(name = "supplier_confirmed_at")
+    private Instant supplierConfirmedAt;
+
+    @Column(name = "tenant_confirmed_at")
+    private Instant tenantConfirmedAt;
+
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive = true;
+
     @OneToOne(mappedBy = "rental", cascade = CascadeType.ALL)
     private Chat chat;
 
@@ -53,34 +74,4 @@ public class Rental {
         createdAt = Instant.now();
     }
 
-    // Getters and setters
-    public UUID getId() { return id; }
-    public void setId(UUID id) { this.id = id; }
-
-    public RentalRequest getRentalRequest() { return rentalRequest; }
-    public void setRentalRequest(RentalRequest rentalRequest) { this.rentalRequest = rentalRequest; }
-
-    public Service getService() { return service; }
-    public void setService(Service service) { this.service = service; }
-
-    public User getSupplier() { return supplier; }
-    public void setSupplier(User supplier) { this.supplier = supplier; }
-
-    public User getTenant() { return tenant; }
-    public void setTenant(User tenant) { this.tenant = tenant; }
-
-    public LocalDate getStartDate() { return startDate; }
-    public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
-
-    public LocalDate getEndDate() { return endDate; }
-    public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
-
-    public BigDecimal getTotalPrice() { return totalPrice; }
-    public void setTotalPrice(BigDecimal totalPrice) { this.totalPrice = totalPrice; }
-
-    public Chat getChat() { return chat; }
-    public void setChat(Chat chat) { this.chat = chat; }
-
-    public Instant getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
 }

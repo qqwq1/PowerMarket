@@ -2,34 +2,42 @@ package org.dev.powermarket.service;
 
 import org.dev.powermarket.domain.Service;
 import org.dev.powermarket.domain.ServiceAvailability;
-import org.dev.powermarket.domain.User;
+import org.dev.powermarket.security.entity.User;
 import org.dev.powermarket.domain.enums.Role;
 import org.dev.powermarket.domain.enums.ServiceCategory;
 import org.dev.powermarket.repository.ServiceAvailabilityRepository;
 import org.dev.powermarket.repository.ServiceRepository;
-import org.dev.powermarket.repository.UserRepository;
+import org.dev.powermarket.integration.search.MlSearchClient;
+import org.dev.powermarket.integration.search.MlSearchProperties;
+import java.util.stream.Collectors;
+import java.util.Comparator;
+import java.time.LocalDate;
+
+import org.dev.powermarket.security.repository.AuthorizedUserRepository;
 import org.dev.powermarket.service.dto.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @org.springframework.stereotype.Service
 public class ServiceService {
 
     private final ServiceRepository serviceRepository;
     private final ServiceAvailabilityRepository availabilityRepository;
-    private final UserRepository userRepository;
+    private final AuthorizedUserRepository userRepository;
+    private final MlSearchClient mlSearchClient;
+    private final MlSearchProperties mlSearchProperties;
 
     public ServiceService(ServiceRepository serviceRepository,
                           ServiceAvailabilityRepository availabilityRepository,
-                          UserRepository userRepository) {
+                          AuthorizedUserRepository userRepository, MlSearchClient mlSearchClient, MlSearchProperties mlSearchProperties) {
         this.serviceRepository = serviceRepository;
+        this.mlSearchClient = mlSearchClient;
+        this.mlSearchProperties = mlSearchProperties;
         this.availabilityRepository = availabilityRepository;
         this.userRepository = userRepository;
     }
@@ -51,6 +59,7 @@ public class ServiceService {
         service.setLocation(request.getLocation());
         service.setCapacity(request.getCapacity());
         service.setTechnicalSpecs(request.getTechnicalSpecs());
+        service.setAvailableCapacity(request.getCapacity());
         service.setSupplier(supplier);
         service.setIsActive(true);
 
@@ -100,6 +109,24 @@ public class ServiceService {
     @Transactional(readOnly = true)
     public Page<ServiceDto> searchServices(String keyword, ServiceCategory category,
                                            LocalDate startDate, LocalDate endDate, Pageable pageable) {
+        // ML-based search integration: if enabled and keyword present, delegate to ML service
+        if (keyword != null && !keyword.isBlank() && mlSearchProperties != null && mlSearchProperties.isEnabled()) {
+            var ids = mlSearchClient.searchServiceIds(keyword, pageable.getPageNumber() + 1, pageable.getPageSize());
+            if (!ids.isEmpty()) {
+                var list = serviceRepository.findByIdInAndIsActiveTrue(ids);
+                // Preserve ML order
+                var order = new java.util.HashMap<java.util.UUID, Integer>();
+                for (int i = 0; i < ids.size(); i++) order.put(ids.get(i), i);
+                var sorted = list.stream()
+                        .sorted(Comparator.comparingInt(s -> order.getOrDefault(s.getId(), Integer.MAX_VALUE)))
+                        .map(this::toDto)
+                        .collect(Collectors.toList());
+                // Create Page
+                return new org.springframework.data.domain.PageImpl<>(sorted, pageable, sorted.size());
+            }
+        }
+
+
         Page<Service> services;
 
         if (keyword != null && !keyword.isBlank()) {
@@ -153,15 +180,22 @@ public class ServiceService {
         dto.setCategory(service.getCategory());
         dto.setPricePerDay(service.getPricePerDay());
         dto.setLocation(service.getLocation());
-        dto.setCapacity(service.getCapacity());
+        dto.setTotalCapacity(service.getCapacity());
+        dto.setTotalCapacityUnits(service.getTotalCapacityUnits());
         dto.setTechnicalSpecs(service.getTechnicalSpecs());
         dto.setSupplierId(service.getSupplier().getId());
         dto.setSupplierName(service.getSupplier().getFullName());
         dto.setActive(service.getIsActive());
+        dto.setAverageRating(service.getAverageRating());
+        dto.setTotalReviews(service.getTotalReviews());
         dto.setCreatedAt(service.getCreatedAt());
+        dto.setAvailableCapacity(service.getAvailableCapacity());
 
-        List<ServiceAvailabilityDto> availabilities = availabilityRepository
-                .findByServiceAndIsReservedFalse(service).stream()
+        List<ServiceAvailability> freeAvailabilities = availabilityRepository
+                .findByServiceAndIsReservedFalse(service);
+        dto.setAvailableCapacityUnits(freeAvailabilities.isEmpty() ? 0 : service.getTotalCapacityUnits());
+
+        List<ServiceAvailabilityDto> availabilities = freeAvailabilities.stream()
                 .map(this::toAvailabilityDto)
                 .collect(Collectors.toList());
         dto.setAvailabilities(availabilities);
@@ -175,5 +209,11 @@ public class ServiceService {
                 availability.getAvailableDate(),
                 availability.getIsReserved()
         );
+    }
+
+    public List<ServiceDto> getAllServices() {
+        return serviceRepository.findAll().stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
     }
 }

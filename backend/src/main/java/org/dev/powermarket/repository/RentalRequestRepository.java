@@ -2,7 +2,7 @@ package org.dev.powermarket.repository;
 
 import org.dev.powermarket.domain.RentalRequest;
 import org.dev.powermarket.domain.Service;
-import org.dev.powermarket.domain.User;
+import org.dev.powermarket.security.entity.User;
 import org.dev.powermarket.domain.enums.RentalRequestStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

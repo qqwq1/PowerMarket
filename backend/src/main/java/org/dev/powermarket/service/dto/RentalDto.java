@@ -3,6 +3,7 @@ package org.dev.powermarket.service.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.dev.powermarket.domain.enums.RentalRequestStatus;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -21,9 +22,16 @@ public class RentalDto {
     private String supplierName;
     private UUID tenantId;
     private String tenantName;
+    private Double capacityRented;
     private LocalDate startDate;
     private LocalDate endDate;
     private BigDecimal totalPrice;
     private UUID chatId;
+    private Boolean supplierConfirmed;
+    private Boolean tenantConfirmed;
+    private Instant supplierConfirmedAt;
+    private Instant tenantConfirmedAt;
+    private RentalRequestStatus status;
+    private Boolean isActive;
     private Instant createdAt;
 }

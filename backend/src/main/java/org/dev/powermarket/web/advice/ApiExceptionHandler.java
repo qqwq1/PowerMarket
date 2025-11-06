@@ -6,6 +6,8 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import jakarta.servlet.http.HttpServletRequest;
+
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -36,7 +38,13 @@ public class ApiExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleOther(Exception ex) {
+    public ResponseEntity<Map<String, Object>> handleOther(Exception ex, HttpServletRequest req) {
+        String uri = req.getRequestURI();
+        if (uri.startsWith("/v3/api-docs") || uri.startsWith("/swagger-ui")) {
+            throw new RuntimeException(ex);
+        }
+        ex.printStackTrace();
+
         Map<String, Object> body = base(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
     }
