@@ -58,7 +58,7 @@
 .stepTail {
   align-self: center;
   flex: 1 1 0;
-  max-width: 166px;
+  /* max-width: 166px; */
   border-top: 1px solid var(--text-placeholder);
 
   &[data-step-passed='false'] {

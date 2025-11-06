@@ -1,11 +1,9 @@
-export type TUserRole = 'seller' | 'buyer'
-
-export type Role = 'ADMIN' | 'SUPPLIER' | 'TENANT'
+export type TUserRole = 'ADMIN' | 'SUPPLIER' | 'TENANT'
 
 export interface IUser {
   id: number
   email: string
-  role: Role
+  role: TUserRole
   fullName: string
   companyName?: string
   inn?: string
@@ -13,3 +11,5 @@ export interface IUser {
   address?: string
   createdAt?: string | Date
 }
+
+export type TUserDto = Omit<IUser, 'id' | 'createdAt'>

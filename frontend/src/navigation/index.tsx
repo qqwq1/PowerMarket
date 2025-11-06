@@ -12,6 +12,10 @@ const router = createBrowserRouter([
     element: <Auth />,
   },
   {
+    path: urls.register,
+    element: <Auth />,
+  },
+  {
     path: urls.home,
     element: <Navigate to={urls.equipmentLots} replace={true} />,
   },

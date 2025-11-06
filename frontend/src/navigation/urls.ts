@@ -2,6 +2,7 @@ import { IEquipmentLot } from '@/pages/EquipmentLot/equipmentLot.types'
 
 const urls = {
   auth: '/auth',
+  register: '/register',
   home: '/',
   main: '/main',
   equipmentLots: '/equipmentLots',

@@ -1,21 +1,20 @@
 import Factory from '@/assets/images/factory.svg?react'
 import MagnifyingGlass from '@/assets/images/magnifyingGlassSearch.svg?react'
-import css from './authRoleSelection.module.css'
-
+import css from './registrationRoleSelection.module.css'
 interface IProps {
-  userRole: 'seller' | 'buyer' | null
-  setUserRole: (role: 'seller' | 'buyer') => void
+  userRole: 'SUPPLIER' | 'TENANT'
+  setUserRole: (role: 'SUPPLIER' | 'TENANT') => void
 }
 
-const AuthRoleSelection = ({ userRole, setUserRole }: IProps) => {
+const RegistrationRoleSelection = ({ userRole, setUserRole }: IProps) => {
   return (
     <>
       <h3>Что вы хотите сделать?</h3>
       <div className="inline-flex-gap gap16">
         <div
           className={css.roleSelectionButton}
-          onClick={() => setUserRole('seller')}
-          data-active={userRole === 'seller'}
+          onClick={() => setUserRole('SUPPLIER')}
+          data-active={userRole === 'SUPPLIER'}
         >
           <Factory width="64px" />
           <h6 className="text-lg">Предложить свои мощности</h6>
@@ -23,8 +22,8 @@ const AuthRoleSelection = ({ userRole, setUserRole }: IProps) => {
         </div>
         <div
           className={css.roleSelectionButton}
-          onClick={() => setUserRole('buyer')}
-          data-active={userRole === 'buyer'}
+          onClick={() => setUserRole('TENANT')}
+          data-active={userRole === 'TENANT'}
         >
           <MagnifyingGlass width="64px" />
           <h6 className="text-lg">Найти мощности</h6>
@@ -35,4 +34,4 @@ const AuthRoleSelection = ({ userRole, setUserRole }: IProps) => {
   )
 }
 
-export default AuthRoleSelection
+export default RegistrationRoleSelection
