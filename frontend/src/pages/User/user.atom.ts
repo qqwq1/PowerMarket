@@ -1,16 +1,14 @@
 import { atom } from 'recoil'
-import { TUserRole } from './user.types'
+import { IUser } from './user.types'
 
-interface IUser {
-  userRole: TUserRole | null
+interface IUserState {
+  user: IUser
 }
 
-// type TUserRole = 'ADMIN' | 'SUPPLIER' | 'TENANT'
-
-const userAtom = atom<IUser>({
+const userAtom = atom<IUserState>({
   key: 'self/user',
   default: {
-    userRole: null,
+    user: null,
   },
 })
 

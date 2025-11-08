@@ -14,6 +14,8 @@ const MainLayout = (props: PropsWithChildren) => {
   const userState = useRecoilValue(userAtom)
   const logoutAction = useLogout()
 
+  if (!userState.user) return null
+
   return (
     <div className={css.wrapper}>
       <div className={css.header}>
@@ -27,7 +29,7 @@ const MainLayout = (props: PropsWithChildren) => {
           </div>
           <div className="inline-flex-gap gap16 center">
             <span className="text-nm text-default text-center">
-              {`Добрый день, ${userState.userRole === 'seller' ? 'исполнитель' : 'заказчик'}!`}
+              {`Добрый день, ${userState.user.role === 'SUPPLIER' ? 'исполнитель' : 'заказчик'}!`}
             </span>
             <Button size="default" type="default" text="Выйти" onClick={logoutAction} />
           </div>

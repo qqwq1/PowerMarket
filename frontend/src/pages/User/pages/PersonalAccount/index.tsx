@@ -6,13 +6,14 @@ import SellerPersonalAccountContent from './components/SellerPersonalAccountCont
 import BuyerPersonalAccountContent from './components/BuyerPersonalAccountContent'
 
 const PersonalAccount = () => {
-  const { userRole } = useRecoilValue(userAtom)
+  const userState = useRecoilValue(userAtom)
 
   const renderContent = () => {
-    if (userRole === 'seller') {
+    if (!userState.user) return null
+    if (userState.user.role === 'SUPPLIER') {
       return <SellerPersonalAccountContent />
     }
-    if (userRole === 'buyer') {
+    if (userState.user.role === 'TENANT') {
       return <BuyerPersonalAccountContent />
     }
   }

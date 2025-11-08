@@ -25,7 +25,7 @@ const EquipmentLotPage = () => {
               <h1 className="text-heading-3" style={{ margin: 0 }}>
                 {equipmentLot.title}
               </h1>
-              {userState.userRole === 'buyer' && (
+              {userState.user.role === 'TENANT' && (
                 <Button
                   icon={<PlusIcon />}
                   text="Предложить сотрудничество"
@@ -36,7 +36,7 @@ const EquipmentLotPage = () => {
               )}
             </div>
             <div className={css.content}>
-              <img src={equipmentLot.images[0]} style={{ height: '580px' }} alt="" />
+              {/* <img src={equipmentLot.images[0]} style={{ height: '580px' }} alt="" /> */}
               <div className="flex-lines gap16">
                 <h6 className="text-heading-3">Описание</h6>
                 <p className="text-sm">{equipmentLot.description}</p>

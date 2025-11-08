@@ -1,20 +1,18 @@
 import { atom } from 'recoil'
-import { IEquipmentLot } from './equipmentLot.types'
+import { IEquipmentLot, TEquipmentLotCategory } from './equipmentLot.types'
 
 export interface IEquipmentLotFiltersState {
-  category: IEquipmentLot['category'] | null
+  category: TEquipmentLotCategory | null
   location: IEquipmentLot['location'] | null
   price: [number, number]
-  status: IEquipmentLot['status'] | null
 }
 
 const equipmentLotFiltersAtom = atom<IEquipmentLotFiltersState>({
   key: 'equipmentLotFilters',
   default: {
-    category: '',
+    category: null,
     location: '',
     price: [null, null],
-    status: null,
   },
 })
 export default equipmentLotFiltersAtom

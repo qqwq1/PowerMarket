@@ -1,9 +1,16 @@
-const categoryOptions = [
-  { title: 'Металлообработка', value: 'metalworking' },
-  { title: '3D-печать', value: '3d-print' },
-  { title: 'Станки с ЧПУ', value: 'cnc-machining' },
-  { title: 'Лазерная резка', value: 'laser-cutting' },
-  { title: 'Сварочное оборудование', value: 'welding' },
+import { IOption } from '@/types/global'
+import { TEquipmentLotCategory } from '../../equipmentLot.types'
+
+const categoryOptions: IOption<TEquipmentLotCategory>[] = [
+  { title: 'Производство', value: 'MANUFACTURING' },
+  { title: 'Оборудование', value: 'EQUIPMENT' },
+  { title: 'Складские помещения', value: 'WAREHOUSE' },
+  { title: 'Транспорт', value: 'TRANSPORT' },
+  { title: 'Лабораторные услуги', value: 'LABORATORY' },
+  { title: 'Обработка', value: 'PROCESSING' },
+  { title: 'Сборка', value: 'ASSEMBLY' },
+  { title: 'Тестирование', value: 'TESTING' },
+  { title: 'Другое', value: 'OTHER' },
 ]
 
 const statusOptions = [

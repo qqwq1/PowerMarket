@@ -41,6 +41,7 @@ export const applyInterceptors = (
       .refreshToken(refreshToken)
       .then((r) => {
         if (r.status === 'success') {
+          localStorage.setItem('refreshToken', r.body.refreshToken)
           const newAuth = { accessToken: r.body.token, expires: Date.now() + 3600000 }
           setAuthState((prev) => ({
             ...prev,
@@ -68,33 +69,10 @@ export const applyInterceptors = (
 
   http.interceptors.response.use(
     (response) => response,
-    async (err) => {
-      const originalRequest = err.config
-      const shouldRetry = err.response && err.response.status === 401 && !originalRequest._retry
+    (err) => {
+      const shouldLogout = err.response && err.response.status === 401
 
-      if (shouldRetry) {
-        originalRequest._retry = true
-
-        try {
-          const { accessToken } = await refreshAccessToken()
-
-          if (accessToken) {
-            originalRequest.headers.Authorization = `Bearer ${accessToken}`
-            return http(originalRequest)
-          }
-        } catch (refreshError) {
-          // Если обновление токена не удалось, разлогиниваем
-          setAuthState({
-            expires: 0,
-            accessToken: '',
-            authState: 'not-authorized',
-          })
-          throw refreshError
-        }
-      }
-
-      // Если это повторная ошибка 401 или другая ошибка
-      if (err.response && err.response.status === 401) {
+      if (shouldLogout) {
         setAuthState({
           expires: 0,
           accessToken: '',
@@ -129,7 +107,7 @@ export const handleHttpError = (error: AxiosError): IHTTPErrorResponse => {
   }
 
   if (error?.response?.status >= 500) {
-    console.log({ type: 'error', title: `Непредвиденная ошибка`, description: `${error?.message}` })
+    alert({ type: 'error', title: `Непредвиденная ошибка`, description: `${error?.message}` })
   }
 
   const message = error?.message || 'Ошибка при запросе на\n' + error.config.url

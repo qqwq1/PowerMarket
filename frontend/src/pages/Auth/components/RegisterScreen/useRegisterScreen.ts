@@ -5,9 +5,10 @@ import { useNavigate } from 'react-router-dom'
 import { TUserDto } from '../../../User/user.types'
 import { useSetRecoilState } from 'recoil'
 import userAtom from '../../../User/user.atom'
-import authAtom from '../../auth.atom'
+import authAtom, { IAuthState } from '../../auth.atom'
 import authApi from '../../auth.api'
 import useHttpLoader from '@/shared/hooks/useHttpLoader'
+import http, { applyInterceptors } from '@/services/http'
 
 const useRegisterScreen = () => {
   const navigate = useNavigate()
@@ -58,9 +59,16 @@ const useRegisterScreen = () => {
 
     wait(authApi.register(dto), (resp) => {
       if (resp.status === 'success') {
+        const newAuthState: IAuthState = {
+          authState: 'authorized' as const,
+          accessToken: resp.body.token,
+          expires: Date.now() + 3600000,
+        }
+        applyInterceptors(newAuthState, setAuthState, resp.body.refreshToken, http, 'default')
         localStorage.setItem('accessToken', resp.body.token)
+        localStorage.setItem('refreshToken', resp.body.refreshToken)
         setAuthState((prev) => ({ ...prev, authState: 'authorized', accessToken: resp.body.token }))
-        setUserState({ userRole: resp.body.user.role })
+        setUserState({ user: resp.body.user })
         navigate(urls.home)
       } else {
         const msg = resp.message || 'Не удалось завершить регистрацию'

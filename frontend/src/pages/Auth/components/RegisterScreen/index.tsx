@@ -19,7 +19,7 @@ const RegisterScreen = () => {
   }
   return (
     <>
-      <div style={{ width: '28%' }}>
+      <div style={{ width: '100%', maxWidth: '300px' }}>
         <StepIndicator stepNames={['', '']} activeStepIndex={ctrl.stepIndex} />
       </div>
       <div className={cn(css.roleSelectionBlock, 'flex-lines gap24 center')}>

@@ -1,18 +1,19 @@
 import { useState } from 'react'
-import DropArea from '@/shared/Files/Droparea'
 import TextInput from '@/shared/Inputs/TextInput'
 import DropdownInput from '@/shared/Inputs/DropdownInput'
 import Button from '@/shared/Buttons/Button'
-import { IEquipmentLot } from '@/pages/EquipmentLot/equipmentLot.types'
 import SidePage from '@/shared/SidePage'
 import FormField from '@/shared/Forms/FormField'
 import SeparateLine from '@/shared/SeparateLine'
 import equipmentLotCreateConstants from './equipmentLotCreate.constants'
-import useDroparea from '@/shared/Files/hooks/useDroparea'
-import useInputFile from '@/shared/hooks/useInputFile'
-import AttachmentLine from '@/shared/Files/Attachment/AttachmentLine'
-import formsUtils from '@/shared/Forms/forms.utils'
-import PlusIcon from '@/assets/icons/plus.svg?react'
+import equipmentLotUtils from '../../equipmentLot.utils'
+import useHttpLoader from '@/shared/hooks/useHttpLoader'
+import equipmentLotApi from '../../equipmentLot.api'
+import { useSetRecoilState } from 'recoil'
+import equipmentLotAtom from '../../equipmentLot.atom'
+import { TEquipmentLotDto } from '../../equipmentLot.types'
+import TextArea from '@/shared/Inputs/TextArea'
+import AntDateRangePicker from '@/shared/Forms/DatePickers/AntDateRangePicker'
 
 interface IProps {
   open: boolean
@@ -20,50 +21,68 @@ interface IProps {
 }
 
 const EquipmentLotCreate = (props: IProps) => {
-  const [files, setFiles] = useState<File[]>([])
-  const dropAreaCtrl = useDroparea({ onFiles: (files) => setFiles((prev) => [...prev, ...files]) })
-  const fileInputHandler = useInputFile({ onFiles: (files) => setFiles((prev) => [...prev, ...files]) })
-  const [form, setForm] = useState<Partial<IEquipmentLot>>({
-    title: '',
-    description: '',
-    category: '',
-    price: null,
-    location: '',
-    images: [],
-    status: 'moderation',
-  })
+  const setEquipmentLotState = useSetRecoilState(equipmentLotAtom)
+  // const [files, setFiles] = useState<File[]>([])
+  // const dropAreaCtrl = useDroparea({ onFiles: (files) => setFiles((prev) => [...prev, ...files]) })
+  // const fileInputHandler = useInputFile({ onFiles: (files) => setFiles((prev) => [...prev, ...files]) })
+  const [form, setForm] = useState<TEquipmentLotDto>(equipmentLotUtils.generateEmptyEquipmentLot())
+  const { wait } = useHttpLoader()
 
-  const handleChange = (val: string | number, name: keyof IEquipmentLot) => {
+  const handleChange = (val: string | number, name: keyof TEquipmentLotDto) => {
     setForm((prev) => ({ ...prev, [name]: val }))
   }
 
   const handleSubmit = () => {
-    alert('Лот создан! (заглушка)' + JSON.stringify(form))
+    console.log('123123')
+    wait(equipmentLotApi.createEquipmentLot(form), (resp) => {
+      console.log(resp)
+      if (resp.status === 'success') {
+        setEquipmentLotState((prev) => ({
+          ...prev,
+          items: [...prev.items, resp.body],
+        }))
+      }
+    })
   }
 
-  const renderFilesBlock = () => {
-    return (
-      <div className="flex-lines gap16" style={{ marginTop: '16px', marginBottom: '16px' }}>
-        <Button
-          size="default"
-          type="default"
-          text="Добавить файл"
-          fullWidth={true}
-          icon={<PlusIcon />}
-          onClick={fileInputHandler}
-        />
-        <div>
-          {files.map((f, index) => (
-            <AttachmentLine
-              index={index}
-              file={f}
-              onDelete={() => setFiles((prev) => formsUtils.arrays.removeItem(prev, index))}
-            />
-          ))}
-        </div>
-      </div>
-    )
+  const handleRangeChange = (index: number, startTs: number, endTs: number) => {
+    const startDate = startTs ? new Date(startTs).toISOString() : ''
+    const endDate = endTs ? new Date(endTs).toISOString() : ''
+
+    setForm((prev) => {
+      const newAvailabilities = [...prev.availabilities]
+      if (!newAvailabilities[index]) return prev
+      newAvailabilities[index] = { startDate, endDate }
+      return {
+        ...prev,
+        availabilities: newAvailabilities,
+      }
+    })
   }
+
+  // const renderFilesBlock = () => {
+  //   return (
+  //     <div className="flex-lines gap16" style={{ marginTop: '16px', marginBottom: '16px' }}>
+  //       <Button
+  //         size="default"
+  //         type="default"
+  //         text="Добавить файл"
+  //         fullWidth={true}
+  //         icon={<PlusIcon />}
+  //         onClick={fileInputHandler}
+  //       />
+  //       <div>
+  //         {files.map((f, index) => (
+  //           <AttachmentLine
+  //             index={index}
+  //             file={f}
+  //             onDelete={() => setFiles((prev) => formsUtils.arrays.removeItem(prev, index))}
+  //           />
+  //         ))}
+  //       </div>
+  //     </div>
+  //   )
+  // }
 
   return (
     <SidePage onClose={props.onClose} open={props.open}>
@@ -107,16 +126,16 @@ const EquipmentLotCreate = (props: IProps) => {
                 title="Выберите категорию"
               />
             </FormField>
-            <FormField label="Цена" required={true}>
+            <FormField label="Цена в ₽ за день" required={true}>
               <TextInput
                 name="price"
-                value={form.price?.toString() ?? ''}
-                onChange={(val) => handleChange(Number(val), 'price')}
-                placeHolder="Введите цена в ₽ за час"
+                value={form.pricePerDay?.toString() ?? ''}
+                onChange={(val) => handleChange(Number(val), 'pricePerDay')}
+                placeHolder="руб./день"
                 type="number"
               />
             </FormField>
-            <FormField label="Город/локация" required={true}>
+            <FormField label="Адрес" required={true}>
               <TextInput
                 name="location"
                 value={form.location as string}
@@ -124,16 +143,46 @@ const EquipmentLotCreate = (props: IProps) => {
                 placeHolder="Введите город"
               />
             </FormField>
-            <FormField label="Статус лота" required={true}>
-              <DropdownInput
-                name="status"
-                options={equipmentLotCreateConstants.statusOptions}
-                selectedOption={form.status as string}
-                onSelect={(val) => handleChange(val, 'status')}
-                title="Статус лота"
+            <FormField label="Технические характеристики">
+              <TextArea
+                name="technicalSpecs"
+                value={form.technicalSpecs as string}
+                onChange={handleChange}
+                placeHolder="Дополнительная техническая информация"
               />
             </FormField>
-            <DropArea
+
+            <div className="flex-lines gap24">
+              <div className="flex-space-between">
+                <p className="text-nm" style={{ whiteSpace: 'pre-wrap' }}>
+                  Периоды доступности <span className="text-nm text-error">*</span>
+                </p>
+                <Button
+                  size="default"
+                  type="default"
+                  text="Добавить период"
+                  onClick={() =>
+                    setForm((prev) => ({
+                      ...prev,
+                      availabilities: [...prev.availabilities, { startDate: null, endDate: null }],
+                    }))
+                  }
+                />
+              </div>
+              <div className="flex-lines gap16">
+                {form.availabilities.map((availability, index) => (
+                  <AntDateRangePicker
+                    key={index}
+                    onChange={(startTs, endTs) => handleRangeChange(index, startTs, endTs)}
+                    allowSelectInFuture
+                    startTs={availability.startDate ? Date.parse(availability.startDate) : null}
+                    endTs={availability.endDate ? Date.parse(availability.endDate) : null}
+                    panelStyle={{ width: '100%' }}
+                  />
+                ))}
+              </div>
+            </div>
+            {/* <DropArea
               onDrop={dropAreaCtrl.handleDrop}
               isActive={dropAreaCtrl.over}
               onDragOver={dropAreaCtrl.handleDragOver}
@@ -141,7 +190,7 @@ const EquipmentLotCreate = (props: IProps) => {
               onDragLeave={dropAreaCtrl.handleDragLeave}
             >
               {renderFilesBlock()}
-            </DropArea>
+            </DropArea> */}
           </div>
         </div>
         <div style={{ marginTop: 'auto' }}>
