@@ -8,8 +8,8 @@ export interface IAuthResponse {
   user: IUser
 }
 
-const login = (dto: { login: string; password: string }): Promise<HTTPResponse<IAuthResponse>> => {
-  return http.post('/api/auth/login', dto).then(handleHttpResponse).catch(handleHttpError)
+const login = (email: string, password: string): Promise<HTTPResponse<IAuthResponse>> => {
+  return http.post('/api/auth/login', { email, password }).then(handleHttpResponse).catch(handleHttpError)
 }
 
 const refreshToken = async (refreshToken: string): Promise<HTTPResponse<IAuthResponse>> => {

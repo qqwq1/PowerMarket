@@ -10,24 +10,18 @@ export interface IHTTPErrorResponse {
 }
 
 export interface IPaginationResponse<T = any> {
-  totalCount: number
-  nextPage: string | null
-  prevPage: string | null
-  items: T[]
+  page: {
+    size: number
+    number: number
+    totalElements: number
+    totalPages: number
+  }
+  content: T[]
 }
 
 export interface IPaginationRequestQuery {
-  limit?: number
-  page?: string
+  size?: number
+  page?: number
 }
 
 export type HTTPResponse<T = undefined> = IHTTPErrorResponse | IHTTPSuccessResponse<T>
-
-type IOmitFirstArg<F> = F extends (x: any, ...args: infer P) => infer R ? (...args: P) => R : never
-
-export interface IAbortableRequest<T extends (...args: any[]) => any> {
-  (...args: Parameters<IOmitFirstArg<T>>): Promise<Awaited<ReturnType<T>>>
-  abort: () => void
-}
-
-export type ISignalable = (signal: AbortController['signal'], ...args: any[]) => any

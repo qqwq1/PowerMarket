@@ -7,7 +7,6 @@ const generateEmptyEquipmentLot = (): TEquipmentLotDto => ({
   pricePerDay: 0,
   location: '',
   capacity: '',
-  availableCapacity: '',
   technicalSpecs: '',
   availabilities: [],
 })

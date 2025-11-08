@@ -25,7 +25,7 @@ const useLoginScreen = () => {
     if (isActionDisabled) return
     setLoading(true)
     setError(null)
-    wait(authApi.login({ login: state.email.trim(), password: state.password }), (resp) => {
+    wait(authApi.login(state.email.trim(), state.password), (resp) => {
       if (resp.status === 'success') {
         const newAuthState: IAuthState = {
           authState: 'authorized' as const,

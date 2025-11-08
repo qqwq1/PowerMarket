@@ -40,7 +40,7 @@ const AuthGate = (props: PropsWithChildren) => {
   if (authState.authState === 'not-authorized') {
     return <Navigate to="/auth" replace={true} state={{ from: location }} />
   }
-
+  console.log(authState.authState)
   return props.children
 }
 

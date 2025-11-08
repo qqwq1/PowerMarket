@@ -6,6 +6,7 @@ import SidePage from '@/shared/SidePage'
 import FormField from '@/shared/Forms/FormField'
 import SeparateLine from '@/shared/SeparateLine'
 import equipmentLotCreateConstants from './equipmentLotCreate.constants'
+import timeUtils from '@/utils/time.utils'
 import equipmentLotUtils from '../../equipmentLot.utils'
 import useHttpLoader from '@/shared/hooks/useHttpLoader'
 import equipmentLotApi from '../../equipmentLot.api'
@@ -33,9 +34,7 @@ const EquipmentLotCreate = (props: IProps) => {
   }
 
   const handleSubmit = () => {
-    console.log('123123')
     wait(equipmentLotApi.createEquipmentLot(form), (resp) => {
-      console.log(resp)
       if (resp.status === 'success') {
         setEquipmentLotState((prev) => ({
           ...prev,
@@ -46,8 +45,8 @@ const EquipmentLotCreate = (props: IProps) => {
   }
 
   const handleRangeChange = (index: number, startTs: number, endTs: number) => {
-    const startDate = startTs ? new Date(startTs).toISOString() : ''
-    const endDate = endTs ? new Date(endTs).toISOString() : ''
+    const startDate = startTs ? timeUtils.formatDate(startTs, 'yyyy-MM-dd') : ''
+    const endDate = endTs ? timeUtils.formatDate(endTs, 'yyyy-MM-dd') : ''
 
     setForm((prev) => {
       const newAvailabilities = [...prev.availabilities]
@@ -151,6 +150,15 @@ const EquipmentLotCreate = (props: IProps) => {
                 placeHolder="Дополнительная техническая информация"
               />
             </FormField>
+            <FormField label="Мощность">
+              <TextInput
+                type="number"
+                name="capacity"
+                value={form.capacity as string}
+                onChange={handleChange}
+                placeHolder="Дополнительная техническая информация"
+              />
+            </FormField>
 
             <div className="flex-lines gap24">
               <div className="flex-space-between">
@@ -173,6 +181,7 @@ const EquipmentLotCreate = (props: IProps) => {
                 {form.availabilities.map((availability, index) => (
                   <AntDateRangePicker
                     key={index}
+                    withTime={false}
                     onChange={(startTs, endTs) => handleRangeChange(index, startTs, endTs)}
                     allowSelectInFuture
                     startTs={availability.startDate ? Date.parse(availability.startDate) : null}
@@ -206,3 +215,35 @@ const EquipmentLotCreate = (props: IProps) => {
 }
 
 export default EquipmentLotCreate
+// {
+//   "title": "string",
+//   "description": "string",
+//   "category": "MANUFACTURING",
+//   "pricePerDay": 0,
+//   "location": "string",
+//   "capacity": "string",
+//   "availableCapacity": "string",
+//   "technicalSpecs": "string",
+//   "availabilities": [
+//     {
+//       "startDate": "2025-11-08",
+//       "endDate": "2025-11-08"
+//     }
+//   ]
+// }
+
+// {
+//   "title": "qwdqwdq",
+//   "description": "wqdqwdqwd",
+//   "category": "LOGISTICS",
+//   "pricePerDay": 12213,
+//   "capacity": "123123",
+//   "location": "qwdwqd",
+//   "technicalSpecs": "wqdqdwqd",
+//   "availabilities": [
+//     {
+//       "startDate": "2025-11-26",
+//       "endDate": "2025-12-05"
+//     }
+//   ]
+// }

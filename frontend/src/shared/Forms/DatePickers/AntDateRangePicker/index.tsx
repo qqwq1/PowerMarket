@@ -45,7 +45,7 @@ const AntDateRangePicker = (props: IProps) => {
         renderExtraFooter={() => props.renderExtraFooter}
         open={props.open}
         showTime={props.withTime ? { format: 'HH:mm:ss' } : false}
-        format={props.withTime ? 'DD.MM.YYYY HH:mm:ss' : 'DD.MM.YYYY HH:mm'}
+        format={props.withTime ? 'DD.MM.YYYY HH:mm:ss' : 'DD.MM.YYYY'}
         onChange={(value: [dayjs.Dayjs, dayjs.Dayjs]) => {
           if (value === null) {
             props.onChange(null, null)

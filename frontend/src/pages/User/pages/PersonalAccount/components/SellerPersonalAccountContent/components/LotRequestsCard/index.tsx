@@ -6,6 +6,7 @@ import { useState } from 'react'
 import SeparateLine from '@/shared/SeparateLine'
 import ClientListItem from '../ClientListItem'
 import { IRentalRequest } from '@/pages/Rental/rental.types'
+import ImagePlaceholder from '@/assets/images/imageCardPlaceholder.svg?react'
 
 interface IProps {
   lot: IEquipmentLot
@@ -58,7 +59,7 @@ export const mockRentalRequests: IRentalRequest[] = [
 
 const LotRequestsCard = (props: IProps) => {
   const [collapsed, setCollapsed] = useState(true)
-  const [rentalRequests, setRentalRequests] = useState(mockRentalRequests)
+  const [rentalRequests, _] = useState(mockRentalRequests)
 
   const renderClientList = () => {
     return (
@@ -86,7 +87,8 @@ const LotRequestsCard = (props: IProps) => {
             onClick={() => setCollapsed((prev) => !prev)}
           />
         </div>
-        <img src={props.lot.images[0]} alt={props.lot.title} className={css.img} />
+        <ImagePlaceholder className={css.img} />
+        {/* <img src={props.lot.images[0]} alt={props.lot.title} className={css.img} /> */}
       </div>
       <SeparateLine />
       {!collapsed && (

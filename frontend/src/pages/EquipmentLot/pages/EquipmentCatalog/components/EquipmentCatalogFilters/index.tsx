@@ -1,28 +1,23 @@
 import { IEquipmentLotFiltersState } from '@/pages/EquipmentLot/equipmentLotFilters.atom'
 
 import DropdownInput from '@/shared/Inputs/DropdownInput'
-import Button from '@/shared/Buttons/Button'
-import { IOption } from '@/types/global'
-import { IEquipmentLot } from '@/pages/EquipmentLot/equipmentLot.types'
-import TextInput from '@/shared/Inputs/TextInput'
+import equipmentLotCreateConstants from '../../../EquipmentLotCreate/equipmentLotCreate.constants'
+import AntDateRangePicker from '@/shared/Forms/DatePickers/AntDateRangePicker'
+import timeUtils from '@/utils/time.utils'
+import SearchInput from '@/shared/Inputs/SearchInput'
 
 interface IProps {
   filters: IEquipmentLotFiltersState
   handleChange: <T extends keyof IEquipmentLotFiltersState>(value: IEquipmentLotFiltersState[T], key: T) => void
-  applyFilters: () => void
 }
 
 const EquipmentCatalogFilters = (props: IProps) => {
-  const fieldTypeOptions: IOption<IEquipmentLot['category']>[] = [
-    { title: 'Не выбрано', value: null },
-    { title: 'Металлообработка', value: 'metalworking' },
-    { title: '3D-печать', value: '3d-print' },
-    { title: 'Станки с ЧПУ', value: 'cnc-machining' },
-    { title: 'Лазерная резка', value: 'laser-cutting' },
-    { title: 'Сварочное оборудование', value: 'welding' },
-  ]
-  const toInputValue = (v: number | null) => (v != null && !isNaN(v) ? String(v) : '')
-  const toNumberOrNull = (e: string) => (e === '' ? null : +e)
+  const handleRangeChange = (startTs: number, endTs: number) => {
+    const startDate = startTs ? timeUtils.formatDate(startTs, 'yyyy-MM-dd') : ''
+    const endDate = endTs ? timeUtils.formatDate(endTs, 'yyyy-MM-dd') : ''
+    props.handleChange(startDate, 'startDate')
+    props.handleChange(endDate, 'endDate')
+  }
 
   return (
     <div className="flex-lines gap8">
@@ -31,27 +26,24 @@ const EquipmentCatalogFilters = (props: IProps) => {
       <DropdownInput
         name={'category'}
         onSelect={(e) => props.handleChange(e, 'category')}
-        options={fieldTypeOptions}
+        options={equipmentLotCreateConstants.categoryOptions}
         selectedOption={props.filters.category}
         title={'Выберите категорию'}
       />
-      <div className="inline-flex-gap gap8">
-        <TextInput
-          placeHolder="от 0"
-          value={toInputValue(props.filters.price[0])}
-          name="minPrice"
-          onChange={(e) => props.handleChange([toNumberOrNull(e), props.filters.price[1]], 'price')}
-        />
-
-        <TextInput
-          placeHolder="до 9 999"
-          value={toInputValue(props.filters.price[1])}
-          name="maxPrice"
-          onChange={(e) => props.handleChange([props.filters.price[0], toNumberOrNull(e)], 'price')}
-        />
-      </div>
-
-      <Button fullWidth size="default" type="primary" text="Применить фильтры" onClick={props.applyFilters} />
+      <SearchInput
+        placeHolder="Поиск производственных мощностей"
+        value={props.filters.keyword}
+        name="keyword"
+        onChange={(e) => props.handleChange(e.trim(), 'keyword')}
+      />
+      <AntDateRangePicker
+        withTime={false}
+        onChange={(startTs, endTs) => handleRangeChange(startTs, endTs)}
+        allowSelectInFuture
+        startTs={props.filters.startDate ? Date.parse(props.filters.startDate) : null}
+        endTs={props.filters.endDate ? Date.parse(props.filters.endDate) : null}
+        panelStyle={{ width: '100%' }}
+      />
     </div>
   )
 }

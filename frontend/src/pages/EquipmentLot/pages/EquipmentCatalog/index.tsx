@@ -1,43 +1,14 @@
 import MainLayout from '@/shared/Layouts/MainLayout'
-import { useRecoilState, useRecoilValue } from 'recoil'
-import equipmentLotAtom from '../../equipmentLot.atom'
 import EquipmentLotCard from './components/EquipmentLotCard'
 import EquipmentCatalogFilters from './components/EquipmentCatalogFilters'
-import equipmentLotFiltersAtom, { IEquipmentLotFiltersState } from '../../equipmentLotFilters.atom'
 import css from './equipmentCatalog.module.css'
 import { useNavigate } from 'react-router-dom'
 import urls from '@/navigation/urls'
-import { useMemo } from 'react'
+import useEquipmentCatalog from './useEquipmentCatalog'
 
 const EquipmentCatalog = () => {
-  const equipment = useRecoilValue(equipmentLotAtom).items
-  const [filtersState, setFiltersState] = useRecoilState(equipmentLotFiltersAtom)
+  const ctrl = useEquipmentCatalog()
   const navigate = useNavigate()
-
-  const handleFilterChange = <T extends keyof IEquipmentLotFiltersState>(
-    value: IEquipmentLotFiltersState[T],
-    key: T
-  ) => {
-    setFiltersState((prev) => ({ ...prev, [key]: value }))
-  }
-
-  const filteredEquipment = useMemo(() => {
-    return equipment.filter((item) => {
-      if (filtersState.category && item.category !== filtersState.category) {
-        return false
-      }
-
-      const [minPrice, maxPrice] = filtersState.price
-      if (minPrice != null && item.price < minPrice) {
-        return false
-      }
-      if (maxPrice != null && item.price > maxPrice) {
-        return false
-      }
-
-      return true
-    })
-  }, [equipment, filtersState])
 
   return (
     <MainLayout>
@@ -50,15 +21,11 @@ const EquipmentCatalog = () => {
           </div>
           <div className={css.content}>
             <aside className="filters">
-              <EquipmentCatalogFilters
-                filters={filtersState}
-                handleChange={handleFilterChange}
-                applyFilters={() => {}}
-              />
+              <EquipmentCatalogFilters filters={ctrl.filtersState} handleChange={ctrl.handleFilterChange} />
             </aside>
             <div className={css.resizer}></div>
             <div className={css.catalog}>
-              {filteredEquipment.map((item) => (
+              {ctrl.equipmentLots.map((item) => (
                 <EquipmentLotCard
                   key={item.id}
                   equipmentLot={item}

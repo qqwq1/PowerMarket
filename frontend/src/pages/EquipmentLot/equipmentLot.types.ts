@@ -34,7 +34,6 @@ export type TEquipmentLotDto = {
   pricePerDay: 0
   location: string
   capacity: string
-  availableCapacity: string
   technicalSpecs: string
   availabilities: IEquipmentAvailability[]
 }

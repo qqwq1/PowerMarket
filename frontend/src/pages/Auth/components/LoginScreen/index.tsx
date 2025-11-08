@@ -26,6 +26,7 @@ const LoginScreen = () => {
 
             <FormField label="Пароль" style={{ width: '100%' }} required>
               <TextInput
+                type="password"
                 value={ctrl.state.password}
                 name="password"
                 onChange={ctrl.handleChange}
