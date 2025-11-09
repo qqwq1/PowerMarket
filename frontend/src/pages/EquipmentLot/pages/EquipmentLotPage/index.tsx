@@ -41,30 +41,30 @@ const EquipmentLotPage = () => {
               {/* <img src={equipmentLot.images[0]} style={{ height: '580px' }} alt="" /> */}
               <div className="flex-lines gap16 width100">
                 <p className="text-heading-4">Описание</p>
-                <p className="text-sm">{equipmentLot.description}</p>
+                <p className="text-nm">{equipmentLot.description}</p>
                 <p className="text-nm text-secondary">
                   {'Поставщик: '}
-                  <span className="text-sm">{equipmentLot.supplierName || '-'}</span>
+                  <span className="text-nm">{equipmentLot.supplierName || '-'}</span>
                 </p>
                 <p className="text-nm text-secondary">
                   {'Локация: '}
-                  <span className="text-sm">{equipmentLot.location || '-'}</span>
+                  <span className="text-nm">{equipmentLot.location || '-'}</span>
                 </p>
                 <p className="text-nm text-secondary">
                   {'Технические характеристики: '}
-                  <span className="text-sm">{equipmentLot.technicalSpecs || '-'}</span>
+                  <span className="text-nm">{equipmentLot.technicalSpecs || '-'}</span>
                 </p>
                 <p className="text-nm text-secondary">
                   {'Цена за день: '}
-                  <span className="text-sm">{equipmentLot.pricePerDay ? `${equipmentLot.pricePerDay} ₽` : '-'}</span>
+                  <span className="text-nm">{equipmentLot.pricePerDay ? `${equipmentLot.pricePerDay} ₽` : '-'}</span>
                 </p>
                 <div className="inline-flex-gap gap16">
                   <p className="text-nm text-secondary">
                     {'Общее(-ая) количество / мощность: '}{' '}
-                    <span className="text-sm text-success">{equipmentLot.availableCapacity}</span>
+                    <span className="text-nm text-success">{equipmentLot.availableCapacity}</span>
                   </p>
                   <p className="text-nm text-secondary">
-                    {'Доступно: '} <span className="text-sm">{equipmentLot.totalCapacity}</span>
+                    {'Доступно: '} <span className="text-nm">{equipmentLot.totalCapacity}</span>
                   </p>
                 </div>
               </div>

@@ -22,10 +22,10 @@ const createRentalRequest = (dto: IRentalRequestCreateDto): Promise<HTTPResponse
   return http.post('/api/rental-requests', dto).then(handleHttpResponse).catch(handleHttpError)
 }
 
-const getSelfEquipmentLots = (): Promise<HTTPResponse<IEquipmentLot[]>> => {
-  return http.get(`/api/v1/services`).then(handleHttpResponse).catch(handleHttpError)
+const getSelfRentalRequests = (): Promise<HTTPResponse<IRentalRequest[]>> => {
+  return http.get(`/api/v1/rental-requests/sent`).then(handleHttpResponse).catch(handleHttpError)
 }
 
-const rentalApi = { respondRentalRequest, createRentalRequest, getSelfEquipmentLots }
+const rentalApi = { respondRentalRequest, createRentalRequest, getSelfRentalRequests }
 
 export default rentalApi

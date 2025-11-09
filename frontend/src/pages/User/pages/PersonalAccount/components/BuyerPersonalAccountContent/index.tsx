@@ -1,46 +1,24 @@
 import css from './buyerPersonalAccountContent.module.css'
-import { useMemo, useState } from 'react'
 import SearchInput from '@/shared/Inputs/SearchInput'
 import DropdownInput from '@/shared/Inputs/DropdownInput'
 import BasicTable from '@/shared/Tables/BasicTable'
-import { useRecoilValue } from 'recoil'
-import rentalRequestAtom from '@/pages/Rental/rentalRequest.atom'
-import { IOption } from '@/types/global'
-import { TRentalStatus } from '@/pages/Rental/rental.types'
-
-const fieldTypeOptions: IOption<TRentalStatus>[] = [
-  { title: 'Не выбрано', value: null },
-  { title: 'В процессе', value: 'PENDING' },
-  { title: 'Принято', value: 'APPROVED' },
-  { title: 'Откланено', value: 'REJECTED' },
-]
+import useBuyerPersonalAccount from './useBuyerPersonalAccount'
+import rentalConstants from '@/pages/Rental/rental.constants'
 
 const BuyerPersonalAccountContent = () => {
-  const rentalRequestsState = useRecoilValue(rentalRequestAtom)
-  const [filters, setFilters] = useState({
-    query: '',
-    status: null,
-  })
-
-  const rentalRequestsFiltred = useMemo(() => {
-    return rentalRequestsState.items.filter((req) => {
-      // const titleMatch = !filters.query.trim() || (req.serviceTitle ?? '').toLowerCase().includes(filters.query.trim().toLowerCase())
-      const statusMatch = !filters.status || req.status === filters.status
-      return true && statusMatch
-    })
-  }, [rentalRequestsState, filters])
+  const ctrl = useBuyerPersonalAccount()
 
   const renderTable = () => {
-    if (rentalRequestsFiltred.length === 0) return <p>Нет заявок.</p>
+    if (ctrl.rentalRequests.length === 0) return <p>Нет заявок. Попробуйте изменить параметры.</p>
 
-    const columns = ['ID', 'Оборудование', 'Статус', 'Дата начала', 'Дата окончания', 'Комментарий']
-    const values = rentalRequestsFiltred.map((req) => [
-      req.id,
-      req.serviceTitle ?? '',
-      req.status ?? '',
-      req.startDate ? new Date(req.startDate).toLocaleDateString() : '',
-      req.endDate ? new Date(req.endDate).toLocaleDateString() : '',
-      req.message ?? '',
+    const columns = ['Оборудование', 'ФИО владельца', 'Статус', 'Дата начала', 'Дата окончания', 'Комментарий']
+    const values = ctrl.rentalRequests.map((req) => [
+      req.serviceTitle ?? '-',
+      req.tenantName ?? '-',
+      rentalConstants.rentalStatusTitles[req.status] ?? '-',
+      req.startDate ? new Date(req.startDate).toLocaleDateString() : '-',
+      req.endDate ? new Date(req.endDate).toLocaleDateString() : '-',
+      req.message ?? '-',
     ])
 
     return <BasicTable columns={columns} values={values} />
@@ -51,17 +29,17 @@ const BuyerPersonalAccountContent = () => {
       <div className={css.content}>
         <div className="inline-flex-gap width100">
           <SearchInput
-            value={filters.query}
+            value={ctrl.filters.query}
             name={'query'}
-            onChange={(v) => setFilters((prev) => ({ ...prev, query: v }))}
+            onChange={ctrl.onFilterChange}
             placeHolder="Поиск по названию оборудования"
           />
           <DropdownInput
             wrapperStyle={{ width: '25%' }}
-            name={'rentalStatus'}
-            onSelect={(e) => setFilters((prev) => ({ ...prev, status: e }))}
-            options={fieldTypeOptions}
-            selectedOption={filters.status}
+            name={'status'}
+            onSelect={ctrl.onFilterChange}
+            options={rentalConstants.fieldTypeOptions}
+            selectedOption={ctrl.filters.status}
             title={'Выберите статус'}
           />
         </div>

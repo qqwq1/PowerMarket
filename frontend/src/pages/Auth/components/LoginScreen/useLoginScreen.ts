@@ -39,7 +39,9 @@ const useLoginScreen = () => {
         setUserState({ loaded: true, user: resp.body.user })
         navigate(urls.home)
       } else {
-        setError(resp.message || 'Ошибка авторизации')
+        handleChange('', 'password')
+        console.log(resp)
+        setError(resp.body?.error || 'Ошибка авторизации')
         setAuthState((prev) => ({ ...prev, authState: 'not-authorized' }))
       }
     })

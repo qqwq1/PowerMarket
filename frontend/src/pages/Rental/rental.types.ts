@@ -2,32 +2,27 @@ import { IEquipmentLot } from '../EquipmentLot/equipmentLot.types'
 
 export type TRentalStatus = 'PENDING' | 'APPROVED' | 'REJECTED'
 
-export interface IRental {
-  id: number
-  serviceId: number
-  tenantId: number
-  supplierId: number
-  startDate: string
-  endDate: string
-  totalPrice?: number
-  createdAt?: string | Date
-  status?: TRentalStatus
-}
-
 // 3апросы (входящие для поставщика, исходящие для арендатора)
 export interface IRentalRequest {
   id: number
   serviceId?: number
   serviceTitle?: string
-  tenantId?: number
-  tenantName?: string
-  supplierId?: number
+
+  tenantId: string
+  tenantName: string
+  tenantInn: string
+  tenantEmail: string
+  tenantPhone: string
+
   startDate: string
   endDate: string
   message?: string
-  totalPrice?: number
+  totalPrice: number
   status: TRentalStatus
-  createdAt?: string | Date
+  createdAt?: string
+  respondedAt?: string
+  rejectionReason?: string
+  capacityNeeded: number
 }
 
 export interface IRentalRequestCreateDto {

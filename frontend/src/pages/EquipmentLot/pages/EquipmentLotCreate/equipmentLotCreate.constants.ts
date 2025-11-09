@@ -2,6 +2,7 @@ import { IOption } from '@/types/global'
 import { TEquipmentLotCategory } from '../../equipmentLot.types'
 
 const categoryOptions: IOption<TEquipmentLotCategory>[] = [
+  { title: 'Не выбрано', value: null },
   { title: 'Производство', value: 'MANUFACTURING' },
   { title: 'Оборудование', value: 'EQUIPMENT' },
   { title: 'Складские помещения', value: 'WAREHOUSE' },
@@ -14,6 +15,7 @@ const categoryOptions: IOption<TEquipmentLotCategory>[] = [
 ]
 
 const statusOptions = [
+  { title: 'Не выбрано', value: null },
   { title: 'Активен', value: 'active' },
   { title: 'На модерации', value: 'moderation' },
   { title: 'Приостановлен', value: 'paused' },

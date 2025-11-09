@@ -35,6 +35,7 @@ const LoginScreen = () => {
             </FormField>
           </div>
         </form>
+        {ctrl.error && <p className="text-nm text-error">{ctrl.error}</p>}
         <Button
           disabled={ctrl.isActionDisabled}
           onClick={() => ctrl.handleSubmit()}
