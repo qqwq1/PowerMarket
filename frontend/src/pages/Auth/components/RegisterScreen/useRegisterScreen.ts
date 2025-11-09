@@ -68,7 +68,7 @@ const useRegisterScreen = () => {
         localStorage.setItem('accessToken', resp.body.token)
         localStorage.setItem('refreshToken', resp.body.refreshToken)
         setAuthState((prev) => ({ ...prev, authState: 'authorized', accessToken: resp.body.token }))
-        setUserState({ user: resp.body.user })
+        setUserState({ loaded: true, user: resp.body.user })
         navigate(urls.home)
       } else {
         const msg = resp.message || 'Не удалось завершить регистрацию'

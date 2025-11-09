@@ -5,7 +5,6 @@ import ArrowDown from '@/assets/icons/arrowDown.svg?react'
 import { useState } from 'react'
 import SeparateLine from '@/shared/SeparateLine'
 import ClientListItem from '../ClientListItem'
-import { IRentalRequest } from '@/pages/Rental/rental.types'
 import ImagePlaceholder from '@/assets/images/imageCardPlaceholder.svg?react'
 
 interface IProps {
@@ -14,7 +13,7 @@ interface IProps {
 
 const LotRequestsCard = (props: IProps) => {
   const [collapsed, setCollapsed] = useState(true)
-  const [rentalRequests, _] = useState(mockRentalRequests)
+  const [rentalRequests, _] = useState([])
 
   const renderClientList = () => {
     return (

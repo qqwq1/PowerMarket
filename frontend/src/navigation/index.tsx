@@ -5,6 +5,7 @@ import EquipmentCatalog from '@/pages/EquipmentLot/pages/EquipmentCatalog'
 import AuthGate from '@/pages/Auth/components/AuthGate'
 import EquipmentLotPage from '@/pages/EquipmentLot/pages/EquipmentLotPage'
 import PersonalAccount from '@/pages/User/pages/PersonalAccount'
+import ContentLoadedGate from '@/pages/Main/ContentLoadedGate'
 
 const router = createBrowserRouter([
   {
@@ -23,7 +24,9 @@ const router = createBrowserRouter([
     path: urls.equipmentLots,
     element: (
       <AuthGate>
-        <EquipmentCatalog />
+        <ContentLoadedGate>
+          <EquipmentCatalog />
+        </ContentLoadedGate>
       </AuthGate>
     ),
   },
@@ -31,7 +34,9 @@ const router = createBrowserRouter([
     path: urls.personalAccount,
     element: (
       <AuthGate>
-        <PersonalAccount />
+        <ContentLoadedGate>
+          <PersonalAccount />
+        </ContentLoadedGate>
       </AuthGate>
     ),
   },
@@ -40,7 +45,9 @@ const router = createBrowserRouter([
     path: urls.equipmentLot + '/:id',
     element: (
       <AuthGate>
-        <EquipmentLotPage />
+        <ContentLoadedGate>
+          <EquipmentLotPage />
+        </ContentLoadedGate>
       </AuthGate>
     ),
   },

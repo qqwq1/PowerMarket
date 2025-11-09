@@ -28,7 +28,7 @@ const AuthGate = (props: PropsWithChildren) => {
             ...prev,
             ...newAuthState,
           }))
-          setUserState({ user: r.body.user })
+          setUserState((prev) => ({ ...prev, user: r.body.user }))
           localStorage.setItem('accessToken', r.body.token)
           localStorage.setItem('refreshToken', r.body.refreshToken)
           applyInterceptors(newAuthState, setAuthState, r.body.refreshToken, http, 'default')
@@ -40,7 +40,6 @@ const AuthGate = (props: PropsWithChildren) => {
   if (authState.authState === 'not-authorized') {
     return <Navigate to="/auth" replace={true} state={{ from: location }} />
   }
-  console.log(authState.authState)
   return props.children
 }
 
