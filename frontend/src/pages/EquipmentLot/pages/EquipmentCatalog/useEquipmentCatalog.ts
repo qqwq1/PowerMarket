@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useRecoilState } from 'recoil'
 import equipmentLotFiltersAtom, { IEquipmentLotFiltersState } from '../../equipmentLotFilters.atom'
 import equipmentLotApi from '../../equipmentLot.api'
 import useHttpLoader from '@/shared/hooks/useHttpLoader'
-import { IEquipmentLot } from '../../equipmentLot.types'
+import equipmentLotAtom from '../../equipmentLot.atom'
 
 const useEquipmentCatalog = () => {
-  const [equipmentLots, setEquipmentLots] = useState<IEquipmentLot[]>([])
+  const [equipmentLots, setEquipmentLots] = useRecoilState(equipmentLotAtom)
   const [filtersState, setFiltersState] = useRecoilState(equipmentLotFiltersAtom)
   const { wait } = useHttpLoader()
 
@@ -17,7 +17,7 @@ const useEquipmentCatalog = () => {
       }),
       (resp) => {
         if (resp.status === 'success') {
-          setEquipmentLots(resp.body.content)
+          setEquipmentLots((prev) => ({ ...prev, items: resp.body.content }))
         }
       }
     )
@@ -30,7 +30,7 @@ const useEquipmentCatalog = () => {
     setFiltersState((prev) => ({ ...prev, [key]: value }))
   }
 
-  return { equipmentLots, handleFilterChange, filtersState }
+  return { equipmentLots: equipmentLots.items, handleFilterChange, filtersState }
 }
 
 export default useEquipmentCatalog

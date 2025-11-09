@@ -1,12 +1,12 @@
 import { IEquipmentLot } from '../EquipmentLot/equipmentLot.types'
-import { IRentalDTO } from './rental.types'
+import { IRentalRequestCreateDto } from './rental.types'
 
-const generateCreateRentalDTO = (lotId: IEquipmentLot['id']): IRentalDTO => {
+const generateCreateRentalDTO = (lotId: IEquipmentLot['id']): IRentalRequestCreateDto => {
   return {
-    serviceId: +lotId,
-    startDate: new Date().toUTCString(),
-    endDate: new Date().toUTCString(),
-    message: '',
+    serviceId: lotId,
+    startDate: '',
+    endDate: '',
+    capacityNeeded: 1,
   }
 }
 

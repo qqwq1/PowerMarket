@@ -11,10 +11,10 @@ import equipmentLotUtils from '../../equipmentLot.utils'
 import useHttpLoader from '@/shared/hooks/useHttpLoader'
 import equipmentLotApi from '../../equipmentLot.api'
 import { useSetRecoilState } from 'recoil'
-import equipmentLotAtom from '../../equipmentLot.atom'
 import { TEquipmentLotDto } from '../../equipmentLot.types'
 import TextArea from '@/shared/Inputs/TextArea'
 import AntDateRangePicker from '@/shared/Forms/DatePickers/AntDateRangePicker'
+import selfEquipmentLotsAtom from '@/pages/User/pages/PersonalAccount/components/SellerPersonalAccountContent/selfEquipmentLots.atom'
 
 interface IProps {
   open: boolean
@@ -22,7 +22,7 @@ interface IProps {
 }
 
 const EquipmentLotCreate = (props: IProps) => {
-  const setEquipmentLotState = useSetRecoilState(equipmentLotAtom)
+  const setEquipmentLotState = useSetRecoilState(selfEquipmentLotsAtom)
   // const [files, setFiles] = useState<File[]>([])
   // const dropAreaCtrl = useDroparea({ onFiles: (files) => setFiles((prev) => [...prev, ...files]) })
   // const fileInputHandler = useInputFile({ onFiles: (files) => setFiles((prev) => [...prev, ...files]) })

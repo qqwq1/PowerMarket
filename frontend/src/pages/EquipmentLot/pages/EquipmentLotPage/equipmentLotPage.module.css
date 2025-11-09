@@ -18,6 +18,7 @@
   flex-wrap: wrap;
   gap: 32px;
   background-color: #fff;
+  overflow: auto;
 }
 
 .resizer {

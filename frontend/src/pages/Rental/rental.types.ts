@@ -1,9 +1,4 @@
-export interface IRentalDTO {
-  serviceId: number
-  startDate: string // ISO DateTime
-  endDate: string // ISO DateTime
-  message?: string
-}
+import { IEquipmentLot } from '../EquipmentLot/equipmentLot.types'
 
 export type TRentalStatus = 'PENDING' | 'APPROVED' | 'REJECTED'
 
@@ -33,4 +28,11 @@ export interface IRentalRequest {
   totalPrice?: number
   status: TRentalStatus
   createdAt?: string | Date
+}
+
+export interface IRentalRequestCreateDto {
+  serviceId: IEquipmentLot['id']
+  startDate: string
+  endDate: string
+  capacityNeeded: number
 }

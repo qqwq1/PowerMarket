@@ -2,10 +2,6 @@ import http, { handleHttpError, handleHttpResponse } from '@/services/http'
 import { HTTPResponse, IPaginationRequestQuery, IPaginationResponse } from '@/services/http/http.types'
 import { IEquipmentLot, TEquipmentLotCategory, TEquipmentLotDto } from './equipmentLot.types'
 
-const getEquipmentLots = (): Promise<HTTPResponse<IEquipmentLot[]>> => {
-  return http.get(`/api/v1/services`).then(handleHttpResponse).catch(handleHttpError)
-}
-
 const getEquipmentLot = (id: IEquipmentLot['id']): Promise<HTTPResponse<IEquipmentLot[]>> => {
   return http.get(`/api/v1/services/${id}`).then(handleHttpResponse).catch(handleHttpError)
 }
@@ -20,6 +16,7 @@ const updateEquipmentLot = (
 ): Promise<HTTPResponse<IEquipmentLot>> => {
   return http.put(`/api/v1/services/${id}`, dto).then(handleHttpResponse).catch(handleHttpError)
 }
+
 const deleteEquipmentLot = (id: IEquipmentLot['id']): Promise<HTTPResponse<IEquipmentLot>> => {
   return http.delete(`/api/v1/services/${id}`).then(handleHttpResponse).catch(handleHttpError)
 }
@@ -37,7 +34,6 @@ const searchEquipmentLots = (
 
 const equipmentLotApi = {
   createEquipmentLot,
-  getEquipmentLots,
   updateEquipmentLot,
   deleteEquipmentLot,
   getEquipmentLot,

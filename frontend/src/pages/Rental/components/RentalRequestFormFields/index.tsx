@@ -1,29 +1,32 @@
 import FormField from '@/shared/Forms/FormField'
-import { IRentalDTO } from '../../rental.types'
-
-import TextArea from '@/shared/Inputs/TextArea'
 import AntDateRangePicker from '@/shared/Forms/DatePickers/AntDateRangePicker'
+import { IRentalRequestCreateDto } from '../../rental.types'
+import TextInput from '@/shared/Inputs/TextInput'
+import timeUtils from '@/utils/time.utils'
 
 interface IProps {
-  rentalRequest: IRentalDTO
+  rentalRequest: IRentalRequestCreateDto
   onChange: (val: any, name: string) => void
 }
 
 const RentalRequestFormFields = (props: IProps) => {
   // Обработчик для AntDateRangePicker: получает startTs/endTs (ms)
   const handleRangeChange = (startTs: number, endTs: number) => {
-    props.onChange(startTs ? new Date(startTs).toISOString() : '', 'startDate')
-    props.onChange(endTs ? new Date(endTs).toISOString() : '', 'endDate')
+    const startDate = startTs ? timeUtils.formatDate(startTs, 'yyyy-MM-dd') : ''
+    const endDate = endTs ? timeUtils.formatDate(endTs, 'yyyy-MM-dd') : ''
+    props.onChange(startDate, 'startDate')
+    props.onChange(endDate, 'endDate')
   }
 
   return (
     <>
-      <FormField label="Комментарий" style={{ width: '100%' }}>
-        <TextArea
-          value={props.rentalRequest.message ?? ''}
-          name="message"
+      <FormField label="Требуемая мощность" style={{ width: '100%' }} required>
+        <TextInput
+          type="number"
+          value={props.rentalRequest.capacityNeeded.toString()}
+          name="capacityNeeded"
           onChange={props.onChange}
-          placeHolder="Комментарий к заявке (опционально)"
+          placeHolder="Требуемая мощность/количество"
         />
       </FormField>
       <AntDateRangePicker
