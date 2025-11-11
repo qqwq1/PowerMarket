@@ -34,9 +34,10 @@ const LotRequestsCard = (props: IProps) => {
             <p>{props.lot.description}</p>
           </div>
           <Button
+            disabled={rentalRequests.length === 0}
             size="default"
             type="default"
-            text={`${rentalRequests.length} новых запроса`}
+            text={`${rentalRequests.length} запрос(-ов)`}
             icon={<ArrowDown />}
             onClick={() => setCollapsed((prev) => !prev)}
           />
