@@ -46,3 +46,32 @@ tsconfig.tsbuildinfo
 .vscode
 
 api.ts
+
+# Next.js / frontend-specific ignores
+# Build output
+.next/
+out/
+dist/
+dist-ssr/
+
+# Vercel
+.vercel/
+
+# Local environment variables
+.env.local
+.env.*.local
+
+# pnpm / npm cache and stores
+.pnpm-debug.log
+.pnpm-store
+
+# Turborepo / task runners
+.turbo/
+.cache/
+
+# Next.js image cache / trace
+.next/cache/
+.next/trace/
+
+# Optional: Next standalone build output
+.next/standalone/

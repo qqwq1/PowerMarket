@@ -6,35 +6,38 @@
       "esnext"
     ],
     "allowJs": true,
-    "strict": false,
-    "forceConsistentCasingInFileNames": true,
+    "target": "ES6",
+    "skipLibCheck": true,
+    "strict": true,
     "noEmit": true,
-    "experimentalDecorators": true,
     "esModuleInterop": true,
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
-    "jsx": "preserve",
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"]
-    },
-    "incremental": true,
-    "target": "ESNext",
-    "noImplicitThis": true,
-    "alwaysStrict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-    "downlevelIteration": true,
-    "allowSyntheticDefaultImports": true,
-    "types": ["vite/client", "vite-plugin-svgr/client"],
     "isolatedModules": true,
-    "skipLibCheck": true,
-    "allowImportingTsExtensions": true
+    "jsx": "react-jsx",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": [
+        "./*"
+      ]
+    }
   },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next\\dev/types/**/*.ts",
+    ".next\\dev/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ],
   "exclude": [
     "node_modules"
-  ],
-  "include": ["src", "src/custom-types.d.ts"],
+  ]
 }
