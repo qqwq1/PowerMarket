@@ -1,0 +1,111 @@
+version: "3.9"
+
+networks:
+  appnet:
+
+volumes:
+  backend_pgdata:
+  search_pgdata:
+  typesense_data:
+
+services:
+  # ---------- FRONTEND ----------
+  frontend:
+    build:
+      context: ./front
+    environment:
+      NEXT_PUBLIC_API_URL: http://backend:8080
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks: [appnet]
+    restart: unless-stopped
+
+  # ---------- BACKEND (Spring Boot) ----------
+  backend:
+    build:
+      context: ./backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://backend-postgres:5432/PowerMarket
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: ${BACKEND_DB_PASSWORD}
+      ML_SEARCH_BASE_URL: http://search-service:8081/api
+      SERVER_PORT: "8080"
+    ports:
+      - "8080:8080"
+    depends_on:
+      - backend-postgres
+      - search-service
+    networks: [appnet]
+    restart: unless-stopped
+
+  backend-postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: PowerMarket
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${BACKEND_DB_PASSWORD}
+    volumes:
+      - backend_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL","pg_isready -U postgres -d PowerMarket"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks: [appnet]
+    restart: unless-stopped
+
+  # ---------- SEARCH SERVICE (ML) ----------
+  search-service:
+    build:
+      context: ./search_service/search_service
+    env_file:
+      - ./search_service/search_service/.env
+    environment:
+      DB_HOST: search-postgres
+      TYPESENSE_HOST: typesense
+      TYPESENSE_API_KEY: ${TYPESENSE_API_KEY}
+      SERVICE_PORT: "8081"
+    depends_on:
+      - typesense         # ← убрали condition: service_healthy
+      - search-postgres
+    ports:
+      - "8081:8081"
+    networks: [appnet]
+    restart: unless-stopped
+
+  search-postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: power_market
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${SEARCH_DB_PASSWORD}
+    volumes:
+      - search_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL","pg_isready -U postgres -d power_market"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks: [appnet]
+    restart: unless-stopped
+
+  typesense:
+    image: typesense/typesense:0.25.2
+    command: >
+      --data-dir /data
+      --api-key=${TYPESENSE_API_KEY}
+      --listen-port=8108
+      --enable-cors
+    ports:
+      - "8108:8108"
+    volumes:
+      - typesense_data:/data
+    healthcheck:
+      test: ["CMD","curl","-f","http://localhost:8108/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks: [appnet]
+    restart: unless-stopped
