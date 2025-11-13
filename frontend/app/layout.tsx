@@ -1,29 +1,27 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Geist, Geist_Mono } from "next/font/google"
-import { Analytics } from "@vercel/analytics/next"
+import { Inter, JetBrains_Mono } from "next/font/google"
 import "./globals.css"
+import { AuthProvider } from "@/lib/auth-context"
 
-const _geist = Geist({ subsets: ["latin"] })
-const _geistMono = Geist_Mono({ subsets: ["latin"] })
+const inter = Inter({ subsets: ["latin", "cyrillic"] })
+const jetbrainsMono = JetBrains_Mono({ subsets: ["latin", "cyrillic"] })
 
 export const metadata: Metadata = {
   title: "PowerMarket - Платформа аренды производственных мощностей",
-  description: "Платформа для сведения предприятий и передачи в аренду производственных мощностей",
-  generator: "v0.app",
+  description: "Профессиональная платформа для аренды производственных мощностей",
 }
 
 export default function RootLayout({
-  children,
-}: Readonly<{
+                                     children,
+                                   }: {
   children: React.ReactNode
-}>) {
+}) {
   return (
-    <html lang="ru" className="dark">
-      <body className={`font-sans antialiased`}>
-        {children}
-        <Analytics />
+      <html lang="ru">
+      <body className={inter.className}>
+      <AuthProvider>{children}</AuthProvider>
       </body>
-    </html>
+      </html>
   )
 }

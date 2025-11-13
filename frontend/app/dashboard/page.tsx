@@ -1,329 +1,224 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { Header } from "@/components/layout/header"
-import { useAuth } from "@/lib/auth"
+import { useAuth } from "@/lib/auth-context"
 import { api } from "@/lib/api"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Skeleton } from "@/components/ui/skeleton"
-import Link from "next/link"
-import { Factory, Search, MessageSquare, TrendingUp, Clock, CheckCircle } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Factory, TrendingUp, MessageSquare, Star, Package, FileText, ArrowRight } from "lucide-react"
+import { useRouter } from "next/navigation"
+import type { Service, RentalRequest } from "@/types"
 
 export default function DashboardPage() {
+  const { user } = useAuth()
   const router = useRouter()
-  const { user, token } = useAuth()
-  const [stats, setStats] = useState<any>(null)
-  const [recentActivity, setRecentActivity] = useState<any[]>([])
+  const [stats, setStats] = useState({
+    activeRentals: 0,
+    totalRevenue: 0,
+    unreadMessages: 0,
+  })
+  const [recentServices, setRecentServices] = useState<Service[]>([])
+  const [recentRequests, setRecentRequests] = useState<RentalRequest[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!user || !token) {
-      router.push("/login")
-      return
-    }
-
     loadDashboardData()
-  }, [user, token, router])
+  }, [])
 
   const loadDashboardData = async () => {
-    if (!token) return
-
     try {
-      setLoading(true)
-      const [services, rentals, requests] = await Promise.all([
-        api.getServices(token).catch(() => []),
-        api.getRentals(token).catch(() => []),
-        api.getRentalRequests(token).catch(() => []),
+      const [statsData, servicesData, requestsData] = await Promise.all([
+        api.get<any>("/rentals/stats"),
+        user?.role === "SUPPLIER" ? api.get<Service[]>("/services") : api.get<Service[]>("/services"),
+        user?.role === "SUPPLIER"
+          ? api.get<RentalRequest[]>("/rental-requests/received")
+          : api.get<RentalRequest[]>("/rental-requests/sent"),
       ])
 
-      // Calculate stats based on user role
-      if (user?.role === "SUPPLIER") {
-        setStats({
-          totalServices: services.length,
-          activeRentals: rentals.filter((r: any) => r.status === "ACTIVE").length,
-          pendingRequests: requests.filter((r: any) => r.status === "PENDING").length,
-          totalRevenue: rentals.reduce((sum: number, r: any) => sum + (r.totalPrice || 0), 0),
-        })
-      } else {
-        setStats({
-          activeRentals: rentals.filter((r: any) => r.status === "ACTIVE").length,
-          pendingRequests: requests.filter((r: any) => r.status === "PENDING").length,
-          completedRentals: rentals.filter((r: any) => r.status === "COMPLETED").length,
-          totalSpent: rentals.reduce((sum: number, r: any) => sum + (r.totalPrice || 0), 0),
-        })
-      }
-
-      // Set recent activity
-      setRecentActivity(requests.slice(0, 5))
+      setStats(statsData)
+      setRecentServices(servicesData.slice(0, 3))
+      setRecentRequests(requestsData.slice(0, 5))
     } catch (error) {
-      console.error("[v0] Failed to load dashboard data:", error)
+      console.error("Ошибка загрузки данных:", error)
     } finally {
       setLoading(false)
     }
   }
 
-  if (!user) {
-    return null
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-lg text-muted-foreground">Загрузка...</div>
+      </div>
+    )
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header user={user} />
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold">Добро пожаловать, {user?.companyName || user?.email}</h1>
+        <p className="text-muted-foreground mt-1">
+          {user?.role === "SUPPLIER"
+            ? "Управляйте своими производственными мощностями и заявками на аренду"
+            : "Просматривайте доступные мощности и управляйте своими арендами"}
+        </p>
+      </div>
 
-      <main className="flex-1 container py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Добро пожаловать, {user.fullName}</h1>
-          <p className="text-muted-foreground">
-            {user.role === "SUPPLIER"
-              ? "Управляйте своими услугами и арендами"
-              : "Найдите необходимые производственные мощности"}
-          </p>
-        </div>
-
-        {/* Stats Grid */}
-        {loading ? (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
-            {[...Array(4)].map((_, i) => (
-              <Card key={i}>
-                <CardHeader className="pb-2">
-                  <Skeleton className="h-4 w-24" />
-                </CardHeader>
-                <CardContent>
-                  <Skeleton className="h-8 w-16" />
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
-            {user.role === "SUPPLIER" ? (
-              <>
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardDescription>Всего услуг</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center gap-2">
-                      <Factory className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-2xl font-bold">{stats?.totalServices || 0}</span>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardDescription>Активные аренды</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center gap-2">
-                      <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-2xl font-bold">{stats?.activeRentals || 0}</span>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardDescription>Ожидающие запросы</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-2xl font-bold">{stats?.pendingRequests || 0}</span>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardDescription>Общий доход</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <span className="text-2xl font-bold">{stats?.totalRevenue?.toLocaleString() || 0} ₽</span>
-                  </CardContent>
-                </Card>
-              </>
-            ) : (
-              <>
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardDescription>Активные аренды</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center gap-2">
-                      <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-2xl font-bold">{stats?.activeRentals || 0}</span>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardDescription>Ожидающие запросы</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-2xl font-bold">{stats?.pendingRequests || 0}</span>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardDescription>Завершенные аренды</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-2xl font-bold">{stats?.completedRentals || 0}</span>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardDescription>Всего потрачено</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <span className="text-2xl font-bold">{stats?.totalSpent?.toLocaleString() || 0} ₽</span>
-                  </CardContent>
-                </Card>
-              </>
-            )}
-          </div>
-        )}
-
-        {/* Quick Actions */}
-        <div className="grid gap-4 md:grid-cols-3 mb-8">
-          {user.role === "SUPPLIER" ? (
-            <>
-              <Card className="hover:bg-accent/50 transition-colors cursor-pointer" >
-                <Link href="/services/new">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Factory className="h-5 w-5" />
-                      Добавить услугу
-                    </CardTitle>
-                    <CardDescription>Разместите новую производственную мощность</CardDescription>
-                  </CardHeader>
-                </Link>
-              </Card>
-              <Card className="hover:bg-accent/50 transition-colors cursor-pointer" >
-                <Link href="/services">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Search className="h-5 w-5" />
-                      Мои услуги
-                    </CardTitle>
-                    <CardDescription>Управляйте своими предложениями</CardDescription>
-                  </CardHeader>
-                </Link>
-              </Card>
-              <Card className="hover:bg-accent/50 transition-colors cursor-pointer" >
-                <Link href="/chats">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <MessageSquare className="h-5 w-5" />
-                      Чаты
-                    </CardTitle>
-                    <CardDescription>Общайтесь с арендаторами</CardDescription>
-                  </CardHeader>
-                </Link>
-              </Card>
-            </>
-          ) : (
-            <>
-              <Card className="hover:bg-accent/50 transition-colors cursor-pointer" >
-                <Link href="/search">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Search className="h-5 w-5" />
-                      Поиск услуг
-                    </CardTitle>
-                    <CardDescription>Найдите необходимые мощности</CardDescription>
-                  </CardHeader>
-                </Link>
-              </Card>
-              <Card className="hover:bg-accent/50 transition-colors cursor-pointer" >
-                <Link href="/rentals">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <TrendingUp className="h-5 w-5" />
-                      Мои аренды
-                    </CardTitle>
-                    <CardDescription>Просмотрите активные аренды</CardDescription>
-                  </CardHeader>
-                </Link>
-              </Card>
-              <Card className="hover:bg-accent/50 transition-colors cursor-pointer" >
-                <Link href="/chats">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <MessageSquare className="h-5 w-5" />
-                      Чаты
-                    </CardTitle>
-                    <CardDescription>Общайтесь с поставщиками</CardDescription>
-                  </CardHeader>
-                </Link>
-              </Card>
-            </>
-          )}
-        </div>
-
-        {/* Recent Activity */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
-          <CardHeader>
-            <CardTitle>Последние запросы на аренду</CardTitle>
-            <CardDescription>Недавняя активность по запросам</CardDescription>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Активные аренды</CardTitle>
+            <Factory className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            {loading ? (
-              <div className="space-y-4">
-                {[...Array(3)].map((_, i) => (
-                  <div key={i} className="flex items-center gap-4">
-                    <Skeleton className="h-12 w-12 rounded" />
-                    <div className="flex-1">
-                      <Skeleton className="h-4 w-48 mb-2" />
-                      <Skeleton className="h-3 w-32" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : recentActivity.length > 0 ? (
-              <div className="space-y-4">
-                {recentActivity.map((request: any) => (
-                  <div
-                    key={request.id}
-                    className="flex items-center justify-between border-b border-border pb-4 last:border-0 last:pb-0"
-                  >
-                    <div className="flex-1">
-                      <p className="font-medium">Запрос #{request.id}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {new Date(request.createdAt).toLocaleDateString("ru-RU")}
-                      </p>
-                    </div>
-                    <Badge
-                      variant={
-                        request.status === "APPROVED"
-                          ? "default"
-                          : request.status === "REJECTED"
-                            ? "destructive"
-                            : "secondary"
-                      }
-                    >
-                      {request.status === "PENDING" && "Ожидает"}
-                      {request.status === "APPROVED" && "Одобрен"}
-                      {request.status === "REJECTED" && "Отклонен"}
-                    </Badge>
-                  </div>
-                ))}
+            <div className="text-2xl font-bold">{stats.activeRentals}</div>
+            <p className="text-xs text-muted-foreground">Сейчас активны</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Общий доход</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.totalRevenue.toLocaleString("ru-RU")} ₽</div>
+            <p className="text-xs text-muted-foreground">За все время</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Сообщения</CardTitle>
+            <MessageSquare className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.unreadMessages}</div>
+            <p className="text-xs text-muted-foreground">Непрочитанных</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Рейтинг</CardTitle>
+            <Star className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{user?.averageRating?.toFixed(1) || "—"}</div>
+            <p className="text-xs text-muted-foreground">Средняя оценка</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle>{user?.role === "SUPPLIER" ? "Мои услуги" : "Популярные услуги"}</CardTitle>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => router.push(user?.role === "SUPPLIER" ? "/dashboard/services" : "/dashboard/browse")}
+              >
+                Все
+                <ArrowRight className="w-4 h-4 ml-1" />
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {recentServices.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                {user?.role === "SUPPLIER" ? "Нет услуг" : "Нет доступных услуг"}
               </div>
             ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>Нет недавней активности</p>
+              <div className="space-y-3">
+                {recentServices.map((service) => (
+                  <div
+                    key={service.id}
+                    className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent cursor-pointer transition-colors"
+                    onClick={() =>
+                      router.push(
+                        user?.role === "SUPPLIER"
+                          ? `/dashboard/services/${service.id}/edit`
+                          : `/dashboard/browse/${service.id}`,
+                      )
+                    }
+                  >
+                    <div className="flex items-center gap-3">
+                      <Package className="w-8 h-8 text-muted-foreground" />
+                      <div>
+                        <div className="font-semibold">{service.title}</div>
+                        <div className="text-sm text-muted-foreground">{service.location}</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-semibold">{service.pricePerDay.toLocaleString("ru-RU")} ₽</div>
+                      <div className="text-sm text-muted-foreground">
+                        {service.availableCapacity}/{service.totalCapacity}
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </CardContent>
         </Card>
-      </main>
+
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle>{user?.role === "SUPPLIER" ? "Последние заявки" : "Мои заявки"}</CardTitle>
+              <Button variant="ghost" size="sm" onClick={() => router.push("/dashboard/requests")}>
+                Все
+                <ArrowRight className="w-4 h-4 ml-1" />
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {recentRequests.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">Нет заявок</div>
+            ) : (
+              <div className="space-y-3">
+                {recentRequests.map((request) => (
+                  <div
+                    key={request.id}
+                    className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent cursor-pointer transition-colors"
+                    onClick={() => router.push(`/dashboard/rentals/${request.id}`)}
+                  >
+                    <div className="flex items-center gap-3">
+                      <FileText className="w-8 h-8 text-muted-foreground" />
+                      <div>
+                        <div className="font-semibold">{request.service?.title}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {new Date(request.startDate).toLocaleDateString("ru-RU")}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div
+                        className={`text-xs font-medium px-2 py-1 rounded ${
+                          request.status === "PENDING"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : request.status === "IN_CONTRACT"
+                              ? "bg-blue-100 text-blue-800"
+                              : request.status === "CONFIRMED"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-gray-100 text-gray-800"
+                        }`}
+                      >
+                        {request.status === "PENDING"
+                          ? "Ожидает"
+                          : request.status === "IN_CONTRACT"
+                            ? "В договоре"
+                            : request.status === "CONFIRMED"
+                              ? "Подтверждено"
+                              : request.status}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

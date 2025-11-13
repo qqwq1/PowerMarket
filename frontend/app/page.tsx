@@ -1,89 +1,95 @@
-import { Header } from "@/components/layout/header"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
 import Link from "next/link"
-import { Factory, Search, MessageSquare, Shield } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Factory, TrendingUp, Shield, Zap } from "lucide-react"
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
+      <div className="min-h-screen">
+        {/* Header */}
+        <header className="border-b border-border bg-card">
+          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Factory className="h-6 w-6" />
+              <span className="text-xl font-semibold">PowerMarket</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <Link href="/login">
+                <Button variant="ghost">Войти</Button>
+              </Link>
+              <Link href="/register">
+                <Button>Начать работу</Button>
+              </Link>
+            </div>
+          </div>
+        </header>
 
-      <main className="flex-1">
         {/* Hero Section */}
-        <section className="container py-20 md:py-32">
-          <div className="mx-auto max-w-3xl text-center">
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-balance mb-6">
+        <section className="container mx-auto px-4 py-20 md:py-32">
+          <div className="max-w-3xl mx-auto text-center">
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 text-balance">
               Платформа аренды производственных мощностей
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground text-balance mb-8">
-              Эффективное решение для сведения предприятий и передачи в аренду производственных мощностей
+            <p className="text-lg md:text-xl text-muted-foreground mb-8 text-pretty">
+              Соединяем владельцев производственных мощностей с компаниями, которым нужны производственные ресурсы.
+              Оптимизируйте операции и максимизируйте использование оборудования.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" asChild>
-                <Link href="/register">Начать работу</Link>
-              </Button>
-              <Button size="lg" variant="outline" asChild>
-                <Link href="/login">Войти</Link>
-              </Button>
+              <Link href="/register">
+                <Button size="lg" className="w-full sm:w-auto">
+                  Арендовать мощности
+                </Button>
+              </Link>
+              <Link href="/register">
+                <Button size="lg" variant="outline" className="w-full sm:w-auto bg-transparent">
+                  Сдать в аренду
+                </Button>
+              </Link>
             </div>
           </div>
         </section>
 
-        {/* Features Section */}
-        <section className="container py-16 md:py-24 bg-muted/50">
-          <div className="mx-auto max-w-5xl">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">Возможности платформы</h2>
-            <div className="grid md:grid-cols-2 gap-6">
-              <Card className="p-6">
-                <Factory className="h-10 w-10 text-primary mb-4" />
-                <h3 className="text-xl font-semibold mb-2">Управление услугами</h3>
+        {/* Features */}
+        <section className="bg-muted py-20">
+          <div className="container mx-auto px-4">
+            <div className="grid md:grid-cols-3 gap-8">
+              <div className="bg-card p-8 rounded-lg">
+                <div className="h-12 w-12 bg-accent rounded-lg flex items-center justify-center mb-4">
+                  <TrendingUp className="h-6 w-6" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Максимальная загрузка</h3>
                 <p className="text-muted-foreground">
-                  Размещайте свои производственные мощности и управляйте доступностью
+                  Превратите простаивающие производственные мощности в источник дохода с помощью нашей эффективной
+                  платформы.
                 </p>
-              </Card>
-              <Card className="p-6">
-                <Search className="h-10 w-10 text-primary mb-4" />
-                <h3 className="text-xl font-semibold mb-2">Поиск и аренда</h3>
+              </div>
+              <div className="bg-card p-8 rounded-lg">
+                <div className="h-12 w-12 bg-accent rounded-lg flex items-center justify-center mb-4">
+                  <Shield className="h-6 w-6" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Безопасные сделки</h3>
                 <p className="text-muted-foreground">
-                  Находите необходимые производственные мощности и отправляйте запросы на аренду
+                  Встроенная система управления договорами и подтверждения сделок обеими сторонами.
                 </p>
-              </Card>
-              <Card className="p-6">
-                <MessageSquare className="h-10 w-10 text-primary mb-4" />
-                <h3 className="text-xl font-semibold mb-2">Коммуникация</h3>
-                <p className="text-muted-foreground">Общайтесь с партнерами напрямую через встроенную систему чатов</p>
-              </Card>
-              <Card className="p-6">
-                <Shield className="h-10 w-10 text-primary mb-4" />
-                <h3 className="text-xl font-semibold mb-2">Безопасность</h3>
+              </div>
+              <div className="bg-card p-8 rounded-lg">
+                <div className="h-12 w-12 bg-accent rounded-lg flex items-center justify-center mb-4">
+                  <Zap className="h-6 w-6" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Общение в реальном времени</h3>
                 <p className="text-muted-foreground">
-                  Защищенная платформа с проверкой предприятий и безопасными транзакциями
+                  Встроенная система чатов для обсуждения условий и быстрого заключения соглашений.
                 </p>
-              </Card>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* CTA Section */}
-        <section className="container py-16 md:py-24">
-          <div className="mx-auto max-w-3xl text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">Готовы начать?</h2>
-            <p className="text-lg text-muted-foreground mb-8">
-              Присоединяйтесь к платформе и начните эффективно использовать производственные мощности
-            </p>
-            <Button size="lg" asChild>
-              <Link href="/register">Зарегистрироваться</Link>
-            </Button>
+        {/* Footer */}
+        <footer className="border-t border-border py-8">
+          <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
+            © 2025 PowerMarket. Профессиональная платформа аренды производственных мощностей.
           </div>
-        </section>
-      </main>
-
-      <footer className="border-t border-border py-8">
-        <div className="container text-center text-sm text-muted-foreground">
-          © 2025 PowerMarket. Все права защищены.
-        </div>
-      </footer>
-    </div>
+        </footer>
+      </div>
   )
 }

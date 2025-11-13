@@ -3,25 +3,20 @@
 import type React from "react"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { Header } from "@/components/layout/header"
+import { useAuth } from "@/lib/auth-context"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { api } from "@/lib/api"
-import { useAuth } from "@/lib/auth"
-import { Loader2 } from "lucide-react"
+import { Factory } from "lucide-react"
 
 export default function LoginPage() {
-  const router = useRouter()
-  const { setAuth } = useAuth()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
+  const { login } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -29,9 +24,7 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      const response = await api.login(email, password)
-      setAuth(response.token, response.user)
-      router.push("/dashboard")
+      await login(email, password)
     } catch (err) {
       setError(err instanceof Error ? err.message : "Ошибка входа")
     } finally {
@@ -40,64 +33,53 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-
-      <main className="flex-1 flex items-center justify-center p-4">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-muted">
         <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle className="text-2xl">Вход в систему</CardTitle>
-            <CardDescription>Введите свои учетные данные для входа</CardDescription>
+          <CardHeader className="space-y-1 text-center">
+            <div className="flex justify-center mb-4">
+              <div className="h-12 w-12 bg-primary rounded-lg flex items-center justify-center">
+                <Factory className="h-6 w-6 text-primary-foreground" />
+              </div>
+            </div>
+            <CardTitle className="text-2xl">Добро пожаловать</CardTitle>
+            <CardDescription>Войдите в свой аккаунт PowerMarket</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              {error && (
-                <Alert variant="destructive">
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="your@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  disabled={loading}
+                    id="email"
+                    type="email"
+                    placeholder="your@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
                 />
               </div>
-
               <div className="space-y-2">
                 <Label htmlFor="password">Пароль</Label>
                 <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  disabled={loading}
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
                 />
               </div>
-
+              {error && <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-md">{error}</div>}
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Войти
+                {loading ? "Вход..." : "Войти"}
               </Button>
-
-              <p className="text-center text-sm text-muted-foreground">
-                Нет аккаунта?{" "}
-                <Link href="/register" className="text-primary hover:underline">
-                  Зарегистрироваться
-                </Link>
-              </p>
             </form>
+            <div className="mt-4 text-center text-sm">
+              <span className="text-muted-foreground">Нет аккаунта? </span>
+              <Link href="/register" className="text-primary hover:underline">
+                Зарегистрироваться
+              </Link>
+            </div>
           </CardContent>
         </Card>
-      </main>
-    </div>
+      </div>
   )
 }
