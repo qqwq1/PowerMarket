@@ -3,15 +3,26 @@ export interface User {
   email: string
   name: string
   companyName?: string
-  role: "SUPPLIER" | "TENANT"
+  role: 'SUPPLIER' | 'TENANT'
   averageRating?: number
 }
+
+export type ServiceCategory =
+  | 'MANUFACTURING' // Производство
+  | 'EQUIPMENT' // Оборудование
+  | 'WAREHOUSE' // Складские помещения
+  | 'TRANSPORT' // Транспорт
+  | 'LABORATORY' // Лабораторные услуги
+  | 'PROCESSING' // Обработка
+  | 'ASSEMBLY' // Сборка
+  | 'TESTING' // Тестирование
+  | 'OTHER' // Другое
 
 export interface Service {
   id: number
   title: string
   description: string
-  category: string
+  category: ServiceCategory
   pricePerDay: number
   totalCapacity: number
   availableCapacity: number
@@ -48,7 +59,7 @@ export interface RentalRequest {
   startDate: string
   endDate: string
   capacityNeeded: number
-  status: "PENDING" | "IN_CONTRACT" | "CONFIRMED" | "IN_RENT" | "COMPLETED" | "REJECTED" | "CANCELLED"
+  status: 'PENDING' | 'IN_CONTRACT' | 'CONFIRMED' | 'IN_RENT' | 'COMPLETED' | 'REJECTED' | 'CANCELLED'
   landlordConfirmed: boolean
   tenantConfirmed: boolean
   createdAt: string
@@ -70,7 +81,7 @@ export interface Rental {
   tenantConfirmed: boolean
   supplierConfirmedAt?: string
   tenantConfirmedAt?: string
-  status: "PENDING" | "IN_CONTRACT" | "CONFIRMED" | "IN_RENT" | "COMPLETED" | "REJECTED" | "CANCELLED"
+  status: 'PENDING' | 'IN_CONTRACT' | 'CONFIRMED' | 'IN_RENT' | 'COMPLETED' | 'REJECTED' | 'CANCELLED'
   isActive: boolean
   createdAt: string
 }
