@@ -7,7 +7,7 @@ import type { RentalRequest } from '@/types'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Calendar, User, Package, CheckCircle, XCircle } from 'lucide-react'
+import { Calendar, User, Package, CheckCircle, XCircle, Coins } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 const statusLabels: Record<string, string> = {
@@ -107,30 +107,35 @@ export default function RequestsPage() {
                 <div className="flex-1 space-y-3">
                   <div className="flex items-start justify-between">
                     <div>
-                      <h3 className="text-lg font-semibold mb-1">{request.service?.title}</h3>
+                      <h3 className="text-lg font-semibold mb-1">{request.serviceTitle}</h3>
                       <Badge className={statusColors[request.status]}>{statusLabels[request.status]}</Badge>
                     </div>
                   </div>
 
                   <div className="grid gap-2 text-sm">
-                    <div className="flex items-center text-muted-foreground">
-                      <User className="w-4 h-4 mr-2" />
-                      {user?.role === 'SUPPLIER'
-                        ? `Арендатор: ${request.tenantName || request.tenantEmail}`
-                        : `Арендодатель: ${request.service?.supplierName}`}
-                    </div>
+                    {user?.role === 'SUPPLIER' && (
+                      <div className="flex items-center text-muted-foreground">
+                        <User className="w-4 h-4 mr-2" />
+                        {`Арендатор: ${request.tenantName || request.tenantEmail}`}
+                      </div>
+                    )}
                     <div className="flex items-center text-muted-foreground">
                       <Calendar className="w-4 h-4 mr-2" />
-                      {new Date(request.startDate).toLocaleDateString('ru-RU')} -{' '}
-                      {new Date(request.endDate).toLocaleDateString('ru-RU')}
+                      {`${new Date(request.startDate).toLocaleDateString('ru-RU')} - ${new Date(
+                        request.endDate
+                      ).toLocaleDateString('ru-RU')}`}
                     </div>
                     <div className="flex items-center text-muted-foreground">
                       <Package className="w-4 h-4 mr-2" />
                       Мощность: {request.capacityNeeded} единиц
                     </div>
+                    <div className="flex items-center text-muted-foreground">
+                      <Coins className="w-4 h-4 mr-2" />
+                      Общая стоимость: {request.totalPrice}₽
+                    </div>
                   </div>
 
-                  {(request.status === 'IN_CONTRACT' || request.status === 'CONFIRMED') && (
+                  {/* {(request.status === 'IN_CONTRACT' || request.status === 'CONFIRMED') && (
                     <div className="flex gap-4 text-sm">
                       <div className="flex items-center">
                         {request.landlordConfirmed ? (
@@ -153,7 +158,7 @@ export default function RequestsPage() {
                         </span>
                       </div>
                     </div>
-                  )}
+                  )} */}
                 </div>
 
                 <div className="flex flex-col gap-2 md:w-48">
@@ -168,11 +173,11 @@ export default function RequestsPage() {
                     </>
                   )} */}
 
-                  {request.status === 'IN_CONTRACT' && (
+                  {/* {request.status === 'IN_CONTRACT' && (
                     <Button onClick={() => router.push(`/dashboard/rentals/${request.id}`)} size="sm">
                       Подтвердить аренду
                     </Button>
-                  )}
+                  )} */}
 
                   <Button variant="outline" onClick={() => router.push(`/dashboard/chat/${request.id}`)} size="sm">
                     Открыть чат

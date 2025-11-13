@@ -47,22 +47,28 @@ export interface ServiceAvailability {
   rentalId?: number
 }
 
+export type RentalStatus = 'PENDING' | 'IN_CONTRACT' | 'CONFIRMED' | 'IN_RENT' | 'COMPLETED' | 'REJECTED' | 'CANCELLED'
+
 export interface RentalRequest {
   id: number
-  serviceId: number
-  service?: Service
+  serviceId?: number
+  serviceTitle?: string
+
   tenantId: string
   tenantName: string
   tenantInn: string
   tenantEmail: string
   tenantPhone: string
+
   startDate: string
   endDate: string
+  message?: string
+  totalPrice: number
+  status: RentalStatus
+  createdAt?: string
+  respondedAt?: string
+  rejectionReason?: string
   capacityNeeded: number
-  status: 'PENDING' | 'IN_CONTRACT' | 'CONFIRMED' | 'IN_RENT' | 'COMPLETED' | 'REJECTED' | 'CANCELLED'
-  landlordConfirmed: boolean
-  tenantConfirmed: boolean
-  createdAt: string
 }
 
 export interface Rental {
@@ -101,23 +107,23 @@ export interface Review {
 }
 
 export interface Chat {
+  createdAt: string //ISO String -  2025-11-10T21:25:13.834658Z
   id: string
+  recentMessages: ChatMessage[]
   rentalId: string
-  supplierId: string | number // Support both UUID and numeric IDs
+  supplierId: string
   supplierName: string
-  tenantId: string | number // Support both UUID and numeric IDs
+  tenantId: string
   tenantName: string
-  createdAt: string
-  recentMessages?: ChatMessage[]
 }
 
 export interface ChatMessage {
-  id: string
   chatId: string
-  senderId: string | number // Support both UUID and numeric IDs
+  content: number
+  id: string
+  senderId: string
   senderName: string
-  content: string
-  createdAt: string
+  sentAt: string // ISO String - 2025-11-10T21:25:19.561836Z
 }
 
 export interface Page<T> {

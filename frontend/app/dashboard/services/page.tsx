@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { useAuth } from '@/lib/auth-context'
 import { api } from '@/lib/api'
 import type { Service } from '@/types'
 import { Button } from '@/components/ui/button'
@@ -10,38 +9,14 @@ import { Card } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Plus, Edit, Trash2, MapPin, Package } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-
-// Справочник меток категорий (код -> отображаемый заголовок)
-const CATEGORY_LABELS: Record<NonNullable<Service['category']>, string> = {
-  MANUFACTURING: 'Производство',
-  EQUIPMENT: 'Оборудование',
-  WAREHOUSE: 'Складские помещения',
-  TRANSPORT: 'Транспорт',
-  LABORATORY: 'Лабораторные услуги',
-  PROCESSING: 'Обработка',
-  ASSEMBLY: 'Сборка',
-  TESTING: 'Тестирование',
-  OTHER: 'Другое',
-}
-
-const CATEGORY_ORDER = [
-  'MANUFACTURING',
-  'EQUIPMENT',
-  'WAREHOUSE',
-  'TRANSPORT',
-  'LABORATORY',
-  'PROCESSING',
-  'ASSEMBLY',
-  'TESTING',
-  'OTHER',
-] as const
+import { CATEGORY_LABELS, SERVICE_CATEGORY, ALL_CATEGORY_VALUE } from '@/lib/constants'
 
 export default function ServicesPage() {
   const router = useRouter()
   const [services, setServices] = useState<Service[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
-  const [category, setCategory] = useState<string>('all')
+  const [category, setCategory] = useState<string>(ALL_CATEGORY_VALUE)
 
   useEffect(() => {
     loadServices()
@@ -63,15 +38,14 @@ export default function ServicesPage() {
 
     try {
       await api.delete(`/services/${id}`)
-      setServices(services.filter((s) => s.id !== id))
+      setServices((prev) => prev.filter((s) => s.id !== id))
     } catch (error) {
       console.error('Ошибка удаления услуги:', error)
       alert('Не удалось удалить услугу')
     }
   }
 
-  // Подготовленный список опций категорий (все предопределенные, а не только из данных)
-  const categoryOptions = useMemo(() => CATEGORY_ORDER.map((value) => ({ value, label: CATEGORY_LABELS[value] })), [])
+  const categoryOptions = useMemo(() => SERVICE_CATEGORY.map((value) => ({ value, label: CATEGORY_LABELS[value] })), [])
 
   const filteredServices = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -79,7 +53,7 @@ export default function ServicesPage() {
       const matchQuery = q
         ? [s.title, s.location, s.description].map((f) => (f ? String(f).toLowerCase() : '')).some((f) => f.includes(q))
         : true
-      const matchCategory = category && category !== 'all' ? String(s.category) === category : true
+      const matchCategory = category && category !== ALL_CATEGORY_VALUE ? String(s.category) === category : true
       return matchQuery && matchCategory
     })
   }, [services, search, category])
@@ -117,7 +91,7 @@ export default function ServicesPage() {
             <SelectValue placeholder="Все категории" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Все категории</SelectItem>
+            <SelectItem value={ALL_CATEGORY_VALUE}>Все категории</SelectItem>
             {categoryOptions.map((opt) => (
               <SelectItem key={opt.value} value={opt.value}>
                 {opt.label}
@@ -146,7 +120,7 @@ export default function ServicesPage() {
             <Button
               onClick={() => {
                 setSearch('')
-                setCategory('all')
+                setCategory(ALL_CATEGORY_VALUE)
               }}
             >
               Сбросить фильтры
