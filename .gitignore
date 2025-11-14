@@ -1,77 +1,69 @@
+# ----------------------
+# OS / IDE
+# ----------------------
+.DS_Store
+Thumbs.db
 .idea/
+.vscode/
 *.iml
-*.ipr
-*.iws
-.gradle/
-build/
-out/
-backend/app/.gradle/
-backend/app/build/
-# Windows streams
-*:Zone.Identifier
-# Allow wrapper if позже добавите
-!/backend/app/gradle/wrapper/gradle-wrapper.jar
-!/backend/app/gradle/wrapper/gradle-wrapper.properties
-!/backend/app/gradlew
-!/backend/app/gradlew.bat
-# Logs
-logs
+
+# ----------------------
+# Java / Maven (backend)
+# ----------------------
+target/
+*.class
 *.log
+hs_err_pid*.log
+
+# Spring Boot: 
+**/src/main/resources/application.properties
+**/src/main/resources/application-*.properties
+**/src/main/resources/*.yml
+!**/src/main/resources/application-example.properties
+!**/src/main/resources/application.yml.example
+
+
+# ----------------------
+.env
+**/.env
+**/.env.*
+!**/.env.example
+
+# ----------------------
+node_modules/
+**/node_modules/
+**/build/
+**/dist/
+**/.next/
+**/coverage/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
-yarn.lock
-tsconfig.tsbuildinfo
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+# ----------------------
+**/__pycache__/
+**/*.py[cod]
+**/*.pyo
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/
+**/.venv/
+**/venv/
+**/.python-version
 
-# Sentry Config File
-.env.sentry-build-plugin
-.vscode
+# ----------------------
+**/.env.local
+**/.env.docker
 
-api.ts
-
-# Next.js / frontend-specific ignores
-# Build output
-.next/
-out/
-dist/
-dist-ssr/
-
-# Vercel
-.vercel/
-
-# Local environment variables
-.env.local
-.env.*.local
-
-# pnpm / npm cache and stores
-.pnpm-debug.log
-.pnpm-store
-
-# Turborepo / task runners
-.turbo/
-.cache/
-
-# Next.js image cache / trace
-.next/cache/
-.next/trace/
-
-# Optional: Next standalone build output
-.next/standalone/
+# ----------------------
+**/*.zip
+**/*.tar
+**/*.gz
+**/*.tgz
+# ----------------------
+!mvnw
+!mvnw.cmd
+!.mvn/wrapper/maven-wrapper.jar
+!.mvn/wrapper/**
