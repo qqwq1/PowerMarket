@@ -67,3 +67,6 @@ pnpm-debug.log*
 !mvnw.cmd
 !.mvn/wrapper/maven-wrapper.jar
 !.mvn/wrapper/**
+
+yarn.lock
+frontend/yarn.lock
