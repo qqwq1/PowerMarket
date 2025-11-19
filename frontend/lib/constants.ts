@@ -23,3 +23,14 @@ export const SERVICE_CATEGORY = [
   'TESTING',
   'OTHER',
 ]
+
+export const testLoginData = {
+  SUPPLIER: {
+    email: 'supplier@mail.ru',
+    password: 'admin1970',
+  },
+  TENANT: {
+    email: 'tenant@mail.ru',
+    password: 'admin1970',
+  },
+}

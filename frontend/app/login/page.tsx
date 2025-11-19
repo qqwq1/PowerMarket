@@ -2,7 +2,7 @@
 
 import type React from 'react'
 
-import { useState } from 'react'
+import { FormEvent, useState } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/lib/auth-context'
 import { Button } from '@/components/ui/button'
@@ -10,6 +10,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Factory } from 'lucide-react'
+import { User } from '@/types'
+import { testLoginData } from '@/lib/constants'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -18,7 +20,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const { login } = useAuth()
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     setError('')
     setLoading(true)
@@ -31,6 +33,11 @@ export default function LoginPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const loginAsTest = (role: User['role']) => {
+    setEmail(testLoginData[role].email)
+    setPassword(testLoginData[role].password)
   }
 
   return (
@@ -72,6 +79,17 @@ export default function LoginPage() {
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? 'Вход...' : 'Войти'}
             </Button>
+            <div className="space-y-1 text-center">
+              <CardDescription>Войдите в тестовый аккаунт</CardDescription>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Button onClick={() => loginAsTest('TENANT')} type="submit" disabled={loading}>
+                  {loading ? 'Вход...' : 'Войти как арендатор'}
+                </Button>
+                <Button onClick={() => loginAsTest('SUPPLIER')} type="submit" disabled={loading}>
+                  {loading ? 'Вход...' : 'Войти как арендодатель'}
+                </Button>
+              </div>
+            </div>
           </form>
           <div className="mt-4 text-center text-sm">
             <span className="text-muted-foreground">Нет аккаунта? </span>
