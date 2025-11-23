@@ -87,7 +87,7 @@ export interface Rental {
   tenantConfirmed: boolean
   supplierConfirmedAt?: string
   tenantConfirmedAt?: string
-  status: 'PENDING' | 'IN_CONTRACT' | 'CONFIRMED' | 'IN_RENT' | 'COMPLETED' | 'REJECTED' | 'CANCELLED'
+  status: RentalStatus
   isActive: boolean
   createdAt: string
 }
@@ -132,4 +132,38 @@ export interface Page<T> {
   totalPages: number
   size: number
   number: number
+}
+
+export type ProductionAnalysisDashboardResponse = {
+  role: string
+  period: {
+    from: string
+    to: string
+  }
+  summary: {
+    activeOrders: number
+    completedOrders: number
+    totalAmount: number
+    pendingRequests: number
+  }
+  charts: {
+    statusesChart: {
+      totalOrders: number
+      items: Array<{
+        status: string
+        label: string
+        count: number
+      }>
+    }
+    incomeChart: {
+      currency: string
+      groupBy: string
+      points: Array<{
+        periodLabel: string
+        periodStart: string
+        totalAmount: number
+        completedOrders: number
+      }>
+    }
+  }
 }

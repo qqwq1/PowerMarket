@@ -1,14 +1,14 @@
-"use client"
+'use client'
 
-import type React from "react"
+import type React from 'react'
 
-import { useAuth } from "@/lib/auth-context"
-import { Button } from "@/components/ui/button"
-import { Factory, LayoutDashboard, Package, MessageSquare, LogOut, Menu, FileText, User } from "lucide-react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { useState } from "react"
-import { cn } from "@/lib/utils"
+import { useAuth } from '@/lib/auth-context'
+import { Button } from '@/components/ui/button'
+import { Factory, LayoutDashboard, Package, MessageSquare, LogOut, Menu, FileText, User, Home } from 'lucide-react'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { useState } from 'react'
+import { cn } from '@/lib/utils'
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth()
@@ -16,19 +16,20 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const navigation = [
-    { name: "Главная", href: "/dashboard", icon: LayoutDashboard },
-    ...(user?.role === "SUPPLIER"
+    { name: 'Главная', href: '/dashboard', icon: Home },
+    ...(user?.role === 'SUPPLIER'
       ? [
-          { name: "Мои услуги", href: "/dashboard/services", icon: Package },
-          { name: "Заявки", href: "/dashboard/requests", icon: FileText },
+          { name: 'Мои услуги', href: '/dashboard/services', icon: Package },
+          { name: 'Заявки', href: '/dashboard/requests', icon: FileText },
+          { name: 'Дашборды', href: '/dashboard/production-analysis', icon: LayoutDashboard },
         ]
       : [
-          { name: "Каталог", href: "/dashboard/browse", icon: Package },
-          { name: "Мои заявки", href: "/dashboard/requests", icon: FileText },
+          { name: 'Каталог', href: '/dashboard/browse', icon: Package },
+          { name: 'Мои заявки', href: '/dashboard/requests', icon: FileText },
         ]),
-    { name: "Аренды", href: "/dashboard/rentals", icon: Factory },
-    { name: "Чаты", href: "/dashboard/chat", icon: MessageSquare },
-    { name: "Профиль", href: "/dashboard/profile", icon: User },
+    { name: 'Аренды', href: '/dashboard/rentals', icon: Factory },
+    { name: 'Чаты', href: '/dashboard/chat', icon: MessageSquare },
+    { name: 'Профиль', href: '/dashboard/profile', icon: User },
   ]
 
   return (
@@ -44,7 +45,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             <div className="hidden md:block text-sm">
               <div className="font-medium">{user?.companyName || user?.email}</div>
               <div className="text-muted-foreground text-xs">
-                {user?.role === "SUPPLIER" ? "Арендодатель" : "Арендатор"}
+                {user?.role === 'SUPPLIER' ? 'Арендодатель' : 'Арендатор'}
               </div>
             </div>
             <Button variant="ghost" size="icon" onClick={logout}>
@@ -68,13 +69,13 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           <nav className="space-y-1">
             {navigation.map((item) => {
               const Icon = item.icon
-              const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
+              const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
               return (
                 <Link key={item.name} href={item.href}>
                   <div
                     className={cn(
-                      "flex items-center gap-3 px-4 py-3 rounded-lg transition-colors",
-                      isActive ? "bg-accent text-foreground font-medium" : "text-muted-foreground hover:bg-accent/50",
+                      'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors',
+                      isActive ? 'bg-accent text-foreground font-medium' : 'text-muted-foreground hover:bg-accent/50'
                     )}
                   >
                     <Icon className="h-5 w-5" />
@@ -99,15 +100,15 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               <nav className="space-y-1">
                 {navigation.map((item) => {
                   const Icon = item.icon
-                  const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
+                  const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
                   return (
                     <Link key={item.name} href={item.href} onClick={() => setMobileMenuOpen(false)}>
                       <div
                         className={cn(
-                          "flex items-center gap-3 px-4 py-3 rounded-lg transition-colors",
+                          'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors',
                           isActive
-                            ? "bg-accent text-foreground font-medium"
-                            : "text-muted-foreground hover:bg-accent/50",
+                            ? 'bg-accent text-foreground font-medium'
+                            : 'text-muted-foreground hover:bg-accent/50'
                         )}
                       >
                         <Icon className="h-5 w-5" />
