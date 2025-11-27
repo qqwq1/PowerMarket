@@ -20,14 +20,49 @@ import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { Card } from '@/components/ui/card'
-import { Factory, TrendingUp, BarChart3 } from 'lucide-react'
+import { Factory, TrendingUp, BarChart3, Download } from 'lucide-react'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
 import { useState } from 'react'
 import { useCallback } from 'react'
 import { ProductionAnalysisDashboardResponse } from '@/types'
-import { MOCK_PRODUCTION_ANALYSIS_DASHBOARD } from './mockData'
+import { api } from '@/lib/api'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
 
 export default function ProductionAnalysisPage() {
+  const [exportOpen, setExportOpen] = useState(false)
+  const [exportFrom, setExportFrom] = useState('')
+  const [exportTo, setExportTo] = useState('')
+  const [exportLoading, setExportLoading] = useState(false)
+
+  const handleExport = async () => {
+    setExportLoading(true)
+    try {
+      const supplierId = user?.id
+      const url = `/v1/services/export/period?supplierId=${supplierId}&from=${exportFrom}&to=${exportTo}`
+      const response = await fetch(url)
+      if (!response.ok) throw new Error('Ошибка экспорта')
+      const blob = await response.blob()
+      const disposition = response.headers.get('Content-Disposition')
+      let filename = 'export.xlsx'
+      if (disposition) {
+        const match = disposition.match(/filename="(.+)"/)
+        if (match) filename = match[1]
+      }
+      const link = document.createElement('a')
+      link.href = window.URL.createObjectURL(blob)
+      link.download = filename
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+    } catch (e: any) {
+      // Можно добавить toast или alert при ошибке
+    } finally {
+      setExportLoading(false)
+    }
+  }
   const { user } = useAuth()
   const router = useRouter()
   const [period, setPeriod] = useState('7')
@@ -39,7 +74,7 @@ export default function ProductionAnalysisPage() {
     from.setHours(0, 0, 0, 0)
     return { dateFrom: from, dateTo: to }
   })
-  const [data, setData] = useState<ProductionAnalysisDashboardResponse | null>(MOCK_PRODUCTION_ANALYSIS_DASHBOARD)
+  const [data, setData] = useState<ProductionAnalysisDashboardResponse | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -48,12 +83,12 @@ export default function ProductionAnalysisPage() {
     setError(null)
     try {
       const format = (d: Date) => d.toISOString().slice(0, 10)
-      const res = await fetch(`/api/v1/pa/dashboard?from=${format(from)}&to=${format(to)}`)
-      if (!res.ok) throw new Error('Ошибка загрузки данных')
-      const json = await res.json()
-      setData(json)
+      const res = await api.get<ProductionAnalysisDashboardResponse>(
+        `/v1/pa/dashboard?from=${format(from)}&to=${format(to)}`
+      )
+      setData(res)
     } catch (e: any) {
-      setError(e.message || 'Ошибка')
+      setError(e instanceof Error ? JSON.parse(e.message)?.error : 'Ошибка')
       setData(null)
     } finally {
       setLoading(false)
@@ -78,14 +113,11 @@ export default function ProductionAnalysisPage() {
     if (user && user.role !== 'SUPPLIER') {
       router.replace('/dashboard')
     }
-  }, [user, router])
 
-  // useEffect(() => {
-  //   if (user && user.role === 'SUPPLIER') {
-  //     fetchData(dates.dateFrom, dates.dateTo)
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [user, dates.dateFrom, dates.dateTo])
+    if (user && user.role === 'SUPPLIER') {
+      fetchData(dates.dateFrom, dates.dateTo)
+    }
+  }, [user, dates.dateFrom, dates.dateTo])
 
   // Пока не знаем пользователя — можно показать простой лоадер
   if (!user) {
@@ -99,25 +131,61 @@ export default function ProductionAnalysisPage() {
 
   return (
     <div className="space-y-8">
+      {/* Модальное окно экспорта */}
+      <Dialog open={exportOpen} onOpenChange={setExportOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Экспорт данных за период</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="exportFrom">Дата начала</Label>
+              <Input id="exportFrom" type="date" value={exportFrom} onChange={(e) => setExportFrom(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="exportTo">Дата окончания</Label>
+              <Input id="exportTo" type="date" value={exportTo} onChange={(e) => setExportTo(e.target.value)} />
+            </div>
+          </div>
+          <div className="flex gap-4 mt-6">
+            <Button onClick={handleExport} disabled={exportLoading || !exportFrom || !exportTo} className="flex-1">
+              {exportLoading ? 'Экспорт...' : 'Выполнить экспорт'}
+            </Button>
+            <Button type="button" variant="outline" onClick={() => setExportOpen(false)} disabled={exportLoading}>
+              Отмена
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
       {loading && <div className="py-4 text-sm text-muted-foreground">Загрузка данных...</div>}
-      {error && <div className="py-4 text-sm text-red-500">{error}</div>}
+
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <h1 className="text-3xl font-bold tracking-tight">Производственный анализ</h1>
+          <h1 className="text-3xl font-bold tracking-tight m-0">Производственный анализ</h1>
         </div>
-        <Select value={period} onValueChange={handlePeriodChange}>
-          <SelectTrigger className="w-48">
-            <SelectValue placeholder="Период" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="7">Последние 7 дней</SelectItem>
-            <SelectItem value="14">Последние 14 дней</SelectItem>
-            <SelectItem value="30">Последний месяц</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-4">
+          <Button onClick={() => setExportOpen(true)} variant="outline" className="flex items-center gap-2">
+            <Download className="w-4 h-4" />
+            Экспортировать по датам
+          </Button>
+          <Select value={period} onValueChange={handlePeriodChange}>
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Период" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="7">Последние 7 дней</SelectItem>
+              <SelectItem value="14">Последние 14 дней</SelectItem>
+              <SelectItem value="30">Последний месяц</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
       <p className="text-muted-foreground mt-2 max-w-2xl">
-        Базовый обзор ключевых показателей по использованию производственных мощностей.
+        {!error ? (
+          'Базовый обзор ключевых показателей по использованию производственных мощностей.'
+        ) : (
+          <div className="py-4 text-sm text-red-500">{error}</div>
+        )}
       </p>
 
       <div className="flex-1 grid gap-6 md:grid-cols-4">
@@ -212,10 +280,10 @@ export default function ProductionAnalysisPage() {
           </Card>
         </div>
         <div className="w-full md:w-[70%]">
-          <Card className="p-6 flex flex-col items-center">
+          <Card className="p-6">
             <div className="mt-8 w-full">
-              <h3 className="text-sm font-medium mb-3">Доход по периодам</h3>
-              <ResponsiveContainer width="100%" height={240}>
+              <h2 className="text-lg font-semibold mb-4">Доход по периодам</h2>
+              <ResponsiveContainer width="100%" height={270}>
                 <BarChart
                   data={data?.charts.incomeChart.points || []}
                   margin={{ top: 10, right: 20, left: 0, bottom: 0 }}

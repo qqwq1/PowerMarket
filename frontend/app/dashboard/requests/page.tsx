@@ -52,23 +52,15 @@ export default function RequestsPage() {
     }
   }
 
-  const handleApprove = async (id: number) => {
+  const handleRespond = async (id: number, approved: boolean) => {
     try {
-      await api.post(`/rental-requests/${id}/approve`, {})
+      await api.post(`/v1/rental-requests/${id}/respond`, {
+        approved,
+      })
       loadRequests()
     } catch (error) {
       console.error('Ошибка одобрения заявки:', error)
       alert('Не удалось одобрить заявку')
-    }
-  }
-
-  const handleReject = async (id: number) => {
-    try {
-      await api.post(`/rental-requests/${id}/reject`, {})
-      loadRequests()
-    } catch (error) {
-      console.error('Ошибка отклонения заявки:', error)
-      alert('Не удалось отклонить заявку')
     }
   }
 
@@ -162,16 +154,16 @@ export default function RequestsPage() {
                 </div>
 
                 <div className="flex flex-col gap-2 md:w-48">
-                  {/* {user?.role === 'SUPPLIER' && request.status === 'PENDING' && (
+                  {user?.role === 'SUPPLIER' && request.status === 'PENDING' && (
                     <>
-                      <Button onClick={() => handleApprove(request.serviceId)} size="sm">
+                      {/* <Button onClick={() => handleRespond(request.id, true)} size="sm">
                         Одобрить
-                      </Button>
-                      <Button variant="outline" onClick={() => handleReject(request.serviceId)} size="sm">
+                      </Button> */}
+                      <Button variant="outline" onClick={() => handleRespond(request.id, false)} size="sm">
                         Отклонить
                       </Button>
                     </>
-                  )} */}
+                  )}
 
                   {/* {request.status === 'IN_CONTRACT' && (
                     <Button onClick={() => router.push(`/dashboard/rentals/${request.id}`)} size="sm">

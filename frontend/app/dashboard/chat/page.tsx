@@ -20,7 +20,7 @@ export default function ChatListPage() {
 
   const loadChats = async () => {
     try {
-      const data = await api.get<Chat[]>('/api/v1/chats/my')
+      const data = await api.get<Chat[]>('/v1/chats/my')
       console.log(data)
       setChats(data)
     } catch (error) {
