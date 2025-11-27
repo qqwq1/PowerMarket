@@ -1,5 +1,5 @@
 'use client'
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
+import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts'
 
 const STATUS_COLORS: Record<string, string> = {
   AWAITING_ACCEPTANCE: '#6B7280', // серый
@@ -207,6 +207,29 @@ export default function ProductionAnalysisPage() {
                   </div>
                 )
               })}
+            </div>
+            {/* Столбчатая диаграмма дохода */}
+          </Card>
+        </div>
+        <div className="w-full md:w-[70%]">
+          <Card className="p-6 flex flex-col items-center">
+            <div className="mt-8 w-full">
+              <h3 className="text-sm font-medium mb-3">Доход по периодам</h3>
+              <ResponsiveContainer width="100%" height={240}>
+                <BarChart
+                  data={data?.charts.incomeChart.points || []}
+                  margin={{ top: 10, right: 20, left: 0, bottom: 0 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="periodLabel" tick={{ fontSize: 12 }} />
+                  <YAxis tick={{ fontSize: 12 }} />
+                  <Tooltip
+                    formatter={(value: number) => `${value.toLocaleString()} ₽`}
+                    labelFormatter={(label) => `${label}`}
+                  />
+                  <Bar dataKey="totalAmount" name="Доход" fill="#2563EB" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </Card>
         </div>
