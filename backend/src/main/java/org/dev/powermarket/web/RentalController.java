@@ -15,7 +15,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping({"/api/v1/rentals","/api/rentals"})
-@SecurityRequirement(name = "Bearer Authentication")
+@SecurityRequirement(name = "bearerAuth")
 public class RentalController {
 
     private final RentalService rentalService;

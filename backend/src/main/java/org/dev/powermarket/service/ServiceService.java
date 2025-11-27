@@ -113,7 +113,7 @@ public class ServiceService {
         if (keyword != null && !keyword.isBlank() && mlSearchProperties != null && mlSearchProperties.isEnabled()) {
             var ids = mlSearchClient.searchServiceIds(keyword, pageable.getPageNumber() + 1, pageable.getPageSize());
             if (!ids.isEmpty()) {
-                var list = serviceRepository.findByIdInAndIsActiveTrue(ids);
+                var list = serviceRepository.findByIdInAndIsActiveTrueAndDeletedFalse(ids);
                 // Preserve ML order
                 var order = new java.util.HashMap<java.util.UUID, Integer>();
                 for (int i = 0; i < ids.size(); i++) order.put(ids.get(i), i);
@@ -132,9 +132,9 @@ public class ServiceService {
         if (keyword != null && !keyword.isBlank()) {
             services = serviceRepository.searchServices(keyword, pageable);
         } else if (category != null) {
-            services = serviceRepository.findByIsActiveTrueAndCategory(category, pageable);
+            services = serviceRepository.findByIsActiveTrueAndCategoryAndDeletedFalse(category, pageable);
         } else {
-            services = serviceRepository.findByIsActiveTrue(pageable);
+            services = serviceRepository.findByIsActiveTrueAndDeletedFalse(pageable);
         }
 
         return services.map(this::toDto);
@@ -152,9 +152,9 @@ public class ServiceService {
         User supplier = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        return serviceRepository.findBySupplierAndIsActiveTrue(supplier).stream()
+        return serviceRepository.findBySupplierAndIsActiveTrueAndDeletedFalse(supplier).stream()
                 .map(this::toDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Transactional
@@ -169,7 +169,9 @@ public class ServiceService {
             throw new AccessDeniedException("You can only delete your own services");
         }
 
-        serviceRepository.delete(service);
+        service.setIsActive(false);
+        service.setDeleted(true);
+        serviceRepository.save(service);
     }
 
     private ServiceDto toDto(Service service) {

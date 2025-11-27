@@ -70,6 +70,9 @@ public class Service {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    @Column(name = "deleted", nullable = false)
+    private Boolean deleted = false;
+
     @PrePersist
     public void prePersist() {
         Instant now = Instant.now();

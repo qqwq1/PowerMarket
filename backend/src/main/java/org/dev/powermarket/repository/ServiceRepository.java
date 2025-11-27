@@ -16,18 +16,18 @@ import java.util.UUID;
 @Repository
 public interface ServiceRepository extends JpaRepository<Service, UUID> {
     
-    Page<Service> findBySupplier(User supplier, Pageable pageable);
+    Page<Service> findBySupplierAndDeletedFalse(User supplier, Pageable pageable);
     
-    Page<Service> findByIsActiveTrue(Pageable pageable);
+    Page<Service> findByIsActiveTrueAndDeletedFalse(Pageable pageable);
     
-    Page<Service> findByIsActiveTrueAndCategory(ServiceCategory category, Pageable pageable);
-    
-    @Query("SELECT s FROM Service s WHERE s.isActive = true AND " +
-           "(LOWER(s.title) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-           "LOWER(s.description) LIKE LOWER(CONCAT('%', :search, '%')))")
+    Page<Service> findByIsActiveTrueAndCategoryAndDeletedFalse(ServiceCategory category, Pageable pageable);
+
+    @Query("SELECT s FROM Service s WHERE s.isActive = true AND s.deleted = false AND " +
+            "(LOWER(s.title) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+            "LOWER(s.description) LIKE LOWER(CONCAT('%', :search, '%')))")
     Page<Service> searchServices(@Param("search") String search, Pageable pageable);
     
-    List<Service> findBySupplierAndIsActiveTrue(User supplier);
+    List<Service> findBySupplierAndIsActiveTrueAndDeletedFalse(User supplier);
 
-    List<Service> findByIdInAndIsActiveTrue(List<UUID> ids);
+    List<Service> findByIdInAndIsActiveTrueAndDeletedFalse(List<UUID> ids);
 }

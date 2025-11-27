@@ -1,16 +1,21 @@
 package org.dev.powermarket.domain;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.time.LocalDate;
 import java.time.Instant;
 import java.util.UUID;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "service_availability")
 public class ServiceAvailability {
 
+    // Getters and setters
     @Id
     @GeneratedValue
     @UuidGenerator
@@ -38,22 +43,4 @@ public class ServiceAvailability {
         createdAt = Instant.now();
     }
 
-    // Getters and setters
-    public UUID getId() { return id; }
-    public void setId(UUID id) { this.id = id; }
-
-    public Service getService() { return service; }
-    public void setService(Service service) { this.service = service; }
-
-    public LocalDate getAvailableDate() { return availableDate; }
-    public void setAvailableDate(LocalDate availableDate) { this.availableDate = availableDate; }
-
-    public Boolean getIsReserved() { return isReserved; }
-    public void setIsReserved(Boolean isReserved) { this.isReserved = isReserved; }
-
-    public Rental getReservedByRental() { return reservedByRental; }
-    public void setReservedByRental(Rental reservedByRental) { this.reservedByRental = reservedByRental; }
-
-    public Instant getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
 }
