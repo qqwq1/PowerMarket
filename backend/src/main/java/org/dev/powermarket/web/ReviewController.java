@@ -24,7 +24,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/reviews")
 @Tag(name = "Reviews", description = "Review management endpoints")
-@SecurityRequirement(name = "Bearer Authentication")
+@SecurityRequirement(name = "bearerAuth")
 public class ReviewController {
 
     private final ReviewService reviewService;
@@ -56,6 +56,7 @@ public class ReviewController {
     }
 
     @GetMapping("/user")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Page<ReviewDto>> getUserReviews(
 //            @RequestParam(required = false) UUID userId,
             Pageable pageable,

@@ -1,91 +1,97 @@
 package org.dev.powermarket.service;
 
+import lombok.RequiredArgsConstructor;
+import org.dev.powermarket.domain.CapacityReservation;
 import org.dev.powermarket.domain.Rental;
 import org.dev.powermarket.domain.Service;
-import org.dev.powermarket.domain.ServiceAvailability;
-import org.dev.powermarket.repository.ServiceAvailabilityRepository;
+import org.dev.powermarket.domain.ServiceAvailabilityPeriod;
+import org.dev.powermarket.domain.dto.response.CapacityAvailabilityResponse;
+import org.dev.powermarket.repository.CapacityReservationRepository;
+import org.dev.powermarket.repository.ServiceAvailabilityPeriodRepository;
 import org.dev.powermarket.repository.ServiceRepository;
 import org.dev.powermarket.service.dto.CapacityAvailabilityDto;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @org.springframework.stereotype.Service
+@RequiredArgsConstructor
 public class CapacityService {
 
     private final ServiceRepository serviceRepository;
-    private final ServiceAvailabilityRepository availabilityRepository;
-
-    public CapacityService(ServiceRepository serviceRepository,
-                           ServiceAvailabilityRepository availabilityRepository) {
-        this.serviceRepository = serviceRepository;
-        this.availabilityRepository = availabilityRepository;
-    }
+    private final ServiceAvailabilityPeriodRepository periodRepository;
+    private final CapacityReservationRepository reservationRepository;
 
     @Transactional(readOnly = true)
-    public List<CapacityAvailabilityDto> getCapacityAvailability(UUID serviceId,
-                                                                 LocalDate startDate,
-                                                                 LocalDate endDate) {
+    public List<CapacityAvailabilityResponse> getCapacityAvailability(UUID serviceId,
+                                                                      LocalDate startDate,
+                                                                      LocalDate endDate) {
         Service service = serviceRepository.findById(serviceId)
                 .orElseThrow(() -> new IllegalArgumentException("Service not found"));
 
-        List<ServiceAvailability> allAvailabilities = availabilityRepository
-                .findByServiceAndDateRange(service, startDate, endDate);
-
-        List<ServiceAvailability> reservedAvailabilities = availabilityRepository
-                .findReservedAvailabilities(service, startDate, endDate);
-
-        // Group by date
-        Map<LocalDate, List<ServiceAvailability>> reservedByDate = reservedAvailabilities.stream()
-                .collect(Collectors.groupingBy(ServiceAvailability::getAvailableDate));
-
-        List<CapacityAvailabilityDto> result = new ArrayList<>();
+        List<CapacityAvailabilityResponse> result = new ArrayList<>();
         LocalDate currentDate = startDate;
 
         while (!currentDate.isAfter(endDate)) {
-            List<ServiceAvailability> reserved = reservedByDate.getOrDefault(currentDate, List.of());
+            // Найти период для текущей даты
+            Optional<ServiceAvailabilityPeriod> periodOpt = periodRepository.findByServiceAndDate(service, currentDate);
 
-            int totalCapacity = service.getTotalCapacityUnits();
-            int occupiedCapacity = reserved.size();
-            int availableCapacity = totalCapacity - occupiedCapacity;
+            BigDecimal totalCapacity = BigDecimal.ZERO;
+            BigDecimal reservedCapacity = BigDecimal.ZERO;
+            List<CapacityAvailabilityResponse.OccupiedSlot> occupiedSlots = new ArrayList<>();
 
-            List<CapacityAvailabilityDto.OccupiedSlot> occupiedSlots = reserved.stream()
-                    .filter(sa -> sa.getReservedByRental() != null)
-                    .map(sa -> {
-                        Rental rental = sa.getReservedByRental();
-                        return new CapacityAvailabilityDto.OccupiedSlot(
-                                rental.getStartDate(),
-                                rental.getEndDate(),
-                                rental.getTenant().getFullName(),
-                                1 // Each availability represents 1 capacity unit
-                        );
-                    })
-                    .collect(Collectors.toList());
+            if (periodOpt.isPresent()) {
+                ServiceAvailabilityPeriod period = periodOpt.get();
+                totalCapacity = period.getTotalCapacity();
 
-            CapacityAvailabilityDto dto = new CapacityAvailabilityDto(
+                // Получить забронированную мощность для этой даты
+                reservedCapacity = reservationRepository.getReservedCapacityForDate(service, currentDate);
+
+                // Получить детали бронирований
+                List<CapacityReservation> reservations = reservationRepository.findByServiceAndDateRange(
+                        service, currentDate, currentDate);
+
+                occupiedSlots = reservations.stream()
+                        .map(reservation -> {
+                            Rental rental = reservation.getRental();
+                            return new CapacityAvailabilityResponse.OccupiedSlot(
+                                    rental.getStartDate(),
+                                    rental.getEndDate(),
+                                    rental.getTenant().getFullName(),
+                                    reservation.getReservedCapacity()
+                            );
+                        })
+                        .toList();
+            }
+
+            BigDecimal availableCapacity = totalCapacity.subtract(reservedCapacity);
+
+            CapacityAvailabilityResponse response = new CapacityAvailabilityResponse(
                     currentDate,
                     totalCapacity,
                     availableCapacity,
-                    occupiedCapacity,
+                    reservedCapacity,
                     occupiedSlots
             );
 
-            result.add(dto);
+            result.add(response);
             currentDate = currentDate.plusDays(1);
         }
 
         return result;
     }
+    /**
+     * Получить сумму забронированной мощности на конкретную дату
+     */
+    private BigDecimal getReservedCapacityForDate(Service service, LocalDate date) {
+        List<CapacityReservation> reservations = reservationRepository
+                .findOverlappingReservations(service, date, date);
 
-    @Transactional(readOnly = true)
-    public boolean isCapacityAvailable(UUID serviceId, LocalDate startDate, LocalDate endDate) {
-        Service service = serviceRepository.findById(serviceId)
-                .orElseThrow(() -> new IllegalArgumentException("Service not found"));
-
-        long days = endDate.toEpochDay() - startDate.toEpochDay() + 1;
-
-        return availabilityRepository.isDateRangeAvailable(service, startDate, endDate, days);
+        return reservations.stream()
+                .map(CapacityReservation::getReservedCapacity)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

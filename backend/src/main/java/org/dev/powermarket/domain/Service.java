@@ -40,14 +40,8 @@ public class Service {
     @Column(precision = 10, scale = 2)
     private BigDecimal pricePerDay;
 
-    @Column(name = "capacity")
-    private String capacity; // Мощность/производительность
-
-    @Column(name = "available_capacity")
-    private String availableCapacity;
-
-    @Column(name = "total_capacity_units")
-    private Integer totalCapacityUnits = 1; // Общее количество единиц мощности
+    @Column(name = "capacity", precision = 10, scale = 2, nullable = false)
+    private BigDecimal maxCapacity; // Максимальная мощность услуги
 
     @Column(name = "location")
     private String location;
@@ -69,6 +63,9 @@ public class Service {
 
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
+
+    @Column(name = "deleted", nullable = false)
+    private Boolean deleted = false;
 
     @PrePersist
     public void prePersist() {

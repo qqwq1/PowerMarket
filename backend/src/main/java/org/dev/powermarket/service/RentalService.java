@@ -1,5 +1,7 @@
 package org.dev.powermarket.service;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.dev.powermarket.domain.*;
 import org.dev.powermarket.domain.enums.NotificationType;
 import org.dev.powermarket.domain.enums.RentalRequestStatus;
@@ -12,6 +14,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
@@ -19,32 +22,21 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class RentalService {
 
     private final RentalRepository rentalRepository;
     private final ChatRepository chatRepository;
-    private final ServiceAvailabilityRepository availabilityRepository;
     private final AuthorizedUserRepository userRepository;
     private final RentalRequestRepository rentalRequestRepository;
     private final NotificationRepository notificationRepository;
+    private final CapacityManagementService capacityManagementService;
 
-    public RentalService(RentalRepository rentalRepository,
-                         ChatRepository chatRepository,
-                         ServiceAvailabilityRepository availabilityRepository,
-                         AuthorizedUserRepository userRepository,
-                         RentalRequestRepository rentalRequestRepository,
-                         NotificationRepository notificationRepository) {
-        this.rentalRepository = rentalRepository;
-        this.chatRepository = chatRepository;
-        this.availabilityRepository = availabilityRepository;
-        this.userRepository = userRepository;
-        this.rentalRequestRepository = rentalRequestRepository;
-        this.notificationRepository = notificationRepository;
-    }
 
     @Transactional
     public void createRentalFromRequest(RentalRequest request) {
-        // Create rental only if it doesn't already exist (created during request submission)
+        // Create rental only if it doesn't already exist
         Rental rental = rentalRepository.findByRentalRequest(request).orElse(null);
 
         if (rental == null) {
@@ -56,6 +48,7 @@ public class RentalService {
             rental.setStartDate(request.getStartDate());
             rental.setEndDate(request.getEndDate());
             rental.setTotalPrice(request.getTotalPrice());
+            rental.setCapacityNeeded(request.getCapacityNeeded());
             rental.setSupplierConfirmed(false);
             rental.setTenantConfirmed(false);
             rental.setIsActive(true);
@@ -131,19 +124,12 @@ public class RentalService {
             request.setStatus(RentalRequestStatus.CONFIRMED);
             rentalRequestRepository.save(request);
 
-            // Reserve dates in availability calendar
-            List<ServiceAvailability> availabilities = availabilityRepository
-                    .findOverlappingAvailabilities(
-                            request.getService(),
-                            request.getStartDate(),
-                            request.getEndDate()
-                    );
-
-            for (ServiceAvailability availability : availabilities) {
-                availability.setIsReserved(true);
-                availability.setReservedByRental(rental);
-                availabilityRepository.save(availability);
-            }
+            capacityManagementService.reserveCapacity(
+                    rental,
+                    request.getStartDate(),
+                    request.getEndDate(),
+                    request.getCapacityNeeded()
+            );
         }
 
         Rental saved = rentalRepository.save(rental);
@@ -192,6 +178,8 @@ public class RentalService {
         rentalRequestRepository.save(request);
         rentalRepository.save(rental);
 
+        capacityManagementService.releaseCapacity(rental);
+
         // Notify both parties
         createNotification(
                 rental.getSupplier(),
@@ -218,7 +206,7 @@ public class RentalService {
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         List<Rental> rentals = rentalRepository.findBySupplierOrTenant(user, user);
-        return rentals.stream().map(this::toDto).collect(Collectors.toList());
+        return rentals.stream().map(this::toDto).toList();
     }
 
     @Transactional(readOnly = true)
@@ -238,16 +226,16 @@ public class RentalService {
                 .filter(r -> r.getRentalRequest().getStatus() == RentalRequestStatus.COMPLETED)
                 .count();
 
-        java.math.BigDecimal totalRevenue = rentals.stream()
+        BigDecimal totalRevenue = rentals.stream()
                 .filter(r -> r.getRentalRequest().getStatus() == RentalRequestStatus.COMPLETED)
                 .map(Rental::getTotalPrice)
-                .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         // Calculate average rating from user's reviews
-        java.math.BigDecimal averageRating = user.getAverageRating() != null ?
-                user.getAverageRating() : java.math.BigDecimal.ZERO;
+        BigDecimal averageRating = user.getAverageRating() != null ?
+                user.getAverageRating() : BigDecimal.ZERO;
 
-        return new org.dev.powermarket.service.dto.RentalStatsDto(
+        return new RentalStatsDto(
                 totalRentals, activeRentals, completedRentals, totalRevenue, averageRating);
     }
 
@@ -291,7 +279,6 @@ public class RentalService {
         dto.setTenantId(rental.getTenant().getId());
         dto.setTenantName(rental.getTenant().getFullName());
         dto.setStartDate(rental.getStartDate());
-        dto.setCapacityRented(Double.parseDouble(rental.getService().getCapacity()));
         dto.setEndDate(rental.getEndDate());
         dto.setTotalPrice(rental.getTotalPrice());
         dto.setChatId(rental.getChat() != null ? rental.getChat().getId() : null);
@@ -302,6 +289,9 @@ public class RentalService {
         dto.setStatus(rental.getRentalRequest().getStatus());
         dto.setIsActive(rental.getIsActive());
         dto.setCreatedAt(rental.getCreatedAt());
+        dto.setRequestedCapacity(rental.getCapacityNeeded());
+        dto.setServiceMaxCapacity(rental.getService().getMaxCapacity());
+        dto.setRentalRequestId(rental.getRentalRequest().getId());
         return dto;
     }
 }

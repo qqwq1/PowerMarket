@@ -27,6 +27,9 @@ public class RentalRequest {
     @JoinColumn(name = "service_id", nullable = false)
     private Service service;
 
+    @OneToOne(mappedBy = "rentalRequest", fetch = FetchType.LAZY)
+    private Rental rental;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tenant_id", nullable = false)
     private User tenant;
@@ -40,8 +43,8 @@ public class RentalRequest {
     @Column(name = "total_price", precision = 10, scale = 2)
     private BigDecimal totalPrice;
 
-    @Column(name = "capacity_needed", nullable = false)
-    private Integer capacityNeeded;
+    @Column(name = "capacity_needed", precision = 10, scale = 2, nullable = false)
+    private BigDecimal capacityNeeded;
 
     @Column(columnDefinition = "TEXT")
     private String message; // Сообщение от арендатора

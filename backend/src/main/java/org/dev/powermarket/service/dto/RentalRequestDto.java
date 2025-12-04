@@ -15,6 +15,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class RentalRequestDto {
     private UUID id;
+    private UUID rentalId;
     private UUID serviceId;
     private String serviceTitle;
     private UUID tenantId;
@@ -30,5 +31,5 @@ public class RentalRequestDto {
     private String rejectionReason;
     private Instant createdAt;
     private Instant respondedAt;
-    private Integer capacityNeeded;
+    private BigDecimal capacityNeeded;
 }

@@ -29,9 +29,7 @@ public class CreateServiceRequest {
     private String location;
 
     @Min(1)
-    private String capacity;
-
-    private String availableCapacity;
+    private BigDecimal maxCapacity;
 
     private String technicalSpecs;
 

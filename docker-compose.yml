@@ -12,7 +12,7 @@ services:
   # ---------- FRONTEND ----------
   frontend:
     build:
-      context: ./front
+      context: ./frontend
     environment:
       NEXT_PUBLIC_API_URL: http://backend:8080
     ports:
@@ -48,6 +48,8 @@ services:
       POSTGRES_PASSWORD: ${BACKEND_DB_PASSWORD}
     volumes:
       - backend_pgdata:/var/lib/postgresql/data
+    ports:
+      - "5442:5432"        # ← добавили: БД бэка доступна на localhost:5432
     healthcheck:
       test: ["CMD-SHELL","pg_isready -U postgres -d PowerMarket"]
       interval: 5s
@@ -59,16 +61,16 @@ services:
   # ---------- SEARCH SERVICE (ML) ----------
   search-service:
     build:
-      context: ./search_service/search_service
+      context: search_service
     env_file:
-      - ./search_service/search_service/.env
+      - search_service/.env
     environment:
       DB_HOST: search-postgres
       TYPESENSE_HOST: typesense
       TYPESENSE_API_KEY: ${TYPESENSE_API_KEY}
       SERVICE_PORT: "8081"
     depends_on:
-      - typesense         # ← убрали condition: service_healthy
+      - typesense
       - search-postgres
     ports:
       - "8081:8081"
@@ -83,6 +85,8 @@ services:
       POSTGRES_PASSWORD: ${SEARCH_DB_PASSWORD}
     volumes:
       - search_pgdata:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"       
     healthcheck:
       test: ["CMD-SHELL","pg_isready -U postgres -d power_market"]
       interval: 5s
