@@ -20,7 +20,10 @@ jobs:
 
       - name: Build backend with Maven + tests
         working-directory: backend
-        run: ./mvnw -B clean verify
+        run: |
+          chmod +x mvnw
+          ./mvnw -B clean verify
+
 
       - name: Upload JaCoCo report
         if: always()
