@@ -25,5 +25,4 @@ public class RentalStatsDto {
         this.totalRevenue = totalRevenue;
         this.averageRating = averageRating;
     }
-
 }
