@@ -33,7 +33,7 @@ export default function ServicesPage() {
     }
   }
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     if (!confirm('Вы уверены, что хотите удалить эту услугу?')) return
 
     try {
@@ -54,7 +54,7 @@ export default function ServicesPage() {
         ? [s.title, s.location, s.description].map((f) => (f ? String(f).toLowerCase() : '')).some((f) => f.includes(q))
         : true
       const matchCategory = category && category !== ALL_CATEGORY_VALUE ? String(s.category) === category : true
-      return matchQuery && matchCategory
+      return matchQuery && matchCategory && s.active
     })
   }, [services, search, category])
 
@@ -160,10 +160,8 @@ export default function ServicesPage() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-muted-foreground">Мощность</div>
-                    <div className="font-semibold">
-                      {service.availableCapacity} / {service.totalCapacity}
-                    </div>
+                    <div className="text-muted-foreground">Макс. лимит</div>
+                    <div className="font-semibold">{service.maxCapacity}</div>
                   </div>
                 </div>
 

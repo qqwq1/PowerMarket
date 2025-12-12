@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   postgres:
@@ -7,7 +7,7 @@ services:
     environment:
       POSTGRES_DB: power_market
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD: admin
     ports:
       - "5432:5432"
     volumes:
@@ -26,9 +26,10 @@ services:
       - "8108:8108"
     volumes:
       - typesense-data:/data
-    command: '--data-dir /data --api-key=your-api-key-here --enable-cors'
+    command: "--data-dir /data --api-key=your-api-key-here --enable-cors"
     healthcheck:
-      test: [ "CMD-SHELL", "timeout 1 bash -c '</dev/tcp/localhost/8108' || exit 1" ]
+      test:
+        ["CMD-SHELL", "timeout 1 bash -c '</dev/tcp/localhost/8108' || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -44,7 +45,7 @@ services:
       DB_PORT: 5432
       DB_NAME: power_market
       DB_USER: postgres
-      DB_PASSWORD: password
+      DB_PASSWORD: admin
       TYPESENSE_HOST: typesense
       TYPESENSE_PORT: 8108
       TYPESENSE_PROTOCOL: http

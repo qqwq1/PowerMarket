@@ -19,25 +19,19 @@ export type ServiceCategory =
   | 'OTHER' // Другое
 
 export interface Service {
-  id: number
+  id: string
   title: string
   description: string
   category: ServiceCategory
   pricePerDay: number
-  totalCapacity: number
-  availableCapacity: number
-  totalCapacityUnits?: number
-  availableCapacityUnits?: number
+  maxCapacity: number
   location: string
-  technicalSpecs?: string
-  supplierId: number
-  supplierName?: string
-  supplier?: User
+  technicalSpecs: string
+  supplierId: string
+  supplierName: string
   active: boolean
-  averageRating?: number
-  totalReviews?: number
-  createdAt?: string
-  availabilities?: ServiceAvailability[]
+  createdAt: string // 2025-12-07T21:43:22.514991Z
+  availableCapacity?: number
 }
 
 export interface ServiceAvailability {
@@ -45,12 +39,23 @@ export interface ServiceAvailability {
   availableDate: string
   isReserved: boolean
   rentalId?: number
+
+  serviceId: string
+  availablePeriods: Period[]
+  reservedPeriods: Period[]
+}
+
+export interface Period {
+  startDate: string
+  endDate: string
+  availableCapacity: number
 }
 
 export type RentalStatus = 'PENDING' | 'IN_CONTRACT' | 'CONFIRMED' | 'IN_RENT' | 'COMPLETED' | 'REJECTED' | 'CANCELLED'
 
 export interface RentalRequest {
   id: number
+  rentalId: number
   serviceId?: number
   serviceTitle?: string
 
@@ -73,20 +78,23 @@ export interface RentalRequest {
 
 export interface Rental {
   id: string
-  serviceId: number
+  serviceId: string
+  rentalRequestId: string
   serviceTitle: string
-  supplierId: number
+  supplierId: string
   supplierName: string
-  tenantId: number
+  tenantId: string
   tenantName: string
+  requestedCapacity: number
+  serviceMaxCapacity: number
   startDate: string
   endDate: string
   totalPrice: number
-  chatId?: string // добавлено поле chatId для связи с чатом
+  chatId: string
   supplierConfirmed: boolean
   tenantConfirmed: boolean
-  supplierConfirmedAt?: string
-  tenantConfirmedAt?: string
+  supplierConfirmedAt: string
+  tenantConfirmedAt: string
   status: RentalStatus
   isActive: boolean
   createdAt: string

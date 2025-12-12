@@ -126,13 +126,14 @@ export default function RegisterPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="phone">Телефон</Label>
+                <Label htmlFor="phone">Телефон *</Label>
                 <Input
                   id="phone"
                   type="tel"
                   placeholder="+79991234567"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  required
                 />
               </div>
             </div>

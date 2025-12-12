@@ -156,20 +156,20 @@ export default function RequestsPage() {
                 <div className="flex flex-col gap-2 md:w-48">
                   {user?.role === 'SUPPLIER' && request.status === 'PENDING' && (
                     <>
-                      {/* <Button onClick={() => handleRespond(request.id, true)} size="sm">
+                      <Button onClick={() => handleRespond(request.id, true)} size="sm">
                         Одобрить
-                      </Button> */}
+                      </Button>
                       <Button variant="outline" onClick={() => handleRespond(request.id, false)} size="sm">
                         Отклонить
                       </Button>
                     </>
                   )}
 
-                  {/* {request.status === 'IN_CONTRACT' && (
-                    <Button onClick={() => router.push(`/dashboard/rentals/${request.id}`)} size="sm">
+                  {request.status === 'IN_CONTRACT' && (
+                    <Button onClick={() => router.push(`/dashboard/rentals/${request.rentalId}`)} size="sm">
                       Подтвердить аренду
                     </Button>
-                  )} */}
+                  )}
 
                   <Button variant="outline" onClick={() => router.push(`/dashboard/chat/${request.id}`)} size="sm">
                     Открыть чат

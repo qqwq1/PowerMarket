@@ -121,7 +121,7 @@ export default function ChatPage() {
       <div className="flex items-center justify-between">
         <Button variant="ghost" onClick={() => router.back()}>
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Назад к чатам
+          Назад
         </Button>
       </div>
 

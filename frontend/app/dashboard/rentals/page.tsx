@@ -1,25 +1,25 @@
-"use client"
+'use client'
 
-import { useEffect, useState } from "react"
-import { useAuth } from "@/lib/auth-context"
-import { api } from "@/lib/api"
-import type { Rental } from "@/types"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Calendar, Package, User, Star } from "lucide-react"
-import { useRouter } from "next/navigation"
+import { useEffect, useMemo, useState } from 'react'
+import { useAuth } from '@/lib/auth-context'
+import { api } from '@/lib/api'
+import type { Rental } from '@/types'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Calendar, Package, User, Star } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 const statusLabels: Record<string, string> = {
-  ACTIVE: "Активна",
-  COMPLETED: "Завершена",
-  CANCELLED: "Отменена",
+  ACTIVE: 'Активна',
+  COMPLETED: 'Завершена',
+  CANCELLED: 'Отменена',
 }
 
 const statusColors: Record<string, string> = {
-  ACTIVE: "bg-green-100 text-green-800",
-  COMPLETED: "bg-gray-100 text-gray-800",
-  CANCELLED: "bg-red-100 text-red-800",
+  ACTIVE: 'bg-green-100 text-green-800',
+  COMPLETED: 'bg-gray-100 text-gray-800',
+  CANCELLED: 'bg-red-100 text-red-800',
 }
 
 export default function RentalsPage() {
@@ -34,10 +34,10 @@ export default function RentalsPage() {
 
   const loadRentals = async () => {
     try {
-      const data = await api.get<Rental[]>("/rentals/my")
+      const data = await api.get<Rental[]>('/rentals/my')
       setRentals(data)
     } catch (error) {
-      console.error("Ошибка загрузки аренд:", error)
+      console.error('Ошибка загрузки аренд:', error)
     } finally {
       setLoading(false)
     }
@@ -80,28 +80,28 @@ export default function RentalsPage() {
                   <div className="grid gap-2 text-sm">
                     <div className="flex items-center text-muted-foreground">
                       <User className="w-4 h-4 mr-2" />
-                      {user?.role === "SUPPLIER"
+                      {user?.role === 'SUPPLIER'
                         ? `Арендатор: ${rental.tenantName}`
                         : `Арендодатель: ${rental.supplierName}`}
                     </div>
                     <div className="flex items-center text-muted-foreground">
                       <Calendar className="w-4 h-4 mr-2" />
-                      {new Date(rental.startDate).toLocaleDateString("ru-RU")} -{" "}
-                      {new Date(rental.endDate).toLocaleDateString("ru-RU")}
+                      {new Date(rental.startDate).toLocaleDateString('ru-RU')} -{' '}
+                      {new Date(rental.endDate).toLocaleDateString('ru-RU')}
                     </div>
-                    <div className="flex items-center text-muted-foreground">
+                    {/* <div className="flex items-center text-muted-foreground">
                       <Package className="w-4 h-4 mr-2" />
-                      Мощность: {rental.capacityRented} единиц
-                    </div>
+                      Мощность: {rental} единиц
+                    </div> */}
                   </div>
 
                   <div className="text-lg font-bold text-foreground">
-                    Итого: {rental.totalPrice.toLocaleString("ru-RU")} ₽
+                    Итого: {rental.totalPrice.toLocaleString('ru-RU')} ₽
                   </div>
                 </div>
 
                 <div className="flex flex-col gap-2 md:w-48">
-                  {rental.status === "COMPLETED" && (
+                  {rental.status === 'COMPLETED' && (
                     <Button
                       onClick={() => router.push(`/dashboard/rentals/${rental.id}/review`)}
                       size="sm"

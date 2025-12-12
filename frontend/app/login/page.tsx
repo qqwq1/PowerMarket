@@ -1,7 +1,5 @@
 'use client'
 
-import type React from 'react'
-
 import { FormEvent, useState } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/lib/auth-context'

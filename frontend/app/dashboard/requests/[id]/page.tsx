@@ -1,15 +1,16 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { format, isBefore, startOfDay } from 'date-fns'
 import { useRouter, useParams } from 'next/navigation'
 import { api } from '@/lib/api'
 import { useAuth } from '@/lib/auth-context'
-import type { RentalRequest } from '@/types'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ArrowLeft, CheckCircle, XCircle, MessageSquare } from 'lucide-react'
-
+import { Rental } from '@/types'
+import { ru } from 'date-fns/locale'
 const statusLabels: Record<string, string> = {
   PENDING: 'Ожидает ответа',
   IN_CONTRACT: 'В договоре',
@@ -35,7 +36,7 @@ export default function RentalDetailPage() {
   const params = useParams()
   const { user } = useAuth()
   const rentalId = params.id as string
-  const [rental, setRental] = useState<RentalRequest | null>(null)
+  const [rental, setRental] = useState<Rental>(null)
   const [loading, setLoading] = useState(true)
   const [confirming, setConfirming] = useState(false)
 
@@ -45,7 +46,7 @@ export default function RentalDetailPage() {
 
   const loadRental = async () => {
     try {
-      const data = await api.get<RentalRequest>(`/rental-requests/${rentalId}`)
+      const data = await api.get<Rental>(`/v1/rentals/${rentalId}`)
       setRental(data)
     } catch (error) {
       console.error('Ошибка загрузки заявки:', error)
@@ -59,10 +60,8 @@ export default function RentalDetailPage() {
   const handleConfirm = async () => {
     setConfirming(true)
     try {
-      const endpoint =
-        user?.role === 'SUPPLIER' ? `/rentals/${rentalId}/confirm-landlord` : `/rentals/${rentalId}/confirm-tenant`
-      await api.post(endpoint, {})
-      loadRental()
+      const data = await api.post<Rental>(`/v1/rentals/${rentalId}/approve`)
+      setRental(data)
     } catch (error) {
       console.error('Ошибка подтверждения:', error)
       alert('Не удалось подтвердить аренду')
@@ -71,12 +70,54 @@ export default function RentalDetailPage() {
     }
   }
 
-  // const canConfirm = () => {
-  //   if (!rental || rental.status !== 'IN_CONTRACT') return false
-  //   if (user?.role === 'SUPPLIER') return !rental.landlordConfirmed
-  //   if (user?.role === 'TENANT') return !rental.tenantConfirmed
-  //   return false
-  // }
+  const handleStart = async () => {
+    setConfirming(true)
+    try {
+      const data = await api.post<Rental>(`/v1/rentals/${rentalId}/start`)
+      setRental(data)
+    } catch (error) {
+      console.error('Ошибка старта периода:', error)
+      alert('Не удалось подтвердить начало периода аренды')
+    } finally {
+      setConfirming(false)
+    }
+  }
+
+  const handleComplete = async () => {
+    setConfirming(true)
+    try {
+      const data = await api.post<Rental>(`/v1/rentals/${rentalId}/complete`)
+      setRental(data)
+    } catch (error) {
+      console.error('Ошибка старта периода:', error)
+      alert('Не удалось подтвердить начало периода аренды')
+    } finally {
+      setConfirming(false)
+    }
+  }
+
+  const canConfirm = () => {
+    if (!rental || rental.status !== 'IN_CONTRACT') return false
+    if (user?.role === 'SUPPLIER') return !rental.supplierConfirmed
+    if (user?.role === 'TENANT') return !rental.tenantConfirmed
+    return false
+  }
+
+  const canStart = () => {
+    if (!rental || rental.status !== 'CONFIRMED' || !rental.startDate) return false
+    return (
+      !isBefore(new Date(), startOfDay(new Date(rental.startDate))) &&
+      rental.supplierConfirmed &&
+      rental.tenantConfirmed
+    )
+  }
+
+  const canComplete = () => {
+    if (!rental || rental.status !== 'IN_RENT' || !rental.endDate) return false
+    return (
+      !isBefore(new Date(), startOfDay(new Date(rental.endDate))) && rental.supplierConfirmed && rental.tenantConfirmed
+    )
+  }
 
   const calculateDays = () => {
     if (!rental) return 0
@@ -110,7 +151,7 @@ export default function RentalDetailPage() {
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-6">
-          <Card className="p-6 space-y-4">
+          <Card className="p-6">
             <h2 className="text-xl font-bold">Информация об аренде</h2>
 
             <div className="space-y-3">
@@ -143,14 +184,8 @@ export default function RentalDetailPage() {
 
               <div className="flex items-center justify-between py-2 border-b">
                 <span className="text-muted-foreground">Требуемая мощность</span>
-                <span className="font-semibold">{rental.capacityNeeded} единиц</span>
+                <span className="font-semibold">{rental.requestedCapacity} единиц</span>
               </div>
-
-              <div className="flex items-center justify-between py-2 border-b">
-                <span className="text-muted-foreground">Цена за день</span>
-                <span className="font-semibold">{rental.totalPrice.toLocaleString('ru-RU')} ₽</span>
-              </div>
-
               <div className="flex items-center justify-between py-3 text-lg">
                 <span className="font-bold">Итого</span>
                 <span className="font-bold text-2xl">{rental.totalPrice.toLocaleString('ru-RU')} ₽</span>
@@ -158,26 +193,24 @@ export default function RentalDetailPage() {
             </div>
           </Card>
 
-          {/* {(rental.status === "IN_CONTRACT" || rental.status === "CONFIRMED") && (
+          {(rental.status === 'IN_CONTRACT' || rental.status === 'CONFIRMED') && (
             <Card className="p-6">
-              <h2 className="text-xl font-bold mb-4">Статус подтверждения</h2>
+              <h2 className="text-xl font-bold ">Статус подтверждения</h2>
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
                   <div className="flex items-center gap-3">
-                    {rental.landlordConfirmed ? (
+                    {rental.supplierConfirmed ? (
                       <CheckCircle className="w-6 h-6 text-green-600" />
                     ) : (
                       <XCircle className="w-6 h-6 text-gray-400" />
                     )}
                     <div>
                       <div className="font-semibold">Арендодатель</div>
-                      <div className="text-sm text-muted-foreground">
-                        {rental.service?.supplierName}
-                      </div>
+                      <div className="text-sm text-muted-foreground">{rental.supplierName}</div>
                     </div>
                   </div>
-                  <Badge className={rental.landlordConfirmed ? "bg-green-100 text-green-800" : ""}>
-                    {rental.landlordConfirmed ? "Подтверждено" : "Ожидает"}
+                  <Badge className={rental.supplierConfirmed ? 'bg-green-100 text-green-800' : ''}>
+                    {rental.supplierConfirmed ? 'Подтверждено' : 'Ожидает'}
                   </Badge>
                 </div>
 
@@ -190,37 +223,51 @@ export default function RentalDetailPage() {
                     )}
                     <div>
                       <div className="font-semibold">Арендатор</div>
-                      <div className="text-sm text-muted-foreground">
-                        {rental.tenantName}
-                      </div>
+                      <div className="text-sm text-muted-foreground">{rental.tenantName}</div>
                     </div>
                   </div>
-                  <Badge className={rental.tenantConfirmed ? "bg-green-100 text-green-800" : ""}>
-                    {rental.tenantConfirmed ? "Подтверждено" : "Ожидает"}
+                  <Badge className={rental.tenantConfirmed ? 'bg-green-100 text-green-800' : ''}>
+                    {rental.tenantConfirmed ? 'Подтверждено' : 'Ожидает'}
                   </Badge>
                 </div>
 
-                {rental.landlordConfirmed && rental.tenantConfirmed && rental.status === "CONFIRMED" && (
+                {rental.supplierConfirmed && rental.tenantConfirmed && rental.status === 'CONFIRMED' && (
                   <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-center">
                     <CheckCircle className="w-8 h-8 text-green-600 mx-auto mb-2" />
                     <div className="font-semibold text-green-800">Обе стороны подтвердили аренду</div>
-                    <div className="text-sm text-green-700 mt-1">Аренда будет активирована в дату начала</div>
+                    <div className="text-sm text-green-700 mt-1">{`Одной из сторон необходимо подтвердить начало аренды ${format(
+                      new Date(rental.startDate),
+                      'd MMM yyyy',
+                      { locale: ru }
+                    )} или позже`}</div>
                   </div>
                 )}
               </div>
             </Card>
-          )} */}
+          )}
         </div>
 
         <div className="space-y-4">
-          <Card className="p-6 space-y-4">
+          <Card className="p-6">
             <h3 className="font-semibold">Действия</h3>
 
-            {/* {canConfirm() && (
+            {canConfirm() && (
               <Button className="w-full" onClick={handleConfirm} disabled={confirming}>
                 {confirming ? 'Подтверждение...' : 'Подтвердить аренду'}
               </Button>
-            )} */}
+            )}
+
+            {canStart() && (
+              <Button className="w-full" onClick={handleStart} disabled={confirming}>
+                {confirming ? 'Подтверждение...' : 'Подтвердить начало аренды'}
+              </Button>
+            )}
+
+            {canComplete() && (
+              <Button className="w-full" onClick={handleComplete} disabled={confirming}>
+                {confirming ? 'Подтверждение...' : 'Подтвердить окончание аренды'}
+              </Button>
+            )}
 
             <Button
               variant="outline"
@@ -230,32 +277,12 @@ export default function RentalDetailPage() {
               <MessageSquare className="w-4 h-4 mr-2" />
               Открыть чат
             </Button>
-
-            {/* {rental.status === 'PENDING' && user?.role === 'TENANT' && (
-              <Button
-                variant="outline"
-                className="w-full text-red-600 hover:bg-red-50 bg-transparent"
-                onClick={async () => {
-                  if (confirm('Вы уверены, что хотите отменить заявку?')) {
-                    try {
-                      await api.post(`/rental-requests/${rental.id}/cancel`, {})
-                      router.push('/dashboard/requests')
-                    } catch (error) {
-                      console.error('Ошибка отмены:', error)
-                      alert('Не удалось отменить заявку')
-                    }
-                  }
-                }}
-              >
-                Отменить заявку
-              </Button>
-            )} */}
           </Card>
 
           <Card className="p-6">
-            <h3 className="font-semibold mb-3">Информация</h3>
+            <h3 className="font-semibold">Информация</h3>
             <div className="text-sm text-muted-foreground space-y-2">
-              <p>Заявка создана: {rental.createdAt ? new Date(rental.createdAt).toLocaleDateString('ru-RU') : '-'}</p>
+              <p>Заявка создана: {rental.createdAt ? format(new Date(rental.createdAt), 'MM.dd.yyyy') : '-'}</p>
               {rental.status === 'IN_CONTRACT' && (
                 <p className="text-blue-600">Обе стороны должны подтвердить условия аренды для продолжения.</p>
               )}

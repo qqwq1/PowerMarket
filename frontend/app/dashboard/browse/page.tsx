@@ -40,7 +40,7 @@ export default function BrowsePage() {
   }
 
   const filterServices = () => {
-    let filtered = services
+    let filtered = services.filter((s) => s.active)
 
     if (searchQuery) {
       filtered = filtered.filter(
@@ -145,20 +145,18 @@ export default function BrowsePage() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-sm text-muted-foreground">Доступно</div>
-                    <div className="font-semibold text-green-600">
-                      {service.availableCapacity} / {service.totalCapacity}
-                    </div>
+                    <div className="text-sm text-muted-foreground">Макс. лимит </div>
+                    <div className="font-semibold">{service.maxCapacity}</div>
                   </div>
                 </div>
 
-                {service.averageRating && service.averageRating > 0 && (
+                {/* {service.averageRating && service.averageRating > 0 && (
                   <div className="flex items-center gap-1 text-sm">
                     <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                     <span className="font-semibold">{service.averageRating.toFixed(1)}</span>
                     <span className="text-muted-foreground">({service.totalReviews} отзывов)</span>
                   </div>
-                )}
+                )} */}
 
                 <Button className="w-full" onClick={() => router.push(`/dashboard/browse/${service.id}`)}>
                   Подробнее
