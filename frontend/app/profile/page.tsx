@@ -3,14 +3,13 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/lib/auth-context'
 import { api } from '@/lib/api'
-import type { Review, Page } from '@/types'
+import type { Stats } from '@/types'
 import { Card } from '@/components/ui/card'
 import { Star, UserIcon, Mail, Building, Award } from 'lucide-react'
 import { MainLayout } from '@/components/layout/dashboard-layout'
 
 function ProfilePage() {
   const { user } = useAuth()
-  const [reviews, setReviews] = useState<Review[]>([])
   const [stats, setStats] = useState({
     totalRentals: 0,
     activeRentals: 0,
@@ -24,15 +23,10 @@ function ProfilePage() {
 
   const loadProfile = async () => {
     try {
-      const [reviewsData, statsData] = await Promise.all([
-        api.get<Page<Review>>(`/reviews/user`),
-        api.get<any>('/rentals/stats'),
-      ])
-      setReviews(reviewsData.content) // Extract content array from Page
+      const statsData = await api.get<Stats>('/rentals/stats')
       setStats(statsData)
     } catch (error) {
       console.error('Ошибка загрузки профиля:', error)
-      setReviews([])
     } finally {
       setLoading(false)
     }

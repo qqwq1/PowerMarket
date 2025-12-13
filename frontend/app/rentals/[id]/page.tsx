@@ -256,7 +256,7 @@ function RentalDetailPage() {
             <Button
               variant="outline"
               className="w-full bg-transparent"
-              onClick={() => router.push(urls.common.chatPage(rental.id))}
+              onClick={() => router.push(urls.common.chatPage(rental.rentalRequestId))}
             >
               <MessageSquare className="w-4 h-4 mr-2" />
               Открыть чат

@@ -61,7 +61,7 @@ export type Stats = {
   averageRating: number
 }
 export interface RentalRequest {
-  id: number
+  id: string
   rentalId: Rental['id']
   serviceId: Service['id']
   serviceTitle?: Service['title']

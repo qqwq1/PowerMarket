@@ -130,7 +130,11 @@ function ChatPage() {
                 {new Date(rentalRequest.endDate).toLocaleDateString('ru-RU')}
               </p>
             </div>
-            <Button variant="outline" size="sm" onClick={() => router.push(urls.common.detailRentalPage(requestId))}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push(urls.common.detailRentalPage(rentalRequest.rentalId))}
+            >
               Детали заявки
             </Button>
           </div>

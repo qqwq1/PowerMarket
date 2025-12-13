@@ -138,9 +138,9 @@ function ServiceDetailPage() {
         <RentalRequestDialog
           service={service}
           onClose={() => setShowRequestDialog(false)}
-          onSuccess={(rentalRequestId) => {
+          onSuccess={(id) => {
             setShowRequestDialog(false)
-            router.push(urls.common.chatPage(rentalRequestId))
+            router.push(urls.common.detailRentalPage(id))
           }}
         />
       )}

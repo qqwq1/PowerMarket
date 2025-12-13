@@ -12,7 +12,7 @@ import {
   startOfMonth,
 } from 'date-fns'
 import { api } from '@/lib/api'
-import type { Service, ServiceAvailability } from '@/types'
+import type { RentalRequest, Service, ServiceAvailability } from '@/types'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -56,14 +56,13 @@ export function RentalRequestDialog({ service, onClose, onSuccess }: RentalReque
     setSubmitting(true)
 
     try {
-      console.log(formData)
-      const response = await api.post<{ id: string }>('/rental-requests', {
+      const resp = await api.post<RentalRequest>('/rental-requests', {
         serviceId: service.id,
         startDate: format(formData.startDate, 'yyyy-MM-dd'),
         endDate: format(formData.endDate, 'yyyy-MM-dd'),
         capacityNeeded: formData.capacityNeeded,
       })
-      onSuccess(response.id)
+      onSuccess(resp.rentalId)
     } catch (error) {
       console.error('Ошибка создания заявки:', error)
       alert('Не удалось создать заявку')
