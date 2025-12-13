@@ -128,7 +128,7 @@ export interface Chat {
   counterpartId: string
   counterpartName: string
   counterpartRole: string
-  lastMessagePreview: ChatMessage
+  lastMessagePreview: string
   lastMessageTime: string //2025-12-12T16:10:08.469168Z
   unreadCount: number
   createdAt: string
@@ -165,10 +165,12 @@ export interface ChatMessage {
 
 export interface Page<T> {
   content: T[]
-  totalElements: number
-  totalPages: number
-  size: number
-  number: number
+  page: {
+    totalElements: number
+    totalPages: number
+    size: number
+    number: number
+  }
 }
 
 export type ProductionAnalysisDashboardResponse = {

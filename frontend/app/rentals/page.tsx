@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/lib/auth-context'
 import { api } from '@/lib/api'
-import type { RentalRequest } from '@/types'
+import type { Rental, RentalRequest } from '@/types'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -53,6 +53,15 @@ function RequestsPage() {
         <div className="text-lg text-muted-foreground">Загрузка...</div>
       </div>
     )
+  }
+
+  const navigateToChatPage = async (id: Rental['id']) => {
+    try {
+      const data = await api.get<Rental>(`/v1/rentals/${id}`)
+      router.push(urls.common.chatPage(data.chatId))
+    } catch (error) {
+      console.error('Ошибка загрузки заявки:', error)
+    }
   }
 
   return (
@@ -156,7 +165,7 @@ function RequestsPage() {
                     {request.status === 'IN_CONTRACT' ? 'Подтвердить аренду' : 'Подробнее'}
                   </Button>
 
-                  <Button variant="outline" onClick={() => router.push(urls.common.chatPage(request.id))} size="sm">
+                  <Button variant="outline" onClick={() => navigateToChatPage(request.rentalId)} size="sm">
                     Открыть чат
                   </Button>
                 </div>

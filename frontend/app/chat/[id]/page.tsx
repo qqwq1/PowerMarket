@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useState, useRef, FormEvent } from 'react'
+import { useEffect, useLayoutEffect, useState, useRef, FormEvent, UIEvent, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { api } from '@/lib/api'
-import type { ChatDetails, ChatMessage, Page } from '@/types'
+import type { ChatDetails, ChatMessage, Page, Rental } from '@/types'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -12,6 +12,8 @@ import { ArrowLeft, Send, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import urls from '@/components/layout/urls'
 import { MainLayout } from '@/components/layout/dashboard-layout'
+import { Badge } from '@/components/ui/badge'
+import { statusColors, statusLabels } from '@/lib/constants'
 
 function ChatPage() {
   const router = useRouter()
@@ -19,44 +21,118 @@ function ChatPage() {
   const { user } = useAuth()
   const chatId = params.id as string
   const [chat, setChat] = useState<ChatDetails>(null)
-  const [messages, setMessages] = useState<{ page: number; messages: ChatMessage[] }>({ page: 0, messages: [] })
-  const [loading, setLoading] = useState(true)
+  const [rental, setRental] = useState<Rental>(null)
+  const [messages, setMessages] = useState<{ page: number; messages: ChatMessage[]; totalElements: number }>({
+    page: 0,
+    messages: [],
+    totalElements: 0,
+  })
+  const [chatLoading, setChatLoading] = useState(false)
+  const [messagesLoading, setMessagesLoading] = useState(false)
   const [newMessage, setNewMessage] = useState('')
   const [sending, setSending] = useState(false)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const messagesContainerRef = useRef<HTMLDivElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const isScrolledEnd = useRef(false)
 
   useEffect(() => {
-    loadChat()
-    const interval = setInterval(loadMessages, 1000000) // Poll every 3 seconds
+    if (loadingMore || messagesLoading || chatLoading) return
+
+    const loadData = async () => {
+      await loadChat()
+      loadMessages(0)
+    }
+    loadData()
+    const interval = setInterval(loadData, 3000) // Poll every 3 seconds
     return () => clearInterval(interval)
   }, [chatId])
 
   useEffect(() => {
-    scrollToBottom()
-  }, [messages])
+    if (!chat) return
+    loadRental()
+  }, [chat])
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }
-
-  const loadChat = async () => {
+  const loadRental = async () => {
     try {
-      const data = await api.get<ChatDetails>(`/v1/chats/${chatId}`)
-      setChat(data)
-      loadMessages()
+      const data = await api.get<Rental>(`/v1/rentals/${chat.rentalId}`)
+      setRental(data)
     } catch (error) {
-      console.error('Ошибка загрузки чата:', error)
-    } finally {
-      setLoading(false)
+      console.error('Ошибка загрузки заявки:', error)
+      alert('Не удалось загрузить заявку')
+      router.back()
     }
   }
 
-  const loadMessages = async () => {
+  useLayoutEffect(() => {
+    if (messages.messages.length === 0 || isScrolledEnd.current) return
+    scrollToBottom('auto')
+    isScrolledEnd.current = true
+    console.log(123)
+  }, [messages.messages.length])
+
+  const scrollToBottom = (behavior: ScrollBehavior = 'smooth') => {
+    const container = messagesContainerRef.current
+    if (container) {
+      container.scrollTo({ top: container.scrollHeight, behavior })
+      return
+    }
+    messagesEndRef.current?.scrollIntoView({ behavior, block: 'end' })
+  }
+
+  const loadChat = useCallback(async () => {
     try {
-      const data = await api.get<Page<ChatMessage>>(`/v1/chats/${chatId}/messages`)
-      setMessages({ page: data.number, messages: data.content })
+      setChatLoading(true)
+      const data = await api.get<ChatDetails>(`/v1/chats/${chatId}`)
+      setChat(data)
+    } catch (error) {
+      console.error('Ошибка загрузки чата:', error)
+    } finally {
+      setChatLoading(false)
+    }
+  }, [chatId])
+
+  const loadMessages = async (page = 0, { scrollToBottom: scrollToBottomAfter = false } = {}) => {
+    const container = messagesContainerRef.current
+    const prevScrollHeight = container?.scrollHeight ?? 0
+    const prevScrollTop = container?.scrollTop ?? 0
+
+    try {
+      setMessagesLoading(true)
+      const data = await api.get<Page<ChatMessage>>(`/v1/chats/${chatId}/messages`, { page })
+      setMessages((prev) => {
+        const initMsgIdsSet = new Set<string>(prev.messages.map((m) => m.id))
+        const newMsg = [...data.content].filter((msg) => msg.id && !initMsgIdsSet.has(msg.id))
+        return {
+          page: data.page.number,
+          messages: [...prev.messages, ...newMsg],
+          totalElements: data.page.totalElements,
+        }
+      })
     } catch (error) {
       console.error('Ошибка загрузки сообщений:', error)
+    } finally {
+      if (scrollToBottomAfter) scrollToBottom()
+      setMessagesLoading(false)
+    }
+  }
+
+  const loadMoreMessages = async () => {
+    if (loadingMore) return
+    if (messages.messages.length >= messages.totalElements) return
+
+    setLoadingMore(true)
+    try {
+      await loadMessages(messages.page + 1)
+    } finally {
+      setLoadingMore(false)
+    }
+  }
+
+  const handleScroll = (e: UIEvent<HTMLDivElement>) => {
+    const target = e.currentTarget
+    if (target.scrollTop <= 16 && !loadingMore && messages.messages.length < messages.totalElements) {
+      loadMoreMessages()
     }
   }
 
@@ -70,7 +146,7 @@ function ChatPage() {
         content: newMessage.trim(),
       })
       setNewMessage('')
-      loadMessages()
+      await loadMessages(0, { scrollToBottom: true })
     } catch (error) {
       console.error('Ошибка отправки сообщения:', error)
       alert('Не удалось отправить сообщение')
@@ -79,7 +155,7 @@ function ChatPage() {
     }
   }
 
-  if (loading) {
+  if (!chat) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-lg text-muted-foreground">Загрузка...</div>
@@ -98,33 +174,41 @@ function ChatPage() {
 
       <Card className="p-4 bg-muted">
         <div className="flex items-center justify-between">
-          <div>
-            <h3 className="font-semibold">{chat.rentalTitle}</h3>
-            {/* <p className="text-sm text-muted-foreground">
-                {new Date(rentalRequest.startDate).toLocaleDateString('ru-RU')} -{' '}
-                {new Date(rentalRequest.endDate).toLocaleDateString('ru-RU')}
-              </p> */}
-          </div>
+          {rental && (
+            <div>
+              <h3 className="font-semibold">{chat.rentalTitle}</h3>
+              <p className="text-sm text-muted-foreground">
+                {new Date(rental.startDate).toLocaleDateString('ru-RU')} -{' '}
+                {new Date(rental.endDate).toLocaleDateString('ru-RU')}
+              </p>
+            </div>
+          )}
           <Button variant="outline" size="sm" onClick={() => router.push(urls.common.detailRentalPage(chat.rentalId))}>
             Детали заявки
           </Button>
         </div>
       </Card>
 
-      <Card className="flex flex-col h-[600px]">
+      <Card className="flex flex-col h-[600px] py-0">
         {/* Chat Header */}
-        <div className="p-4 border-b flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-            <User className="w-5 h-5 text-muted-foreground" />
+        <div className="p-4 border-b flex flex-row items-center justify-between">
+          <div className=" flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+              <User className="w-5 h-5 text-muted-foreground" />
+            </div>
+            <div>
+              <h2 className="font-semibold">{chat.counterpartName}</h2>
+              <p className="text-xs text-muted-foreground">{chat.counterpartName}</p>
+            </div>
           </div>
-          <div>
-            <h2 className="font-semibold">{chat.counterpartName}</h2>
-            <p className="text-xs text-muted-foreground">{chat.counterpartName}</p>
-          </div>
+          <div>{rental && <Badge className={statusColors[rental.status]}>{statusLabels[rental.status]}</Badge>}</div>
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4" onScroll={handleScroll}>
+          {loadingMore && (
+            <div className="text-xs text-muted-foreground text-center">Загружаем более старые сообщения...</div>
+          )}
           {messages?.messages.length === 0 ? (
             <div className="flex items-center justify-center h-full text-muted-foreground">
               Нет сообщений. Начните общение!

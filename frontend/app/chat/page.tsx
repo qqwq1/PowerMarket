@@ -66,12 +66,12 @@ function ChatListPage() {
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-lg truncate">{chat.counterpartName}</h3>
                   {chat.lastMessagePreview && (
-                    <p className="text-sm text-muted-foreground truncate">{chat.lastMessagePreview.content}</p>
+                    <p className="text-sm text-muted-foreground truncate">{`Последнее сообщение: ${chat.lastMessagePreview}`}</p>
                   )}
                 </div>
                 {chat.lastMessagePreview && (
                   <div className="text-xs text-muted-foreground">
-                    {new Date(chat.lastMessagePreview.sentAt).toLocaleDateString('ru-RU')}
+                    {`Отправлено: ${new Date(chat.lastMessageTime).toLocaleDateString('ru-RU')}`}
                   </div>
                 )}
               </div>
