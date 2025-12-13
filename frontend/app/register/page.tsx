@@ -27,7 +27,10 @@ export default function RegisterPage() {
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [agree, setAgree] = useState(false)
+  const [agree, setAgree] = useState({
+    personalDataConsent: false,
+    privacyPolicyAccepted: false,
+  })
   const { register } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -44,7 +47,7 @@ export default function RegisterPage() {
       return
     }
 
-    if (!agree) {
+    if (!agree.personalDataConsent || !agree.privacyPolicyAccepted) {
       setError('Необходимо согласиться с правилами платформы')
       return
     }
@@ -185,24 +188,55 @@ export default function RegisterPage() {
                 </div>
               </RadioGroup>
             </div>
-            <div className="flex items-center justify-center gap-2">
-              <Checkbox
-                id="agree"
-                checked={agree}
-                onCheckedChange={(v) => {
-                  setAgree(Boolean(v))
-                  if (error) setError('')
-                }}
-              />
-              <Label htmlFor="agree" className="text-muted-foreground cursor-pointer">
-                {'Я согласен с'}
-                <Link href="/terms" className="text-primary hover:underline">
-                  {'правилами платформы'}
-                </Link>
-              </Label>
+            <div className="flex flex-col gap-3 space-y-2">
+              <div className="flex items-center justify-center gap-2">
+                <Checkbox
+                  id="personalDataConsent"
+                  checked={agree.personalDataConsent}
+                  onCheckedChange={(v) => {
+                    setAgree((prev) => ({ ...prev, personalDataConsent: Boolean(v) }))
+                  }}
+                />
+                <Label htmlFor="personalDataConsent" className="text-muted-foreground cursor-pointer">
+                  {'Даю'}
+                  <Link
+                    href="/Политика_обработки_персональных_данных.pdf"
+                    className="text-primary hover:underline"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {'согласие'}
+                  </Link>
+                  {'на обработку моих персональных данных'}
+                </Label>
+              </div>
+              <div className="flex items-center justify-center gap-2">
+                <Checkbox
+                  id="privacyPolicyAccepted"
+                  checked={agree.privacyPolicyAccepted}
+                  onCheckedChange={(v) => {
+                    setAgree((prev) => ({ ...prev, privacyPolicyAccepted: Boolean(v) }))
+                  }}
+                />
+                <Label htmlFor="privacyPolicyAccepted" className="text-muted-foreground cursor-pointer">
+                  {'Ознакомлен(а) и соглашаюсь с'}
+                  <Link
+                    href="/Политика_обработки_персональных_данных.pdf"
+                    className="text-primary hover:underline"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {'Политикой обработки персональных данных'}
+                  </Link>
+                </Label>
+              </div>
             </div>
             {error && <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-md">{error}</div>}
-            <Button type="submit" className="w-full" disabled={loading || !agree}>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={loading || !agree.personalDataConsent || !agree.privacyPolicyAccepted}
+            >
               {loading ? 'Создание аккаунта...' : 'Создать аккаунт'}
             </Button>
           </form>

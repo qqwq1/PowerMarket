@@ -93,10 +93,6 @@ function ChatPage() {
   }, [chatId])
 
   const loadMessages = async (page = 0, { scrollToBottom: scrollToBottomAfter = false } = {}) => {
-    const container = messagesContainerRef.current
-    const prevScrollHeight = container?.scrollHeight ?? 0
-    const prevScrollTop = container?.scrollTop ?? 0
-
     try {
       setMessagesLoading(true)
       const data = await api.get<Page<ChatMessage>>(`/v1/chats/${chatId}/messages`, { page })
