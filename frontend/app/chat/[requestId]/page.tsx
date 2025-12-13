@@ -12,8 +12,10 @@ import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { ArrowLeft, Send, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import urls from '@/components/layout/urls'
+import { MainLayout } from '@/components/layout/dashboard-layout'
 
-export default function ChatPage() {
+function ChatPage() {
   const router = useRouter()
   const params = useParams()
   const { user } = useAuth()
@@ -92,15 +94,8 @@ export default function ChatPage() {
 
   const getOtherParticipant = () => {
     if (!chat) return null
-    const userIdStr = String(user?.id)
-    const chatSupplierIdStr = String(chat.supplierId)
-    const chatTenantIdStr = String(chat.tenantId)
 
-    if (
-      chatSupplierIdStr === userIdStr ||
-      chatSupplierIdStr.includes(userIdStr) ||
-      userIdStr.includes(chatSupplierIdStr)
-    ) {
+    if (chat.supplierId === user?.id || chat.supplierId.includes(user?.id) || user?.id.includes(chat.supplierId)) {
       return chat.tenantName
     }
     return chat.supplierName
@@ -135,7 +130,7 @@ export default function ChatPage() {
                 {new Date(rentalRequest.endDate).toLocaleDateString('ru-RU')}
               </p>
             </div>
-            <Button variant="outline" size="sm" onClick={() => router.push(`/dashboard/rentals/${requestId}`)}>
+            <Button variant="outline" size="sm" onClick={() => router.push(urls.common.detailRentalPage(requestId))}>
               Детали заявки
             </Button>
           </div>
@@ -213,3 +208,9 @@ export default function ChatPage() {
     </div>
   )
 }
+
+export default () => (
+  <MainLayout>
+    <ChatPage />
+  </MainLayout>
+)

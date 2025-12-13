@@ -9,9 +9,11 @@ import { Card } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Plus, Edit, Trash2, MapPin, Package } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { CATEGORY_LABELS, SERVICE_CATEGORY, ALL_CATEGORY_VALUE } from '@/lib/constants'
+import { CATEGORY_LABELS, ALL_CATEGORY_VALUE, CATEGORIES } from '@/lib/constants'
+import urls from '@/components/layout/urls'
+import { MainLayout } from '@/components/layout/dashboard-layout'
 
-export default function ServicesPage() {
+function ServicesPage() {
   const router = useRouter()
   const [services, setServices] = useState<Service[]>([])
   const [loading, setLoading] = useState(true)
@@ -45,7 +47,7 @@ export default function ServicesPage() {
     }
   }
 
-  const categoryOptions = useMemo(() => SERVICE_CATEGORY.map((value) => ({ value, label: CATEGORY_LABELS[value] })), [])
+  const categoryOptions = useMemo(() => CATEGORIES.map((value) => ({ value, label: CATEGORY_LABELS[value] })), [])
 
   const filteredServices = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -73,7 +75,7 @@ export default function ServicesPage() {
           <h1 className="text-3xl font-bold text-foreground">Мои услуги</h1>
           <p className="text-muted-foreground mt-1">Управляйте своими производственными мощностями</p>
         </div>
-        <Button onClick={() => router.push('/dashboard/services/create')}>
+        <Button onClick={() => router.push(urls.supplier.servicesCreate)}>
           <Plus className="w-4 h-4 mr-2" />
           Добавить услугу
         </Button>
@@ -106,7 +108,7 @@ export default function ServicesPage() {
           <Package className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
           <h3 className="text-xl font-semibold mb-2">Нет услуг</h3>
           <p className="text-muted-foreground mb-6">Начните с добавления вашей первой производственной мощности</p>
-          <Button onClick={() => router.push('/dashboard/services/create')}>
+          <Button onClick={() => router.push(urls.supplier.servicesCreate)}>
             <Plus className="w-4 h-4 mr-2" />
             Добавить услугу
           </Button>
@@ -169,7 +171,7 @@ export default function ServicesPage() {
                   <Button
                     variant="outline"
                     className="flex-1 bg-transparent"
-                    onClick={() => router.push(`/dashboard/services/${service.id}/edit`)}
+                    onClick={() => router.push(urls.supplier.servicesEdit(service.id))}
                   >
                     <Edit className="w-4 h-4 mr-2" />
                     Изменить
@@ -190,3 +192,9 @@ export default function ServicesPage() {
     </div>
   )
 }
+
+export default () => (
+  <MainLayout>
+    <ServicesPage />
+  </MainLayout>
+)

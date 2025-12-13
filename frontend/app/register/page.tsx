@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Factory } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
+import { User } from '@/types'
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -22,7 +23,7 @@ export default function RegisterPage() {
     inn: '',
     phone: '',
     address: '',
-    role: 'TENANT' as 'SUPPLIER' | 'TENANT',
+    role: 'TENANT' as User['role'],
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)

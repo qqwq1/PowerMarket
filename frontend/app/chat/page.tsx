@@ -7,8 +7,10 @@ import type { Chat } from '@/types'
 import { Card } from '@/components/ui/card'
 import { MessageSquare, User } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import urls from '@/components/layout/urls'
+import { MainLayout } from '@/components/layout/dashboard-layout'
 
-export default function ChatListPage() {
+function ChatListPage() {
   const { user } = useAuth()
   const router = useRouter()
   const [chats, setChats] = useState<Chat[]>([])
@@ -74,7 +76,7 @@ export default function ChatListPage() {
               <Card
                 key={chat.id}
                 className="p-6 cursor-pointer hover:shadow-lg transition-shadow"
-                onClick={() => router.push(`/dashboard/chat/${chat.rentalId}`)}
+                onClick={() => router.push(urls.common.chatPage(chat.rentalId))}
               >
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
@@ -98,3 +100,9 @@ export default function ChatListPage() {
     </div>
   )
 }
+
+export default () => (
+  <MainLayout>
+    <ChatListPage />
+  </MainLayout>
+)

@@ -53,16 +53,23 @@ export interface Period {
 
 export type RentalStatus = 'PENDING' | 'IN_CONTRACT' | 'CONFIRMED' | 'IN_RENT' | 'COMPLETED' | 'REJECTED' | 'CANCELLED'
 
+export type Stats = {
+  totalRentals: number
+  activeRentals: number
+  completedRentals: number
+  totalRevenue: number
+  averageRating: number
+}
 export interface RentalRequest {
   id: number
-  rentalId: number
-  serviceId?: number
-  serviceTitle?: string
+  rentalId: Rental['id']
+  serviceId: Service['id']
+  serviceTitle?: Service['title']
 
-  tenantId: string
-  tenantName: string
+  tenantId: User['id']
+  tenantName: User['name']
   tenantInn: string
-  tenantEmail: string
+  tenantEmail: User['email']
   tenantPhone: string
 
   startDate: string
@@ -78,19 +85,19 @@ export interface RentalRequest {
 
 export interface Rental {
   id: string
-  serviceId: string
-  rentalRequestId: string
-  serviceTitle: string
-  supplierId: string
-  supplierName: string
-  tenantId: string
-  tenantName: string
+  serviceId: Service['id']
+  rentalRequestId: RentalRequest['id']
+  serviceTitle: Service['title']
+  supplierId: User['id']
+  supplierName: User['name']
+  tenantId: User['id']
+  tenantName: User['name']
   requestedCapacity: number
   serviceMaxCapacity: number
   startDate: string
   endDate: string
   totalPrice: number
-  chatId: string
+  chatId: Chat['id']
   supplierConfirmed: boolean
   tenantConfirmed: boolean
   supplierConfirmedAt: string

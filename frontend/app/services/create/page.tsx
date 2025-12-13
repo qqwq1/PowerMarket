@@ -12,37 +12,16 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { ArrowLeft, Plus, X } from 'lucide-react'
 import { format } from 'date-fns'
-
-const categories = [
-  'MANUFACTURING', // Производство
-  'EQUIPMENT', // Оборудование
-  'WAREHOUSE', // Складские помещения
-  'TRANSPORT', // Транспорт
-  'LABORATORY', // Лабораторные услуги
-  'PROCESSING', // Обработка
-  'ASSEMBLY', // Сборка
-  'TESTING', // Тестирование
-  'OTHER', // Другое
-]
-
-const categoryLabels: Record<string, string> = {
-  MANUFACTURING: 'Производство',
-  EQUIPMENT: 'Оборудование',
-  WAREHOUSE: 'Складские помещения',
-  TRANSPORT: 'Транспорт',
-  LABORATORY: 'Лабораторные услуги',
-  PROCESSING: 'Обработка',
-  ASSEMBLY: 'Сборка',
-  TESTING: 'Тестирование',
-  OTHER: 'Другое',
-}
+import urls from '@/components/layout/urls'
+import { MainLayout } from '@/components/layout/dashboard-layout'
+import { CATEGORIES, CATEGORY_LABELS } from '@/lib/constants'
 
 interface AvailabilityPeriod {
   startDate: Date
   endDate: Date
 }
 
-export default function CreateServicePage() {
+function CreateServicePage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
@@ -95,7 +74,7 @@ export default function CreateServicePage() {
         technicalSpecs: formData.technicalSpecs || undefined,
         availabilities: validAvailabilities,
       })
-      router.push('/dashboard/services')
+      router.push(urls.supplier.services)
     } catch (error) {
       console.error('Ошибка создания услуги:', error)
       alert('Не удалось создать услугу. Проверьте все поля.')
@@ -150,9 +129,9 @@ export default function CreateServicePage() {
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                {categories.map((cat) => (
+                {CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>
-                    {categoryLabels[cat]}
+                    {CATEGORY_LABELS[cat]}
                   </option>
                 ))}
               </select>
@@ -279,3 +258,9 @@ export default function CreateServicePage() {
     </div>
   )
 }
+
+export default () => (
+  <MainLayout>
+    <CreateServicePage />
+  </MainLayout>
+)

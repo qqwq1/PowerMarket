@@ -11,27 +11,11 @@ import { Badge } from '@/components/ui/badge'
 import { ArrowLeft, CheckCircle, XCircle, MessageSquare } from 'lucide-react'
 import { Rental } from '@/types'
 import { ru } from 'date-fns/locale'
-const statusLabels: Record<string, string> = {
-  PENDING: 'Ожидает ответа',
-  IN_CONTRACT: 'В договоре',
-  CONFIRMED: 'Подтверждено',
-  IN_RENT: 'В аренде',
-  COMPLETED: 'Завершено',
-  REJECTED: 'Отклонено',
-  CANCELLED: 'Отменено',
-}
+import urls from '@/components/layout/urls'
+import { MainLayout } from '@/components/layout/dashboard-layout'
+import { statusColors, statusLabels } from '@/lib/constants'
 
-const statusColors: Record<string, string> = {
-  PENDING: 'bg-yellow-100 text-yellow-800',
-  IN_CONTRACT: 'bg-blue-100 text-blue-800',
-  CONFIRMED: 'bg-green-100 text-green-800',
-  IN_RENT: 'bg-purple-100 text-purple-800',
-  COMPLETED: 'bg-gray-100 text-gray-800',
-  REJECTED: 'bg-red-100 text-red-800',
-  CANCELLED: 'bg-gray-100 text-gray-800',
-}
-
-export default function RentalDetailPage() {
+function RentalDetailPage() {
   const router = useRouter()
   const params = useParams()
   const { user } = useAuth()
@@ -272,7 +256,7 @@ export default function RentalDetailPage() {
             <Button
               variant="outline"
               className="w-full bg-transparent"
-              onClick={() => router.push(`/dashboard/chat/${rental.id}`)}
+              onClick={() => router.push(urls.common.chatPage(rental.id))}
             >
               <MessageSquare className="w-4 h-4 mr-2" />
               Открыть чат
@@ -293,3 +277,9 @@ export default function RentalDetailPage() {
     </div>
   )
 }
+
+export default () => (
+  <MainLayout>
+    <RentalDetailPage />
+  </MainLayout>
+)

@@ -7,11 +7,13 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { Search, MapPin, Star, Package } from 'lucide-react'
+import { Search, MapPin, Package } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { CATEGORY_LABELS, SERVICE_CATEGORY } from '@/lib/constants'
+import { CATEGORIES, CATEGORY_LABELS } from '@/lib/constants'
+import urls from '@/components/layout/urls'
+import { MainLayout } from '@/components/layout/dashboard-layout'
 
-export default function BrowsePage() {
+function BrowsePage() {
   const router = useRouter()
   const [services, setServices] = useState<Service[]>([])
   const [filteredServices, setFilteredServices] = useState<Service[]>([])
@@ -90,7 +92,7 @@ export default function BrowsePage() {
             className="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:w-48"
           >
             <option value="ALL">Все категории</option>
-            {SERVICE_CATEGORY.map((key) => (
+            {CATEGORIES.map((key) => (
               <option key={key} value={key}>
                 {CATEGORY_LABELS[key]}
               </option>
@@ -111,7 +113,7 @@ export default function BrowsePage() {
             <Card
               key={service.id}
               className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
-              onClick={() => router.push(`/dashboard/browse/${service.id}`)}
+              onClick={() => router.push(urls.tenant.catalogServicePage(service.id))}
             >
               <div className="aspect-video bg-muted relative">
                 {service ? (
@@ -149,16 +151,7 @@ export default function BrowsePage() {
                     <div className="font-semibold">{service.maxCapacity}</div>
                   </div>
                 </div>
-
-                {/* {service.averageRating && service.averageRating > 0 && (
-                  <div className="flex items-center gap-1 text-sm">
-                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                    <span className="font-semibold">{service.averageRating.toFixed(1)}</span>
-                    <span className="text-muted-foreground">({service.totalReviews} отзывов)</span>
-                  </div>
-                )} */}
-
-                <Button className="w-full" onClick={() => router.push(`/dashboard/browse/${service.id}`)}>
+                <Button className="w-full" onClick={() => router.push(urls.tenant.catalogServicePage(service.id))}>
                   Подробнее
                 </Button>
               </div>
@@ -169,3 +162,9 @@ export default function BrowsePage() {
     </div>
   )
 }
+
+export default () => (
+  <MainLayout>
+    <BrowsePage />
+  </MainLayout>
+)

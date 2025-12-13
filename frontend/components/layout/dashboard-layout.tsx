@@ -4,32 +4,29 @@ import type React from 'react'
 
 import { useAuth } from '@/lib/auth-context'
 import { Button } from '@/components/ui/button'
-import { Factory, LayoutDashboard, Package, MessageSquare, LogOut, Menu, FileText, User, Home } from 'lucide-react'
+import { Factory, LayoutDashboard, Package, MessageSquare, LogOut, Menu, User, Home } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
+import urls from './urls'
 
-export function DashboardLayout({ children }: { children: React.ReactNode }) {
+export function MainLayout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth()
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const navigation = [
-    { name: 'Главная', href: '/dashboard', icon: Home },
+    { name: 'Главная', href: urls.common.main, icon: Home },
     ...(user?.role === 'SUPPLIER'
       ? [
-          { name: 'Мои услуги', href: '/dashboard/services', icon: Package },
-          { name: 'Заявки', href: '/dashboard/requests', icon: FileText },
-          { name: 'Дашборды', href: '/dashboard/production-analysis', icon: LayoutDashboard },
+          { name: 'Мои услуги', href: urls.supplier.services, icon: Package },
+          { name: 'Дашборды', href: urls.supplier.dashboard, icon: LayoutDashboard },
         ]
-      : [
-          { name: 'Каталог', href: '/dashboard/browse', icon: Package },
-          { name: 'Мои заявки', href: '/dashboard/requests', icon: FileText },
-        ]),
-    { name: 'Аренды', href: '/dashboard/rentals', icon: Factory },
-    { name: 'Чаты', href: '/dashboard/chat', icon: MessageSquare },
-    { name: 'Профиль', href: '/dashboard/profile', icon: User },
+      : [{ name: 'Каталог', href: urls.tenant.catalog, icon: Package }]),
+    { name: 'Аренды', href: urls.common.rentals, icon: Factory },
+    { name: 'Чаты', href: urls.common.chats, icon: MessageSquare },
+    { name: 'Профиль', href: urls.common.profile, icon: User },
   ]
 
   return (

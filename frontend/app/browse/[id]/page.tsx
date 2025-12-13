@@ -4,12 +4,14 @@ import { useCallback, useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { api } from '@/lib/api'
 import { useAuth } from '@/lib/auth-context'
-import type { Service, Review, Page } from '@/types'
+import type { Service } from '@/types'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { ArrowLeft, MapPin, Star, Package, User } from 'lucide-react'
+import { ArrowLeft, MapPin, Package, User } from 'lucide-react'
 import { RentalRequestDialog } from '@/components/rental-request-dialog'
+import urls from '@/components/layout/urls'
+import { MainLayout } from '@/components/layout/dashboard-layout'
 
 const categoryLabels: Record<string, string> = {
   MANUFACTURING: 'Производство',
@@ -21,30 +23,26 @@ const categoryLabels: Record<string, string> = {
   OTHER: 'Другое',
 }
 
-export default function ServiceDetailPage() {
+function ServiceDetailPage() {
   const router = useRouter()
   const params = useParams()
   const { user } = useAuth()
   const serviceId = params.id as string
   const [service, setService] = useState<Service | null>(null)
-  const [reviews, setReviews] = useState<Review[]>([])
   const [loading, setLoading] = useState(true)
   const [showRequestDialog, setShowRequestDialog] = useState(false)
 
   useEffect(() => {
     loadService()
-    loadReviews()
   }, [serviceId])
-
-  useEffect(() => {
-    if (service && !service.active && user?.role === 'TENANT') {
-      router.push('/dashboard')
-    }
-  }, [service, user, router])
 
   const loadService = useCallback(async () => {
     try {
       const data = await api.get<Service>(`/services/${serviceId}`)
+      if (!data.active) {
+        router.push(urls.common.main)
+        return
+      }
       setService(data)
     } catch (error) {
       console.error('Ошибка загрузки услуги:', error)
@@ -54,16 +52,6 @@ export default function ServiceDetailPage() {
       setLoading(false)
     }
   }, [])
-
-  const loadReviews = async () => {
-    try {
-      const data = await api.get<Page<Review>>(`/reviews/service/${serviceId}`)
-      setReviews(data.content)
-    } catch (error) {
-      console.error('Ошибка загрузки отзывов:', error)
-      setReviews([])
-    }
-  }
 
   if (loading || !service) {
     return (
@@ -107,25 +95,6 @@ export default function ServiceDetailPage() {
                 </div>
               </div>
 
-              {/* {service.averageRating && service.averageRating > 0 && (
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center gap-1">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                            <Star
-                                key={star}
-                                className={`w-5 h-5 ${
-                                    star <= Math.round(service.averageRating!)
-                                        ? "fill-yellow-400 text-yellow-400"
-                                        : "text-gray-300"
-                                }`}
-                            />
-                        ))}
-                      </div>
-                      <span className="font-semibold">{service.averageRating.toFixed(1)}</span>
-                      <span className="text-muted-foreground">({service.totalReviews} отзывов)</span>
-                    </div>
-                )} */}
-
               <div className="prose prose-sm max-w-none">
                 <h3 className="text-lg font-semibold mb-2">Описание</h3>
                 <p className="text-muted-foreground">{service.description}</p>
@@ -135,46 +104,9 @@ export default function ServiceDetailPage() {
                 <User className="w-4 h-4 text-muted-foreground" />
                 <span className="text-muted-foreground">Поставщик:</span>
                 <span className="font-medium">{service.supplierName}</span>
-                {/* {service.supplier?.averageRating && service.supplier.averageRating > 0 && (
-                  <div className="flex items-center gap-1 ml-2">
-                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                    <span className="font-semibold">{service.supplier.averageRating.toFixed(1)}</span>
-                  </div>
-                )} */}
               </div>
             </div>
           </Card>
-
-          {reviews.length > 0 && (
-            <Card className="p-6">
-              <h2 className="text-2xl font-bold mb-4">Отзывы</h2>
-              <div className="space-y-4">
-                {reviews.map((review) => (
-                  <div key={review.id} className="border-b last:border-0 pb-4 last:pb-0">
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <div className="font-semibold">{review.reviewer?.companyName || review.reviewer?.name}</div>
-                        <div className="flex items-center gap-1 mt-1">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <Star
-                              key={star}
-                              className={`w-4 h-4 ${
-                                star <= review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
-                              }`}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        {new Date(review.createdAt).toLocaleDateString('ru-RU')}
-                      </div>
-                    </div>
-                    {review.comment && <p className="text-sm text-muted-foreground">{review.comment}</p>}
-                  </div>
-                ))}
-              </div>
-            </Card>
-          )}
         </div>
 
         <div className="space-y-4">
@@ -208,10 +140,16 @@ export default function ServiceDetailPage() {
           onClose={() => setShowRequestDialog(false)}
           onSuccess={(rentalRequestId) => {
             setShowRequestDialog(false)
-            router.push(`/dashboard/chat/${rentalRequestId}`)
+            router.push(urls.common.chatPage(rentalRequestId))
           }}
         />
       )}
     </div>
   )
 }
+
+export default () => (
+  <MainLayout>
+    <ServiceDetailPage />
+  </MainLayout>
+)

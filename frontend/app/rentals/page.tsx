@@ -9,28 +9,11 @@ import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Calendar, User, Package, CheckCircle, XCircle, Coins } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import urls from '@/components/layout/urls'
+import { MainLayout } from '@/components/layout/dashboard-layout'
+import { statusColors, statusLabels } from '@/lib/constants'
 
-const statusLabels: Record<string, string> = {
-  PENDING: 'Ожидает ответа',
-  IN_CONTRACT: 'В договоре',
-  CONFIRMED: 'Подтверждено',
-  IN_RENT: 'В аренде',
-  COMPLETED: 'Завершено',
-  REJECTED: 'Отклонено',
-  CANCELLED: 'Отменено',
-}
-
-const statusColors: Record<string, string> = {
-  PENDING: 'bg-yellow-100 text-yellow-800',
-  IN_CONTRACT: 'bg-blue-100 text-blue-800',
-  CONFIRMED: 'bg-green-100 text-green-800',
-  IN_RENT: 'bg-purple-100 text-purple-800',
-  COMPLETED: 'bg-gray-100 text-gray-800',
-  REJECTED: 'bg-red-100 text-red-800',
-  CANCELLED: 'bg-gray-100 text-gray-800',
-}
-
-export default function RequestsPage() {
+function RequestsPage() {
   const { user } = useAuth()
   const router = useRouter()
   const [requests, setRequests] = useState<RentalRequest[]>([])
@@ -165,13 +148,15 @@ export default function RequestsPage() {
                     </>
                   )}
 
-                  {request.status === 'IN_CONTRACT' && (
-                    <Button onClick={() => router.push(`/dashboard/rentals/${request.rentalId}`)} size="sm">
-                      Подтвердить аренду
-                    </Button>
-                  )}
+                  <Button
+                    variant={request.status === 'IN_CONTRACT' ? 'default' : 'outline'}
+                    onClick={() => router.push(urls.common.detailRentalPage(request.rentalId))}
+                    size="sm"
+                  >
+                    {request.status === 'IN_CONTRACT' ? 'Подтвердить аренду' : 'Подробнее'}
+                  </Button>
 
-                  <Button variant="outline" onClick={() => router.push(`/dashboard/chat/${request.id}`)} size="sm">
+                  <Button variant="outline" onClick={() => router.push(urls.common.chatPage(request.id))} size="sm">
                     Открыть чат
                   </Button>
                 </div>
@@ -183,3 +168,9 @@ export default function RequestsPage() {
     </div>
   )
 }
+
+export default () => (
+  <MainLayout>
+    <RequestsPage />
+  </MainLayout>
+)

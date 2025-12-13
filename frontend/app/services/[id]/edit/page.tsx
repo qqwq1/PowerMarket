@@ -12,20 +12,11 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { ArrowLeft } from 'lucide-react'
+import urls from '@/components/layout/urls'
+import { MainLayout } from '@/components/layout/dashboard-layout'
+import { CATEGORIES, CATEGORY_LABELS } from '@/lib/constants'
 
-const categories = ['MANUFACTURING', 'LOGISTICS', 'STORAGE', 'PROCESSING', 'ASSEMBLY', 'PACKAGING', 'OTHER']
-
-const categoryLabels: Record<string, string> = {
-  MANUFACTURING: 'Производство',
-  LOGISTICS: 'Логистика',
-  STORAGE: 'Складирование',
-  PROCESSING: 'Обработка',
-  ASSEMBLY: 'Сборка',
-  PACKAGING: 'Упаковка',
-  OTHER: 'Другое',
-}
-
-export default function EditServicePage() {
+function EditServicePage() {
   const router = useRouter()
   const params = useParams()
   const serviceId = params.id as string
@@ -79,7 +70,7 @@ export default function EditServicePage() {
         location: formData.location,
         technicalSpecs: formData.technicalSpecs || undefined,
       })
-      router.push('/dashboard/services')
+      router.push(urls.supplier.services)
     } catch (error) {
       console.error('Ошибка обновления услуги:', error)
       alert('Не удалось обновить услугу')
@@ -140,9 +131,9 @@ export default function EditServicePage() {
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                {categories.map((cat) => (
+                {CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>
-                    {categoryLabels[cat]}
+                    {CATEGORY_LABELS[cat]}
                   </option>
                 ))}
               </select>
@@ -209,3 +200,9 @@ export default function EditServicePage() {
     </div>
   )
 }
+
+export default () => (
+  <MainLayout>
+    <EditServicePage />
+  </MainLayout>
+)

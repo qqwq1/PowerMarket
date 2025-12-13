@@ -1,27 +1,22 @@
-import type React from "react"
-import type { Metadata } from "next"
-import { Inter, JetBrains_Mono } from "next/font/google"
-import "./globals.css"
-import { AuthProvider } from "@/lib/auth-context"
+import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
+import './globals.css'
+import { AuthProvider } from '@/lib/auth-context'
+import { ReactNode } from 'react'
 
-const inter = Inter({ subsets: ["latin", "cyrillic"] })
-const jetbrainsMono = JetBrains_Mono({ subsets: ["latin", "cyrillic"] })
+const inter = Inter({ subsets: ['latin', 'cyrillic'] })
 
 export const metadata: Metadata = {
-  title: "PowerMarket - Платформа аренды производственных мощностей",
-  description: "Профессиональная платформа для аренды производственных мощностей",
+  title: 'PowerMarket - Платформа аренды производственных мощностей',
+  description: 'Профессиональная платформа для аренды производственных мощностей',
 }
 
-export default function RootLayout({
-                                     children,
-                                   }: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-      <html lang="ru">
+    <html lang="ru">
       <body className={inter.className}>
-      <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>{children}</AuthProvider>
       </body>
-      </html>
+    </html>
   )
 }
