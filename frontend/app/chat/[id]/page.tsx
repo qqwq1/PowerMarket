@@ -1,12 +1,10 @@
 'use client'
 
-import type React from 'react'
-
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, FormEvent } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { api } from '@/lib/api'
-import type { Chat, ChatMessage, RentalRequest } from '@/types'
+import type { ChatDetails, ChatMessage, Page } from '@/types'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -19,10 +17,9 @@ function ChatPage() {
   const router = useRouter()
   const params = useParams()
   const { user } = useAuth()
-  const requestId = params.requestId as string
-  const [chat, setChat] = useState<Chat | null>(null)
-  const [messages, setMessages] = useState<ChatMessage[]>([])
-  const [rentalRequest, setRentalRequest] = useState<RentalRequest | null>(null)
+  const chatId = params.id as string
+  const [chat, setChat] = useState<ChatDetails>(null)
+  const [messages, setMessages] = useState<{ page: number; messages: ChatMessage[] }>({ page: 0, messages: [] })
   const [loading, setLoading] = useState(true)
   const [newMessage, setNewMessage] = useState('')
   const [sending, setSending] = useState(false)
@@ -30,10 +27,9 @@ function ChatPage() {
 
   useEffect(() => {
     loadChat()
-    loadRentalRequest()
-    const interval = setInterval(loadMessages, 3000) // Poll every 3 seconds
+    const interval = setInterval(loadMessages, 1000000) // Poll every 3 seconds
     return () => clearInterval(interval)
-  }, [requestId])
+  }, [chatId])
 
   useEffect(() => {
     scrollToBottom()
@@ -45,7 +41,7 @@ function ChatPage() {
 
   const loadChat = async () => {
     try {
-      const data = await api.get<Chat>(`/chats/rental-request/${requestId}`)
+      const data = await api.get<ChatDetails>(`/v1/chats/${chatId}`)
       setChat(data)
       loadMessages()
     } catch (error) {
@@ -57,29 +53,20 @@ function ChatPage() {
 
   const loadMessages = async () => {
     try {
-      const data = await api.get<ChatMessage[]>(`/chats/rental-request/${requestId}/messages`)
-      setMessages(data)
+      const data = await api.get<Page<ChatMessage>>(`/v1/chats/${chatId}/messages`)
+      setMessages({ page: data.number, messages: data.content })
     } catch (error) {
       console.error('Ошибка загрузки сообщений:', error)
     }
   }
 
-  const loadRentalRequest = async () => {
-    try {
-      const data = await api.get<RentalRequest>(`/rental-requests/${requestId}`)
-      setRentalRequest(data)
-    } catch (error) {
-      console.error('Ошибка загрузки заявки:', error)
-    }
-  }
-
-  const handleSend = async (e: React.FormEvent) => {
+  const handleSend = async (e: FormEvent) => {
     e.preventDefault()
     if (!newMessage.trim() || sending) return
 
     setSending(true)
     try {
-      await api.post(`/chats/rental-request/${requestId}/messages`, {
+      await api.post(`/v1/chats/${chatId}/messages`, {
         content: newMessage.trim(),
       })
       setNewMessage('')
@@ -92,15 +79,6 @@ function ChatPage() {
     }
   }
 
-  const getOtherParticipant = () => {
-    if (!chat) return null
-
-    if (chat.supplierId === user?.id || chat.supplierId.includes(user?.id) || user?.id.includes(chat.supplierId)) {
-      return chat.tenantName
-    }
-    return chat.supplierName
-  }
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -108,8 +86,6 @@ function ChatPage() {
       </div>
     )
   }
-
-  const otherParticipant = getOtherParticipant()
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -120,26 +96,20 @@ function ChatPage() {
         </Button>
       </div>
 
-      {rentalRequest && (
-        <Card className="p-4 bg-muted">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-semibold">{rentalRequest.serviceTitle}</h3>
-              <p className="text-sm text-muted-foreground">
+      <Card className="p-4 bg-muted">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="font-semibold">{chat.rentalTitle}</h3>
+            {/* <p className="text-sm text-muted-foreground">
                 {new Date(rentalRequest.startDate).toLocaleDateString('ru-RU')} -{' '}
                 {new Date(rentalRequest.endDate).toLocaleDateString('ru-RU')}
-              </p>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => router.push(urls.common.detailRentalPage(rentalRequest.rentalId))}
-            >
-              Детали заявки
-            </Button>
+              </p> */}
           </div>
-        </Card>
-      )}
+          <Button variant="outline" size="sm" onClick={() => router.push(urls.common.detailRentalPage(chat.rentalId))}>
+            Детали заявки
+          </Button>
+        </div>
+      </Card>
 
       <Card className="flex flex-col h-[600px]">
         {/* Chat Header */}
@@ -148,47 +118,53 @@ function ChatPage() {
             <User className="w-5 h-5 text-muted-foreground" />
           </div>
           <div>
-            <h2 className="font-semibold">{otherParticipant}</h2>
-            <p className="text-xs text-muted-foreground">{otherParticipant}</p>
+            <h2 className="font-semibold">{chat.counterpartName}</h2>
+            <p className="text-xs text-muted-foreground">{chat.counterpartName}</p>
           </div>
         </div>
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {messages.length === 0 ? (
+          {messages?.messages.length === 0 ? (
             <div className="flex items-center justify-center h-full text-muted-foreground">
               Нет сообщений. Начните общение!
             </div>
           ) : (
-            messages.map((message) => {
-              const userIdStr = String(user?.id)
-              const messageSenderIdStr = String(message.senderId)
-              const isOwn =
-                messageSenderIdStr === userIdStr ||
-                messageSenderIdStr.includes(userIdStr) ||
-                userIdStr.includes(messageSenderIdStr)
+            [...messages.messages]
+              .sort((a, b) => {
+                const ta = a?.sentAt ? new Date(a.sentAt).getTime() : 0
+                const tb = b?.sentAt ? new Date(b.sentAt).getTime() : 0
+                return ta - tb
+              })
+              .map((message) => {
+                const userIdStr = String(user?.id)
+                const messageSenderIdStr = String(message.senderId)
+                const isOwn =
+                  messageSenderIdStr === userIdStr ||
+                  messageSenderIdStr.includes(userIdStr) ||
+                  userIdStr.includes(messageSenderIdStr)
 
-              return (
-                <div key={message.id} className={cn('flex', isOwn ? 'justify-end' : 'justify-start')}>
-                  <div className={cn('max-w-[70%] space-y-1', isOwn ? 'items-end' : 'items-start')}>
-                    <div
-                      className={cn(
-                        'rounded-lg px-4 py-2',
-                        isOwn ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground'
-                      )}
-                    >
-                      <p className="text-sm">{message.content}</p>
-                    </div>
-                    <div className="text-xs text-muted-foreground px-2">
-                      {new Date(message.sentAt).toLocaleTimeString('ru-RU', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
+                return (
+                  <div key={message.id} className={cn('flex', isOwn ? 'justify-end' : 'justify-start')}>
+                    <div className={cn('max-w-[70%] space-y-1', isOwn ? 'items-end' : 'items-start')}>
+                      <div
+                        className={cn(
+                          'rounded-lg px-4 py-2',
+                          isOwn ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground'
+                        )}
+                      >
+                        <p className="text-sm">{message.content}</p>
+                      </div>
+                      <div className="text-xs text-muted-foreground px-2">
+                        {new Date(message.sentAt).toLocaleTimeString('ru-RU', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </div>
                     </div>
                   </div>
-                </div>
-              )
-            })
+                )
+              })
           )}
           <div ref={messagesEndRef} />
         </div>

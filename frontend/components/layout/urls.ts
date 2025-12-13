@@ -1,10 +1,10 @@
-import { Rental, RentalRequest, Service } from '@/types'
+import { Chat, Rental, Service } from '@/types'
 
 const common = {
   main: '/main',
   profile: '/profile',
   chats: '/chat',
-  chatPage: (id: RentalRequest['id']) => `/chat/${id}`,
+  chatPage: (id: Chat['id']) => `/chat/${id}`,
   rentals: '/rentals',
   detailRentalPage: (id: Rental['id']) => `/rentals/${id}`,
 }

@@ -1,5 +1,3 @@
-import { UUID } from 'node:crypto'
-
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api'
 
 export class ApiClient {
@@ -14,6 +12,27 @@ export class ApiClient {
     return {
       'Content-Type': 'application/json',
     }
+  }
+
+  private buildQuery(params?: Record<string, unknown>): string {
+    if (!params || Object.keys(params).length === 0) return ''
+
+    const usp = new URLSearchParams()
+
+    for (const [key, value] of Object.entries(params)) {
+      if (value === undefined || value === null) continue
+
+      if (Array.isArray(value)) {
+        value.forEach((v) => usp.append(key, String(v)))
+      } else if (typeof value === 'object') {
+        usp.append(key, JSON.stringify(value))
+      } else {
+        usp.append(key, String(value))
+      }
+    }
+
+    const qs = usp.toString()
+    return qs ? `?${qs}` : ''
   }
 
   async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
@@ -41,8 +60,9 @@ export class ApiClient {
     return response.json()
   }
 
-  async get<T>(endpoint: string): Promise<T> {
-    return this.request<T>(endpoint, { method: 'GET' })
+  async get<T>(endpoint: string, params?: Record<string, unknown>): Promise<T> {
+    const endpointWithQuery = `${endpoint}${this.buildQuery(params)}`
+    return this.request<T>(endpointWithQuery, { method: 'GET' })
   }
 
   async post<T>(endpoint: string, data?: unknown): Promise<T> {

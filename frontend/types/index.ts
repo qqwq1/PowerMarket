@@ -122,23 +122,45 @@ export interface Review {
 }
 
 export interface Chat {
-  createdAt: string //ISO String -  2025-11-10T21:25:13.834658Z
   id: string
-  recentMessages: ChatMessage[]
-  rentalId: string
+  rentalId: Rental['id']
+  rentalTitle: string
+  counterpartId: string
+  counterpartName: string
+  counterpartRole: string
+  lastMessagePreview: ChatMessage
+  lastMessageTime: string //2025-12-12T16:10:08.469168Z
+  unreadCount: number
+  createdAt: string
+}
+export interface ChatDetails {
+  id: string
+  rentalId: Rental['id']
+  rentalTitle: string
   supplierId: string
   supplierName: string
   tenantId: string
-  tenantName: string
+  tenantName: User['name']
+  createdAt: string
+  updatedAt: string
+  recentMessages: ChatMessage
+  lastMessage: ChatMessage[]
+  unreadMessagesCount: number
+  counterpartId: string
+  counterpartName: string
+  counterpartRole: string
 }
 
 export interface ChatMessage {
-  chatId: string
-  content: number
   id: string
+  chatId: string
   senderId: string
-  senderName: string
-  sentAt: string // ISO String - 2025-11-10T21:25:19.561836Z
+  senderName: User['name']
+  content: string
+  sentAt: string
+  readAt: string
+  edited: boolean
+  editedAt: string
 }
 
 export interface Page<T> {

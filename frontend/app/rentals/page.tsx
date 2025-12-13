@@ -35,7 +35,7 @@ function RequestsPage() {
     }
   }
 
-  const handleRespond = async (id: number, approved: boolean) => {
+  const handleRespond = async (id: string, approved: boolean) => {
     try {
       await api.post(`/v1/rental-requests/${id}/respond`, {
         approved,
