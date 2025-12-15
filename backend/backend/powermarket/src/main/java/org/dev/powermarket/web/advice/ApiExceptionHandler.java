@@ -6,8 +6,6 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import jakarta.servlet.http.HttpServletRequest;
-
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -18,14 +16,7 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotValidException ex) {
-        // Берём первую ошибку как основное сообщение, чтобы фронтенду было проще её показать,
-        // а все ошибки дополнительно возвращаем в виде map.
-        String message = "Ошибка валидации. Проверьте корректность введённых данных.";
-        if (!ex.getBindingResult().getFieldErrors().isEmpty()) {
-            message = ex.getBindingResult().getFieldErrors().get(0).getDefaultMessage();
-        }
-
-        Map<String, Object> body = base(HttpStatus.BAD_REQUEST, message);
+        Map<String, Object> body = base(HttpStatus.BAD_REQUEST, "Validation failed");
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getFieldErrors().forEach(fe -> errors.put(fe.getField(), fe.getDefaultMessage()));
         body.put("errors", errors);
@@ -45,13 +36,7 @@ public class ApiExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleOther(Exception ex, HttpServletRequest req) {
-        String uri = req.getRequestURI();
-        if (uri.startsWith("/v3/api-docs") || uri.startsWith("/swagger-ui")) {
-            throw new RuntimeException(ex);
-        }
-        ex.printStackTrace();
-
+    public ResponseEntity<Map<String, Object>> handleOther(Exception ex) {
         Map<String, Object> body = base(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
     }

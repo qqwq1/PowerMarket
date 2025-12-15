@@ -12,6 +12,7 @@ import org.dev.powermarket.security.repository.AuthorizedUserRepository;
 import org.dev.powermarket.service.dto.AuthResponse;
 import org.dev.powermarket.service.dto.LoginRequest;
 import org.dev.powermarket.service.dto.RegisterRequest;
+import org.dev.powermarket.service.EmailService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +25,7 @@ public class AuthService {
     private final AuthorizedUserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final EmailService emailService;
 
     public AuthResponse login(LoginRequest request) {
         System.out.println(request + " 0");
@@ -92,6 +94,9 @@ public class AuthService {
 
         // Сохраняем пользователя
         userRepository.save(user);
+
+        // Отправляем приветственное письмо на e-mail пользователя
+        emailService.sendWelcomeEmail(user);
 
         // Генерируем JWT токены
         String token = jwtService.generateToken(user.getEmail());

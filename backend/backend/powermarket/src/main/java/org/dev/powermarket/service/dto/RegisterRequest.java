@@ -6,29 +6,29 @@ import org.dev.powermarket.domain.enums.Role;
 
 public class RegisterRequest {
     @Email 
-    @NotBlank(message = "Email обязателен для заполнения")
+    @NotBlank(message = "Email is required")
     private String email;
 
-    @NotBlank(message = "Пароль обязателен для заполнения")
-    @Size(min = 8, max = 100, message = "Пароль должен содержать от 8 до 100 символов")
+    @NotBlank(message = "Password is required")
+    @Size(min = 8, max = 100, message = "Password must be between 8 and 100 characters")
     private String password;
 
-    @NotNull(message = "Роль пользователя обязательна")
+    @NotNull(message = "Role is required")
     private Role role;
 
-    @NotBlank(message = "ФИО обязательно для заполнения")
+    @NotBlank(message = "Full name is required")
     @Size(max = 200)
     private String fullName;
 
-    @NotBlank(message = "Название компании обязательно для заполнения")
+    @NotBlank(message = "Company name is required")
     @Size(max = 200)
     private String companyName;
 
-    @NotBlank(message = "ИНН обязателен для заполнения")
-    @Pattern(regexp = "\\d{10}|\\d{12}", message = "ИНН должен содержать 10 или 12 цифр")
+    @NotBlank(message = "INN is required")
+    @Pattern(regexp = "\\d{10}|\\d{12}", message = "INN must be 10 or 12 digits")
     private String inn;
 
-    @Pattern(regexp = "\\+?[0-9]{10,15}", message = "Некорректный формат номера телефона")
+    @Pattern(regexp = "\\+?[0-9]{10,15}", message = "Invalid phone number format")
     private String phone;
 
     private String address;

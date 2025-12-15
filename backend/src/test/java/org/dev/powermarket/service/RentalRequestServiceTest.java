@@ -53,6 +53,8 @@ class RentalRequestServiceTest {
     @Mock
     private NotificationRepository notificationRepository;
     @Mock
+    private EmailService emailService;
+    @Mock
     private RentalService rentalService;
     @Mock
     private RentalRepository rentalRepository;

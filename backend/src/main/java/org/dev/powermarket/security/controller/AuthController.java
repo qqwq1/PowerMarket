@@ -35,8 +35,7 @@ public class AuthController {
             summary = "Register new user",
             description = "Register a new user with SUPPLIER or TENANT role"
     )
-    public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request) {
-        System.out.println("Я тут");
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
         AuthResponse response = authService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
