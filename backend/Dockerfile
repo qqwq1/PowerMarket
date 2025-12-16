@@ -2,12 +2,22 @@
 FROM maven:3.9-eclipse-temurin-23 AS build
 WORKDIR /build
 
+# Обновляем сертификаты (на случай проблем с TLS/handshake при скачивании зависимостей)
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends ca-certificates \
+ && update-ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
+
+# Сначала копируем только pom.xml и прогреваем зависимости (лучше кешируется)
 COPY pom.xml .
+RUN mvn -q -DskipTests dependency:go-offline
+
+# Потом копируем исходники и дополнительные файлы
 COPY src ./src
 COPY files ./files
 
-# Временное!!!
-RUN mvn -q clean package -Dmaven.test.skip=true
+# Собираем jar
+RUN mvn -q clean package -DskipTests
 
 # --- run stage: JRE 23 ---
 FROM eclipse-temurin:23-jre
