@@ -148,12 +148,10 @@ class DashboardServiceIntegrationTest {
 
         // Заполняем обязательные поля для Service
         service.setCategory(ServiceCategory.MANUFACTURING);
-        service.setCapacity("100"); // обязательное поле
-        service.setAvailableCapacity("100");
+        service.setMaxCapacity(BigDecimal.valueOf(100)); // mandatory field (was capacity)
         service.setLocation("Test Location");
         service.setDescription("Test Description");
         service.setTechnicalSpecs("Test Specs");
-        service.setTotalCapacityUnits(2);
 
         // Устанавливаем даты
         java.time.Instant now = java.time.Instant.now();
@@ -170,7 +168,7 @@ class DashboardServiceIntegrationTest {
         request.setStartDate(LocalDate.now().plusDays(1));
         request.setEndDate(LocalDate.now().plusDays(6));
         request.setTotalPrice(totalPrice);
-        request.setCapacityNeeded(100);
+        request.setCapacityNeeded(BigDecimal.valueOf(100));
         request.setStatus(status);
 
         if (status == RentalRequestStatus.REJECTED) {
@@ -190,7 +188,7 @@ class DashboardServiceIntegrationTest {
         request.setStartDate(startDate);
         request.setEndDate(endDate);
         request.setTotalPrice(totalPrice);
-        request.setCapacityNeeded(100);
+        request.setCapacityNeeded(BigDecimal.valueOf(100));
         request.setStatus(RentalRequestStatus.COMPLETED);
 
         RentalRequest savedRequest = rentalRequestRepository.save(request);
@@ -220,7 +218,7 @@ class DashboardServiceIntegrationTest {
         request.setStartDate(startDate);
         request.setEndDate(endDate);
         request.setTotalPrice(new BigDecimal("3000.00"));
-        request.setCapacityNeeded(100);
+        request.setCapacityNeeded(BigDecimal.valueOf(100));
         request.setStatus(RentalRequestStatus.IN_RENT);
 
         RentalRequest savedRequest = rentalRequestRepository.save(request);
