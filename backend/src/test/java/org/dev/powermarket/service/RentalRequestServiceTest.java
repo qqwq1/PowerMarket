@@ -52,8 +52,8 @@ class RentalRequestServiceTest {
     private AuthorizedUserRepository userRepository;
     @Mock
     private NotificationRepository notificationRepository;
-    @Mock
-    private EmailService emailService;
+//    @Mock
+//    private EmailService emailService;
     @Mock
     private RentalService rentalService;
     @Mock

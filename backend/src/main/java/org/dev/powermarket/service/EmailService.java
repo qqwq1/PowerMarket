@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
  * настройке SMTP сервера приложение продолжало работать (ошибки логируются,
  * но не пробрасываются дальше).
  */
-@Service
+//@Service
 @Slf4j
 public class EmailService {
 

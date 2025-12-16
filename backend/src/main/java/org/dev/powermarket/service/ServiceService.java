@@ -105,7 +105,7 @@ public class ServiceService {
             if (!ids.isEmpty()) {
                 var list = serviceRepository.findByIdInAndIsActiveTrueAndDeletedFalse(ids);
                 // Preserve ML order
-                var order = new java.util.HashMap<java.util.UUID, Integer>();
+                var order = new java.util.HashMap<UUID, Integer>();
                 for (int i = 0; i < ids.size(); i++) order.put(ids.get(i), i);
                 var sorted = list.stream()
                         .sorted(Comparator.comparingInt(s -> order.getOrDefault(s.getId(), Integer.MAX_VALUE)))

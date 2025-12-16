@@ -4,6 +4,7 @@ package org.dev.powermarket.security.service;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+import lombok.extern.slf4j.Slf4j;
 import org.dev.powermarket.domain.enums.Role;
 import org.dev.powermarket.security.dto.RefreshTokenRequest;
 import org.dev.powermarket.security.entity.User;
@@ -12,7 +13,6 @@ import org.dev.powermarket.security.repository.AuthorizedUserRepository;
 import org.dev.powermarket.service.dto.AuthResponse;
 import org.dev.powermarket.service.dto.LoginRequest;
 import org.dev.powermarket.service.dto.RegisterRequest;
-import org.dev.powermarket.service.EmailService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -20,15 +20,16 @@ import java.time.Instant;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 
     private final AuthorizedUserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
-    private final EmailService emailService;
+//    private final EmailService emailService;
 
     public AuthResponse login(LoginRequest request) {
-        System.out.println(request + " 0");
+        log.info(request + " 0");
         User user = userRepository.findByEmail(request.getEmail())
                 .orElse(null);
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
@@ -96,7 +97,7 @@ public class AuthService {
         userRepository.save(user);
 
         // Отправляем приветственное письмо на e-mail пользователя
-        emailService.sendWelcomeEmail(user);
+//        emailService.sendWelcomeEmail(user);
 
         // Генерируем JWT токены
         String token = jwtService.generateToken(user.getEmail());

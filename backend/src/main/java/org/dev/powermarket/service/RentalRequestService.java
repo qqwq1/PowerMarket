@@ -28,7 +28,7 @@ public class RentalRequestService {
     private final ServiceRepository serviceRepository;
     private final AuthorizedUserRepository userRepository;
     private final NotificationRepository notificationRepository;
-    private final EmailService emailService;
+//    private final EmailService emailService;
     private final RentalService rentalService;
     private final RentalRepository rentalRepository;
     private final ChatRepository chatRepository;
@@ -240,7 +240,7 @@ public class RentalRequestService {
         notificationRepository.save(notification);
 
         // Отправляем e-mail с изменением статуса сделки
-        emailService.sendDealStatusEmail(user, notification);
+//        emailService.sendDealStatusEmail(user, notification);
     }
 
     private RentalRequestDto toDto(RentalRequest request) {

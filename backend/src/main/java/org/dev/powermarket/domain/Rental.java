@@ -62,8 +62,14 @@ public class Rental {
     @Column(name = "supplier_confirmed", nullable = false)
     private Boolean supplierConfirmed = false;
 
+    @Column(name="supplier_signature_valid")
+    private Boolean supplierSignatureValid=false;
+
     @Column(name = "tenant_confirmed", nullable = false)
     private Boolean tenantConfirmed = false;
+
+    @Column(name="tenant_signature_valid")
+    private Boolean tenantSignatureValid=false;
 
     @Column(name = "supplier_confirmed_at")
     private Instant supplierConfirmedAt;
