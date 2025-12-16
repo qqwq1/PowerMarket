@@ -118,31 +118,6 @@ function RequestsPage() {
                       Общая стоимость: {request.totalPrice}₽
                     </div>
                   </div>
-
-                  {/* {(request.status === 'IN_CONTRACT' || request.status === 'CONFIRMED') && (
-                    <div className="flex gap-4 text-sm">
-                      <div className="flex items-center">
-                        {request.landlordConfirmed ? (
-                          <CheckCircle className="w-4 h-4 text-green-600 mr-1" />
-                        ) : (
-                          <XCircle className="w-4 h-4 text-gray-400 mr-1" />
-                        )}
-                        <span className={request.landlordConfirmed ? 'text-green-600' : 'text-muted-foreground'}>
-                          Арендодатель
-                        </span>
-                      </div>
-                      <div className="flex items-center">
-                        {request.tenantConfirmed ? (
-                          <CheckCircle className="w-4 h-4 text-green-600 mr-1" />
-                        ) : (
-                          <XCircle className="w-4 h-4 text-gray-400 mr-1" />
-                        )}
-                        <span className={request.tenantConfirmed ? 'text-green-600' : 'text-muted-foreground'}>
-                          Арендатор
-                        </span>
-                      </div>
-                    </div>
-                  )} */}
                 </div>
 
                 <div className="flex flex-col gap-2 md:w-48">

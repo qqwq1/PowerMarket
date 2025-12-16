@@ -77,7 +77,7 @@ export default function LoginPage() {
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? 'Вход...' : 'Войти'}
             </Button>
-            <div className="space-y-1 text-center">
+            <div className="space-y-1 text-center flex-col flex gap-2 ">
               <CardDescription>Войдите в тестовый аккаунт</CardDescription>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Button onClick={() => loginAsTest('TENANT')} type="submit" disabled={loading}>

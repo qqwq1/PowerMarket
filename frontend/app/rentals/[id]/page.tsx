@@ -14,6 +14,7 @@ import { ru } from 'date-fns/locale'
 import urls from '@/components/layout/urls'
 import { MainLayout } from '@/components/layout/dashboard-layout'
 import { statusColors, statusLabels } from '@/lib/constants'
+import { RentalContractModal } from '@/components/rental-contract-modal'
 
 function RentalDetailPage() {
   const router = useRouter()
@@ -23,6 +24,7 @@ function RentalDetailPage() {
   const [rental, setRental] = useState<Rental>(null)
   const [loading, setLoading] = useState(true)
   const [confirming, setConfirming] = useState(false)
+  const [contractModalOpen, setContractModalOpen] = useState(false)
 
   useEffect(() => {
     loadRental()
@@ -179,7 +181,7 @@ function RentalDetailPage() {
 
           {(rental.status === 'IN_CONTRACT' || rental.status === 'CONFIRMED') && (
             <Card className="p-6">
-              <h2 className="text-xl font-bold ">Статус подтверждения</h2>
+              <h2 className="text-xl font-bold ">Статус подписания договора</h2>
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
                   <div className="flex items-center gap-3">
@@ -194,7 +196,7 @@ function RentalDetailPage() {
                     </div>
                   </div>
                   <Badge className={rental.supplierConfirmed ? 'bg-green-100 text-green-800' : ''}>
-                    {rental.supplierConfirmed ? 'Подтверждено' : 'Ожидает'}
+                    {rental.supplierConfirmed ? 'Договор подписан' : 'Ожидает'}
                   </Badge>
                 </div>
 
@@ -211,14 +213,14 @@ function RentalDetailPage() {
                     </div>
                   </div>
                   <Badge className={rental.tenantConfirmed ? 'bg-green-100 text-green-800' : ''}>
-                    {rental.tenantConfirmed ? 'Подтверждено' : 'Ожидает'}
+                    {rental.tenantConfirmed ? 'Договор подписан' : 'Ожидает'}
                   </Badge>
                 </div>
 
                 {rental.supplierConfirmed && rental.tenantConfirmed && rental.status === 'CONFIRMED' && (
                   <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-center">
                     <CheckCircle className="w-8 h-8 text-green-600 mx-auto mb-2" />
-                    <div className="font-semibold text-green-800">Обе стороны подтвердили аренду</div>
+                    <div className="font-semibold text-green-800">Обе стороны подписали договор</div>
                     <div className="text-sm text-green-700 mt-1">{`Одной из сторон необходимо подтвердить начало аренды ${format(
                       new Date(rental.startDate),
                       'd MMM yyyy',
@@ -236,20 +238,20 @@ function RentalDetailPage() {
             <h3 className="font-semibold">Действия</h3>
 
             {canConfirm() && (
-              <Button className="w-full" onClick={handleConfirm} disabled={confirming}>
-                {confirming ? 'Подтверждение...' : 'Подтвердить аренду'}
+              <Button className="w-full" onClick={() => setContractModalOpen(true)} disabled={confirming}>
+                {confirming ? 'Загрузка...' : 'Подписать договор'}
               </Button>
             )}
 
             {canStart() && (
               <Button className="w-full" onClick={handleStart} disabled={confirming}>
-                {confirming ? 'Подтверждение...' : 'Подтвердить начало аренды'}
+                {confirming ? 'Загрузка...' : 'Подтвердить начало аренды'}
               </Button>
             )}
 
             {canComplete() && (
               <Button className="w-full" onClick={handleComplete} disabled={confirming}>
-                {confirming ? 'Подтверждение...' : 'Подтвердить окончание аренды'}
+                {confirming ? 'Загрузка...' : 'Подтвердить окончание аренды'}
               </Button>
             )}
 
@@ -268,12 +270,19 @@ function RentalDetailPage() {
             <div className="text-sm text-muted-foreground space-y-2">
               <p>Заявка создана: {rental.createdAt ? format(new Date(rental.createdAt), 'MM.dd.yyyy') : '-'}</p>
               {rental.status === 'IN_CONTRACT' && (
-                <p className="text-blue-600">Обе стороны должны подтвердить условия аренды для продолжения.</p>
+                <p className="text-blue-600">Обе стороны должны подписать договор для продолжения.</p>
               )}
             </div>
           </Card>
         </div>
       </div>
+
+      <RentalContractModal
+        open={contractModalOpen}
+        rentalId={rentalId}
+        onOpenChange={setContractModalOpen}
+        onSuccess={handleConfirm}
+      />
     </div>
   )
 }

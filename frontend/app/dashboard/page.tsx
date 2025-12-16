@@ -28,7 +28,7 @@ function ProductionAnalysisPage() {
     setExportLoading(true)
     try {
       const supplierId = user?.id
-      const url = `/v1/services/export/period?supplierId=${supplierId}&from=${exportFrom}&to=${exportTo}`
+      const url = `api/v1/services/export/period?supplierId=${supplierId}&from=${exportFrom}&to=${exportTo}`
       const response = await fetch(url)
       if (!response.ok) throw new Error('Ошибка экспорта')
       const blob = await response.blob()

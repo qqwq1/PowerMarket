@@ -283,7 +283,7 @@ export function RentalRequestDialog({ service, onClose, onSuccess }: RentalReque
               type="number"
               required
               min={capacityMin}
-              max={capacityMax ?? null}
+              max={isNaN(capacityMax) ? Infinity : capacityMax}
               value={formData.capacityNeeded}
               onChange={handleCapacityNeededChange}
             />

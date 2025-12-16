@@ -1,17 +1,19 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api'
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api'
 
 export class ApiClient {
-  private getAuthHeader(): HeadersInit {
+  private getAuthHeader(contentType: string | null = 'application/json'): HeadersInit {
     const token = localStorage.getItem('jwt_token')
+    const headers: HeadersInit = {}
+
     if (token) {
-      return {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      }
+      headers.Authorization = `Bearer ${token}`
     }
-    return {
-      'Content-Type': 'application/json',
+
+    if (contentType) {
+      headers['Content-Type'] = contentType
     }
+
+    return headers
   }
 
   private buildQuery(params?: Record<string, unknown>): string {
@@ -37,7 +39,8 @@ export class ApiClient {
 
   async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${API_BASE_URL}${endpoint}`
-    const headers = this.getAuthHeader()
+    const isFormData = options.body instanceof FormData
+    const headers = this.getAuthHeader(isFormData ? null : 'application/json')
 
     const response = await fetch(url, {
       ...options,

@@ -68,7 +68,6 @@ function ChatPage() {
     if (messages.messages.length === 0 || isScrolledEnd.current) return
     scrollToBottom('auto')
     isScrolledEnd.current = true
-    console.log(123)
   }, [messages.messages.length])
 
   const scrollToBottom = (behavior: ScrollBehavior = 'smooth') => {
