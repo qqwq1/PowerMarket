@@ -10,8 +10,6 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-# продовый URL API для фронта
-ENV NEXT_PUBLIC_API_URL=http://51.250.32.83:8080/api
 # чтобы next собрал standalone-бандл
 RUN npm run build
 
@@ -20,7 +18,7 @@ FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
-ENV NEXT_PUBLIC_API_URL=http://51.250.32.83:8080/api
+ENV NEXT_PUBLIC_API_URL=http://backend:8080
 
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public

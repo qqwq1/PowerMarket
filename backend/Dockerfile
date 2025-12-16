@@ -4,6 +4,7 @@ WORKDIR /build
 
 COPY pom.xml .
 COPY src ./src
+COPY files ./files
 
 # Временное!!!
 RUN mvn -q clean package -Dmaven.test.skip=true
@@ -13,6 +14,7 @@ FROM eclipse-temurin:23-jre
 WORKDIR /app
 
 COPY --from=build /build/target/*.jar /app/app.jar
+COPY --from=build /build/files ./files
 
 ENV SPRING_PROFILES_ACTIVE=prod
 EXPOSE 8080
