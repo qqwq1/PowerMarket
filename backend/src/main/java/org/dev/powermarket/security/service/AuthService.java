@@ -1,10 +1,7 @@
 package org.dev.powermarket.security.service;
 
-
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-
-import lombok.extern.slf4j.Slf4j;
 import org.dev.powermarket.domain.enums.Role;
 import org.dev.powermarket.security.dto.RefreshTokenRequest;
 import org.dev.powermarket.security.entity.User;
@@ -20,21 +17,31 @@ import java.time.Instant;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class AuthService {
 
     private final AuthorizedUserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
-//    private final EmailService emailService;
 
-    public AuthResponse login(LoginRequest request) {
-        log.info(request + " 0");
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElse(null);
-        if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
+    public AuthResponse login(@Valid LoginRequest request) {
+        if (request == null) {
+            throw new AuthenticationException("Пустой запрос");
+        }
+
+        String email = request.getEmail();
+        String password = request.getPassword();
+
+        if (email == null || email.isBlank() || password == null || password.isBlank()) {
+            throw new AuthenticationException("Введите email и пароль");
+        }
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new AuthenticationException("Неверный логин или пароль"));
+
+        if (!passwordEncoder.matches(password, user.getPasswordHash())) {
             throw new AuthenticationException("Неверный логин или пароль");
         }
+
         String token = jwtService.generateToken(user.getEmail());
         String refreshToken = jwtService.generateRefreshToken(user.getEmail());
 
@@ -47,6 +54,7 @@ public class AuthService {
 
     public AuthResponse refreshToken(RefreshTokenRequest request) {
         String userLogin = jwtService.extractUsername(request.getRefreshToken());
+
         User user = userRepository.findByEmail(userLogin)
                 .orElseThrow(() -> new AuthenticationException("Пользователь не найден"));
 
@@ -74,12 +82,10 @@ public class AuthService {
     }
 
     public AuthResponse register(@Valid RegisterRequest request) {
-        // Проверяем, существует ли пользователь с таким email
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Пользователь с таким email уже существует");
+            throw new AuthenticationException("Пользователь с таким email уже существует");
         }
 
-        // Создаем нового пользователя
         User user = User.builder()
                 .email(request.getEmail())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
@@ -93,22 +99,15 @@ public class AuthService {
                 .updatedAt(Instant.now())
                 .build();
 
-        // Сохраняем пользователя
         userRepository.save(user);
 
-        // Отправляем приветственное письмо на e-mail пользователя
-//        emailService.sendWelcomeEmail(user);
-
-        // Генерируем JWT токены
         String token = jwtService.generateToken(user.getEmail());
         String refreshToken = jwtService.generateRefreshToken(user.getEmail());
 
-        // Возвращаем DTO с токенами и данными пользователя
         return AuthResponse.builder()
                 .token(token)
                 .refreshToken(refreshToken)
                 .user(AuthResponse.UserDto.fromEntity(user))
                 .build();
     }
-
 }
