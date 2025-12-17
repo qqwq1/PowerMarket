@@ -13,8 +13,10 @@ services:
   frontend:
     build:
       context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: http://power.expolink.pro:8080/api
     environment:
-      NEXT_PUBLIC_API_URL: http://backend:8080
+      NEXT_PUBLIC_API_URL: http://power.expolink.pro:8080/api
     ports:
       - "3000:3000"
     depends_on:
@@ -49,7 +51,7 @@ services:
     volumes:
       - backend_pgdata:/var/lib/postgresql/data
     ports:
-      - "5442:5432"        # ← добавили: БД бэка доступна на localhost:5432
+      - "5442:5432"
     healthcheck:
       test: ["CMD-SHELL","pg_isready -U postgres -d PowerMarket"]
       interval: 5s
@@ -86,7 +88,7 @@ services:
     volumes:
       - search_pgdata:/var/lib/postgresql/data
     ports:
-      - "5433:5432"       
+      - "5433:5432"
     healthcheck:
       test: ["CMD-SHELL","pg_isready -U postgres -d power_market"]
       interval: 5s
