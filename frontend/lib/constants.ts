@@ -1,14 +1,28 @@
 export const ALL_CATEGORY_VALUE = 'all'
 
-export const CATEGORIES = ['MANUFACTURING', 'LOGISTICS', 'STORAGE', 'PROCESSING', 'ASSEMBLY', 'PACKAGING', 'OTHER']
+export const CATEGORIES = [
+  'MANUFACTURING',
+  'EQUIPMENT',
+  'WAREHOUSE',
+  'TRANSPORT',
+  'LABORATORY',
+  'PROCESSING',
+  'ASSEMBLY',
+  'TESTING',
+  'OTHER',
+] as const
 
-export const CATEGORY_LABELS: Record<string, string> = {
+export type CategoryValue = (typeof CATEGORIES)[number]
+
+export const CATEGORY_LABELS: Record<CategoryValue, string> = {
   MANUFACTURING: 'Производство',
-  LOGISTICS: 'Логистика',
-  STORAGE: 'Складирование',
+  EQUIPMENT: 'Оборудование',
+  WAREHOUSE: 'Складские помещения',
+  TRANSPORT: 'Транспорт',
+  LABORATORY: 'Лабораторные услуги',
   PROCESSING: 'Обработка',
   ASSEMBLY: 'Сборка',
-  PACKAGING: 'Упаковка',
+  TESTING: 'Тестирование',
   OTHER: 'Другое',
 }
 

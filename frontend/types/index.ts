@@ -1,3 +1,5 @@
+import type { CategoryValue } from '@/lib/constants'
+
 export interface User {
   id: number
   email: string
@@ -7,16 +9,7 @@ export interface User {
   averageRating?: number
 }
 
-export type ServiceCategory =
-  | 'MANUFACTURING' // Производство
-  | 'EQUIPMENT' // Оборудование
-  | 'WAREHOUSE' // Складские помещения
-  | 'TRANSPORT' // Транспорт
-  | 'LABORATORY' // Лабораторные услуги
-  | 'PROCESSING' // Обработка
-  | 'ASSEMBLY' // Сборка
-  | 'TESTING' // Тестирование
-  | 'OTHER' // Другое
+export type ServiceCategory = CategoryValue
 
 export interface Service {
   id: string
