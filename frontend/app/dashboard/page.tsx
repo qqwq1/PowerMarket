@@ -10,7 +10,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@
 import { useState } from 'react'
 import { useCallback } from 'react'
 import { ProductionAnalysisDashboardResponse } from '@/types'
-import { api } from '@/lib/api'
+import { api, API_BASE_URL } from '@/lib/api'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -28,8 +28,17 @@ function ProductionAnalysisPage() {
     setExportLoading(true)
     try {
       const supplierId = user?.id
-      const url = `api/v1/services/export/period?supplierId=${supplierId}&from=${exportFrom}&to=${exportTo}`
-      const response = await fetch(url)
+      // Приводим даты к ISO с временем: начало дня 00:00:00, конец дня 23:59:59
+      const fromDateIso = new Date(`${exportFrom}T00:00:00`).toISOString()
+      const toDateIso = new Date(`${exportTo}T23:59:59`).toISOString()
+
+      const url = `${API_BASE_URL}/v1/services/export/period?supplierId=${encodeURIComponent(
+        supplierId ?? ''
+      )}&from=${encodeURIComponent(fromDateIso)}&to=${encodeURIComponent(toDateIso)}`
+      const token = typeof window !== 'undefined' ? localStorage.getItem('jwt_token') : null
+      const headers: Record<string, string> = { Accept: 'application/octet-stream' }
+      if (token) headers['Authorization'] = `Bearer ${token}`
+      const response = await fetch(url, { method: 'GET', headers })
       if (!response.ok) throw new Error('Ошибка экспорта')
       const blob = await response.blob()
       const disposition = response.headers.get('Content-Disposition')

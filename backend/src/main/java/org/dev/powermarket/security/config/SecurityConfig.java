@@ -1,6 +1,5 @@
 package org.dev.powermarket.security.config;
 
-
 import lombok.RequiredArgsConstructor;
 import org.dev.powermarket.security.repository.AuthorizedUserRepository;
 import org.dev.powermarket.security.service.JwtService;
@@ -45,7 +44,6 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-//                        .requestMatchers("/**").permitAll()
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/actuator/health",
@@ -73,10 +71,15 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000")); // ✅ твой фронт
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
-        configuration.setAllowCredentials(true); // если используешь cookies или авторизацию
+        configuration.setAllowedOrigins(List.of(
+                "http://localhost:3000",
+                "http://51.250.32.83:3000",
+                "http://power.expolink.pro:3000"
+        ));
+        configuration.setAllowCredentials(true);
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
